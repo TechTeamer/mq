@@ -40,7 +40,7 @@ class RPCClient {
         channel = ch
       })
     }).then(() => {
-      return this._getReplyQueue().catch((err) => {
+      return this._getReplyQueue(channel).catch((err) => {
         this._logger.error('RPCCLIENT: cannot get reply queue', err)
         throw new Error('Cannot get reply queue')
       })
@@ -60,9 +60,27 @@ class RPCClient {
           correlationId = uuid()
         } while (this._correlationIdMap.has(correlationId))
 
-        this._correlationIdMap.set(correlationId, {resolve, reject})
+        this._correlationIdMap.set(correlationId, {
+          resolve: (result) => {
+            if (!timedOut) {
+              clearTimeout(timeoutId)
+              timeoutId = null
+              resolve(result)
+            }
+          },
+          reject: (err) => {
+            if (!timedOut) {
+              clearTimeout(timeoutId)
+              timeoutId = null
+              reject(err)
+            }
+          },
+          isTimedOut: () => timedOut
+        })
 
-        setTimeout(() => {
+        let timedOut = false
+        let timeoutId = setTimeout(() => {
+          timedOut = true
           if (this._correlationIdMap.has(correlationId)) {
             reject(new Error('RCPCLIENT TIMEOUT ' + this.name))
           }
@@ -84,12 +102,10 @@ class RPCClient {
    * @return Promise<String>
    * @private
    * */
-  _getReplyQueue () {
+  _getReplyQueue (ch) {
     if (this._replyQueue) {
       return Promise.resolve(this._replyQueue)
     }
-
-    let ch = this.channel
 
     return ch.assertQueue('', {exclusive: true}).then((replyQueue) => {
       this._replyQueue = replyQueue.queue
@@ -113,7 +129,11 @@ class RPCClient {
    * */
   _onReply (reply) {
     if (reply && reply.properties && reply.properties.correlationId && this._correlationIdMap.has(reply.properties.correlationId)) {
-      const {resolve, reject} = this._correlationIdMap.get(reply.properties.correlationId)
+      const {resolve, reject, isTimedOut} = this._correlationIdMap.get(reply.properties.correlationId)
+
+      if (isTimedOut && isTimedOut()) {
+        return
+      }
 
       this._correlationIdMap.delete(reply.properties.correlationId)
 

@@ -16,10 +16,10 @@ class QueueService {
   constructor (config) {
     this.connection = new QueueConnection(config)
     this._config = new QueueConfig(config)
-    this._rpcClients = new Map()
-    this._rpcServers = new Map()
-    this._queueClients = new Map()
-    this._queueServers = new Map()
+    this.rpcClients = new Map()
+    this.rpcServers = new Map()
+    this.queueClients = new Map()
+    this.queueServers = new Map()
   }
 
   /**
@@ -27,13 +27,13 @@ class QueueService {
    * @return RPCClient
    * */
   getRPCClient (rpcName) {
-    if (this._rpcClients.has(rpcName)) {
-      return this._rpcClients.get(rpcName)
+    if (this.rpcClients.has(rpcName)) {
+      return this.rpcClients.get(rpcName)
     }
 
-    const rpcClient = new RPCClient(this.connection, this._config.logger, rpcName)
+    const rpcClient = new RPCClient(this.connection, this._config.logger, rpcName, this._config.rpcQueueMaxSize, this._config.rpcTimeoutMs)
 
-    this._rpcClients.set(rpcName, rpcClient)
+    this.rpcClients.set(rpcName, rpcClient)
 
     return rpcClient
   }
@@ -45,13 +45,13 @@ class QueueService {
    * @return RPCServer
    */
   getRPCServer (rpcName, prefetchCount = 1, timeoutMs = this._config.rpcTimeoutMs) {
-    if (this._rpcServers.has(rpcName)) {
-      return this._rpcServers.get(rpcName)
+    if (this.rpcServers.has(rpcName)) {
+      return this.rpcServers.get(rpcName)
     }
 
     const rpcServer = new RPCServer(this.connection, this._config.logger, rpcName, prefetchCount, timeoutMs)
 
-    this._rpcServers.set(rpcName, rpcServer)
+    this.rpcServers.set(rpcName, rpcServer)
 
     return rpcServer
   }
@@ -61,13 +61,13 @@ class QueueService {
    * @return QueueClient
    */
   getQueueClient (queueName) {
-    if (this._queueClients.has(queueName)) {
-      return this._queueClients.get(queueName)
+    if (this.queueClients.has(queueName)) {
+      return this.queueClients.get(queueName)
     }
 
-    const queueClient = new QueueClient(this.connection, this._config.logger, queueName, this._config.rpcQueueMaxSize, this._config.rpcTimeoutMs)
+    const queueClient = new QueueClient(this.connection, this._config.logger, queueName)
 
-    this._queueClients.set(queueName, queueClient)
+    this.queueClients.set(queueName, queueClient)
 
     return queueClient
   }
@@ -80,13 +80,13 @@ class QueueService {
    * @return QueueServer
    */
   getQueueServer (queueName, prefetchCount = 1, maxRetry = 5, timeoutMs = this._config.rpcTimeoutMs) {
-    if (this._queueServers.has(queueName)) {
-      return this._queueServers.get(queueName)
+    if (this.queueServers.has(queueName)) {
+      return this.queueServers.get(queueName)
     }
 
     const queueServer = new QueueServer(this.connection, this._config.logger, queueName, prefetchCount, maxRetry, timeoutMs)
 
-    this._queueServers.set(queueName, queueServer)
+    this.queueServers.set(queueName, queueServer)
 
     return queueServer
   }
