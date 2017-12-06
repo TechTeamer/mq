@@ -1,3 +1,4 @@
+const QueueConfig = require('./QueueConfig')
 const QueueConnection = require('./QueueConnection')
 const RPCClient = require('./RPCClient')
 const RPCServer = require('./RPCServer')
@@ -14,7 +15,7 @@ class QueueService {
    */
   constructor (config) {
     this.connection = new QueueConnection(config)
-    this._config = config
+    this._config = new QueueConfig(config)
     this._rpcClients = new Map()
     this._rpcServers = new Map()
     this._queueClients = new Map()

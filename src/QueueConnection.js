@@ -1,5 +1,6 @@
 const fs = require('fs')
 const amqp = require('amqplib/channel_api')
+const QueueConfig = require('./QueueConfig')
 
 /**
  * @class QueueConnection
@@ -9,7 +10,7 @@ class QueueConnection {
    * @param {QueueConfig} config
    */
   constructor (config) {
-    this._config = config
+    this._config = new QueueConfig(config)
     this._connection = null
     this._connectionPromise = null
     this._channel = null
