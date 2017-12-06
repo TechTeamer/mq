@@ -1,0 +1,19 @@
+const QueueClient = require('./src/QueueClient')
+const QueueConfig = require('./src/QueueConfig')
+const QueueConnection = require('./src/QueueConnection')
+const QueueMessage = require('./src/QueueMessage')
+const QueueServer = require('./src/QueueServer')
+const QueueService = require('./src/QueueService')
+const RPCClient = require('./src/RPCClient')
+const RPCError = require('./src/RPCError')
+const RPCServer = require('./src/RPCServer')
+
+module.exports.QueueClient = QueueClient
+module.exports.QueueConfig = QueueConfig
+module.exports.QueueConnection = QueueConnection
+module.exports.QueueMessage = QueueMessage
+module.exports.QueueServer = QueueServer
+module.exports.QueueService = QueueService
+module.exports.RPCClient = RPCClient
+module.exports.RPCError = RPCError
+module.exports.RPCServer = RPCServer
