@@ -38,7 +38,7 @@ class QueueConnection {
       options.ca = options.ca.map((ca) => fs.readFileSync(ca))
     }
 
-    this._connectionPromise = amqp.connect(this._config.url, options).then(function (conn) {
+    this._connectionPromise = amqp.connect(this._config.url, options).then((conn) => {
       this._config.logger.info('RabbitMQ connection established')
 
       conn.on('error', (err) => {
@@ -59,7 +59,7 @@ class QueueConnection {
 
       this._connection = conn
       return conn
-    }).catch(function (err) {
+    }).catch((err) => {
       this._config.logger.error(err)
 
       throw err
@@ -80,10 +80,10 @@ class QueueConnection {
 
     this._channelPromise = this.connect().then((connection) => {
       return connection.createConfirmChannel()
-    }).then(function (channel) {
+    }).then((channel) => {
       this._channel = channel
       return channel
-    }).catch(function (err) {
+    }).catch((err) => {
       this._config.logger.error(err)
       throw err
     })
