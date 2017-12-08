@@ -5,6 +5,9 @@
   "main": "index.js",
   "author": "tunderdomb <tunderdomb@gmail.com>",
   "license": "MIT",
+  "engines": {
+    "node": ">=6"
+  },
   "dependencies": {
     "amqplib": "^0.5.2",
     "uuid": "^3.1.0"
