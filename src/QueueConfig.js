@@ -1,5 +1,5 @@
 
-class RabbitMQOptions {
+class RabbitMqOptions {
   constructor (options = {}) {
     let {
       rejectUnauthorized = false,
@@ -21,16 +21,14 @@ class QueueConfig {
       url = 'amqps://localhost:5672',
       options = null,
       rpcTimeoutMs = 10000,
-      rpcQueueMaxSize = 100,
-      logger = console
+      rpcQueueMaxSize = 100
     } = config
 
-    let rabbitMqOptions = new RabbitMQOptions(options)
+    let rabbitMqOptions = new RabbitMqOptions(options)
     this.url = url
     this.options = rabbitMqOptions
     this.rpcTimeoutMs = rpcTimeoutMs
     this.rpcQueueMaxSize = rpcQueueMaxSize
-    this.logger = logger
   }
 }
 

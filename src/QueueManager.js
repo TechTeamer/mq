@@ -6,20 +6,34 @@ const QueueClient = require('./QueueClient')
 const QueueServer = require('./QueueServer')
 
 /**
- * @class QueueService
+ * @class QueueManager
  * @param {QueueConnection} connection
  * */
-class QueueService {
+class QueueManager {
   /**
    * @param {QueueConfig} config
    */
   constructor (config) {
     this.connection = new QueueConnection(config)
     this._config = new QueueConfig(config)
+    this._logger = console
     this.rpcClients = new Map()
     this.rpcServers = new Map()
     this.queueClients = new Map()
     this.queueServers = new Map()
+  }
+
+  connect () {
+    return this.connection.connect()
+  }
+
+  getChannel () {
+    return this.connection.getChannel()
+  }
+
+  setLogger (logger) {
+    this._logger = logger
+    this.connection.setLogger(logger)
   }
 
   /**
@@ -31,7 +45,7 @@ class QueueService {
       return this.rpcClients.get(rpcName)
     }
 
-    const rpcClient = new RPCClient(this.connection, this._config.logger, rpcName, this._config.rpcQueueMaxSize, this._config.rpcTimeoutMs)
+    const rpcClient = new RPCClient(this.connection, this._logger, rpcName, this._config.rpcQueueMaxSize, this._config.rpcTimeoutMs)
 
     this.rpcClients.set(rpcName, rpcClient)
 
@@ -49,7 +63,7 @@ class QueueService {
       return this.rpcServers.get(rpcName)
     }
 
-    const rpcServer = new RPCServer(this.connection, this._config.logger, rpcName, prefetchCount, timeoutMs)
+    const rpcServer = new RPCServer(this.connection, this._logger, rpcName, prefetchCount, timeoutMs)
 
     this.rpcServers.set(rpcName, rpcServer)
 
@@ -65,7 +79,7 @@ class QueueService {
       return this.queueClients.get(queueName)
     }
 
-    const queueClient = new QueueClient(this.connection, this._config.logger, queueName)
+    const queueClient = new QueueClient(this.connection, this._logger, queueName)
 
     this.queueClients.set(queueName, queueClient)
 
@@ -84,7 +98,7 @@ class QueueService {
       return this.queueServers.get(queueName)
     }
 
-    const queueServer = new QueueServer(this.connection, this._config.logger, queueName, prefetchCount, maxRetry, timeoutMs)
+    const queueServer = new QueueServer(this.connection, this._logger, queueName, prefetchCount, maxRetry, timeoutMs)
 
     this.queueServers.set(queueName, queueServer)
 
@@ -92,4 +106,4 @@ class QueueService {
   }
 }
 
-module.exports = QueueService
+module.exports = QueueManager

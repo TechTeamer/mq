@@ -11,10 +11,15 @@ class QueueConnection {
    */
   constructor (config) {
     this._config = new QueueConfig(config)
+    this._logger = console
     this._connection = null
     this._connectionPromise = null
     this._channel = null
     this._channelPromise = null
+  }
+
+  setLogger (logger) {
+    this._logger = logger
   }
 
   /**
@@ -39,28 +44,28 @@ class QueueConnection {
     }
 
     this._connectionPromise = amqp.connect(this._config.url, options).then((conn) => {
-      this._config.logger.info('RabbitMQ connection established')
+      this._logger.info('RabbitMQ connection established')
 
       conn.on('error', (err) => {
         if (err.message !== 'Connection closing') {
-          this._config.logger.warn('RabbitMQ error', err)
+          this._logger.warn('RabbitMQ error', err)
         }
       })
       conn.on('close', () => {
-        this._config.logger.error('RabbitMQ closed')
+        this._logger.error('RabbitMQ closed')
         process.exit(2)
       })
       conn.on('blocked', (reason) => {
-        this._config.logger.warn('RabbitMQ blocked', reason)
+        this._logger.warn('RabbitMQ blocked', reason)
       })
       conn.on('unblocked', (reason) => {
-        this._config.logger.warn('RabbitMQ unblocked', reason)
+        this._logger.warn('RabbitMQ unblocked', reason)
       })
 
       this._connection = conn
       return conn
     }).catch((err) => {
-      this._config.logger.error(err)
+      this._logger.error(err)
 
       throw err
     })
@@ -84,7 +89,7 @@ class QueueConnection {
       this._channel = channel
       return channel
     }).catch((err) => {
-      this._config.logger.error(err)
+      this._logger.error(err)
       throw err
     })
 
