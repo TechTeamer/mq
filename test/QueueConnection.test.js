@@ -14,11 +14,11 @@ describe('QueueConnection', () => {
       url: 'amqps://localhost:5671',
       options: {
         rejectUnauthorized: false,
-        cert: '/home/nikolov/workspace/rabbitmq_cert/client/cert.pem',
-        key: '/home/nikolov/workspace/rabbitmq_cert/client/key.pem',
-        ca: ['/home/nikolov/workspace/rabbitmq_cert/ca/cacert.pem']
+        cert: './test/test_certificates/cert.pem',
+        key: './test/test_certificates/key.pem',
+        ca: ['./test/test_certificates/cacert.pem']
       },
-      rpcTimeoutMs: 10000,
+      rpcTimeoutMs: 1000,
       rpcQueueMaxSize: 100
     }
   )).connect()
