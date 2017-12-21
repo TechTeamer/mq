@@ -30,5 +30,3 @@ clientConnection.connect()
   .then((qc) => {
     qc.send(process.argv[3], '12345')
   })
-  .then(() => {
-  })

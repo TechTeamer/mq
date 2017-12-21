@@ -20,15 +20,17 @@ const serverConnection = new QueueConnection(new QueueConfig(
   }
 ))
 
-let qServer = serverConnection.connect()
+let qServer
+
+serverConnection.connect()
   .then(() => {
     return new QueueServer(serverConnection, console, process.argv[2], 1, 5, 10000)
   })
   .then((qs) => {
     qServer = qs
-  })
-  .then(() => {
     qServer.consume((msg) => {
-      process.send(`${msg}`)
+      if (msg !== undefined) {
+        process.send(`${msg}`)
+      }
     })
   })
