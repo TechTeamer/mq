@@ -13,7 +13,8 @@
     "node": ">=6"
   },
   "scripts": {
-    "test": "./node_modules/.bin/eslint . && ./node_modules/.bin/mocha"
+    "test": "./node_modules/.bin/eslint . && ./node_modules/.bin/mocha",
+    "test-no-lint": "./node_modules/.bin/mocha --exit"
   },
   "dependencies": {
     "amqplib": "^0.5.2",
@@ -21,6 +22,7 @@
   },
   "devDependencies": {
     "chai": "^4.1.2",
+    "chai-as-promised": "^7.1.1",
     "eslint": "^4.12.1",
     "eslint-config-standard": "^10.2.1",
     "eslint-plugin-import": "^2.8.0",
