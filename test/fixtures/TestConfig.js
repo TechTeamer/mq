@@ -1,21 +1,16 @@
 const QueueConfig = require('../../src/QueueConfig')
-const QueueConnection = require('../../src/QueueConnection')
 
-let queueConnection = () => {
-  return new QueueConnection(new QueueConfig(
-    {
-      url: 'amqps://localhost:5671',
-      options: {
-        rejectUnauthorized: false,
-        cert: '/workspace/vuer_docker/workspace/cert/vuer_mq_cert/client/cert.pem',
-        key: '/workspace/vuer_docker/workspace/cert/vuer_mq_cert/client/key.pem',
-        ca: ['/workspace/vuer_docker/workspace/cert/vuer_mq_cert/ca/cacert.pem']
-      },
-      rpcTimeoutMs: 10000,
-      rpcQueueMaxSize: 100,
-      logger: console
-    }
-  ))
-}
+let certPath = '/workspace/vuer_docker/workspace/cert/vuer_mq_cert'
 
-module.exports = queueConnection
+module.exports = new QueueConfig({
+  url: 'amqps://localhost:5671',
+  options: {
+    rejectUnauthorized: false,
+    cert: certPath + '/client/cert.pem',
+    key: certPath + '/client/key.pem',
+    ca: [certPath + '/ca/cacert.pem']
+  },
+  rpcTimeoutMs: 10000,
+  rpcQueueMaxSize: 100,
+  logger: console
+})
