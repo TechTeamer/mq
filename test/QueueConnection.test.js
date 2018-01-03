@@ -1,5 +1,5 @@
 describe('QueueConnection', () => {
-  let connection = require('./fixtures/TestConfig')
+  let connection = require('./fixtures/TestConfig')()
   it('#connect() creates a connection to RabbitMQ', (done) => {
     connection.connect()
       .then((c) => {

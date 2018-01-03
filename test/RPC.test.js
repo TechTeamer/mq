@@ -5,8 +5,8 @@ const QueueMessage = require('../src/QueueMessage')
 describe('RPCClient && RPCServer', () => {
   let rpcName = 'test-rpc'
   let message = new QueueMessage('ok', 'TEST DATA: Queue.test.js')
-  const clientConnection = require('./fixtures/TestConfig')
-  const serverConnection = require('./fixtures/TestConfig')
+  const clientConnection = require('./fixtures/TestConfig')()
+  const serverConnection = require('./fixtures/TestConfig')()
   it('RPCClient.call() sends a message and RPCServer.consume() consumes it', (done) => {
     clientConnection.connect()
       .then((c) => {
