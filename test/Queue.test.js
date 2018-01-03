@@ -5,8 +5,8 @@ const QueueServer = require('../src/QueueServer')
 describe('QueueClient && QueueServer', () => {
   let queueName = 'test-queue'
   let message = new QueueMessage('ok', 'TEST DATA: Queue.test.js')
-  const clientConnection = require('./fixtures/TestConfig')
-  const serverConnection = require('./fixtures/TestConfig')
+  const clientConnection = require('./fixtures/TestConfig')()
+  const serverConnection = require('./fixtures/TestConfig')()
   it('QueueClient.send() sends a message and QueueServer.consume() receives it', (done) => {
     clientConnection.connect()
       .then(() => {
