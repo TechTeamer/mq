@@ -1,21 +1,33 @@
-const {fork} = require('child_process')
-
-let channelName = 'queue-client-queue-server'
-let message = 'ASDF'
+const QueueMessage = require('../src/QueueMessage')
+const QueueClient = require('../src/QueueClient')
+const QueueServer = require('../src/QueueServer')
 
 describe('QueueClient && QueueServer', () => {
+  let queueName = 'test-queue'
+  let message = new QueueMessage('ok', 'TEST DATA: Queue.test.js')
+  const clientConnection = require('./fixtures/TestConfig')
+  const serverConnection = require('./fixtures/TestConfig')
   it('QueueClient.send() sends a message and QueueServer.consume() receives it', (done) => {
-    let producer = fork('./test/fixtures/queue-client-producer.js', [channelName, message])
-    let consumer = fork('./test/fixtures/queue-server-consumer.js', [channelName])
+    clientConnection.connect()
+      .then(() => {
+        return new QueueClient(clientConnection, console, queueName)
+      })
+      .then((qc) => {
+        qc.send(message, '12345')
+      })
 
-    consumer.on('message', (msg) => {
-      consumer.kill()
-      producer.kill()
-      if (msg === message) {
-        done()
-      } else {
-        done(new Error('msg !== message'))
-      }
-    })
+    serverConnection.connect()
+      .then(() => {
+        return new QueueServer(serverConnection, console, queueName, 1, 5, 10000)
+      })
+      .then((qs) => {
+        qs.consume((msg) => {
+          if (msg.data === message.data) {
+            done()
+          } else {
+            done(new Error('msg.data != message.data'))
+          }
+        })
+      })
   })
 })
