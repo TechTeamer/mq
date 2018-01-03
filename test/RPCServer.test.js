@@ -1,4 +1,7 @@
-// const {assert} = require('chai')
+const chai = require('chai')
+const chaiAsPromised = require('chai-as-promised')
+
+chai.use(chaiAsPromised)
 
 describe('QueueMessage', () => {
   it('works', () => {
