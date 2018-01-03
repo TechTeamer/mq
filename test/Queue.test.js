@@ -9,13 +9,13 @@ describe('QueueClient && QueueServer', () => {
     let consumer = fork('./test/fixtures/queue-server-consumer.js', [channelName])
 
     consumer.on('message', (msg) => {
+      consumer.kill()
+      producer.kill()
       if (msg === message) {
         done()
       } else {
         done(new Error('msg !== message'))
       }
-      consumer.kill()
-      producer.kill()
     })
   })
 })

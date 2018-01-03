@@ -9,13 +9,13 @@ describe('RPCClient && RPCServer', () => {
     const consumer = fork('./test/fixtures/rpc-server-consumer.js', [channelName])
 
     consumer.on('message', (msg) => {
+      consumer.kill()
+      producer.kill()
       if (msg === message) {
         done()
       } else {
         done(new Error('Wrong msg'))
       }
-      consumer.kill()
-      producer.kill()
     })
   })
 })
