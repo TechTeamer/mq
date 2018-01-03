@@ -11,9 +11,9 @@ const serverConnection = new QueueConnection(new QueueConfig(
     url: 'amqps://localhost:5671',
     options: {
       rejectUnauthorized: false,
-      cert: './test/test_certificates/cert.pem',
-      key: './test/test_certificates/key.pem',
-      ca: ['./test/test_certificates/cacert.pem']
+      cert: '/workspace/vuer_docker/workspace/cert/vuer_mq_cert/client/cert.pem',
+      key: '/workspace/vuer_docker/workspace/cert/vuer_mq_cert/client/key.pem',
+      ca: ['/workspace/vuer_docker/workspace/cert/vuer_mq_cert/ca/cacert.pem']
     },
     rpcTimeoutMs: 10000,
     rpcQueueMaxSize: 100

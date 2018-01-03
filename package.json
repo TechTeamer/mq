@@ -13,7 +13,7 @@
     "node": ">=6"
   },
   "scripts": {
-    "test": "./node_modules/.bin/eslint . && ./node_modules/.bin/mocha",
+    "test": "./node_modules/.bin/eslint . && ./node_modules/.bin/mocha --exit",
     "test-no-lint": "./node_modules/.bin/mocha --exit"
   },
   "dependencies": {

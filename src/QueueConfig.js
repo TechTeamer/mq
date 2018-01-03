@@ -19,7 +19,7 @@ class QueueConfig {
   constructor (config = {}) {
     let {
       url = 'amqps://localhost:5672',
-      options = null,
+      options = {},
       rpcTimeoutMs = 10000,
       rpcQueueMaxSize = 100
     } = config
