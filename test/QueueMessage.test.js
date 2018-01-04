@@ -1,8 +1,4 @@
 const chai = require('chai')
-const chaiAsPromised = require('chai-as-promised')
-
-chai.use(chaiAsPromised)
-
 let expect = chai.expect
 
 const QueueMessage = require('../src/QueueMessage')
