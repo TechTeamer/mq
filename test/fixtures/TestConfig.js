@@ -1,4 +1,5 @@
 const QueueConfig = require('../../src/QueueConfig')
+const ConsoleInspector = require('../consoleInspector')
 
 let certPath = '/workspace/vuer_docker/workspace/cert/vuer_mq_cert'
 
@@ -12,5 +13,5 @@ module.exports = new QueueConfig({
   },
   rpcTimeoutMs: 10000,
   rpcQueueMaxSize: 100,
-  logger: console
+  logger: new ConsoleInspector(console)
 })

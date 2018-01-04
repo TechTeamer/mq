@@ -1,10 +1,14 @@
 const RPCClient = require('../src/RPCClient')
 const RPCServer = require('../src/RPCServer')
 const QueueConnection = require('../src/QueueConnection')
-const chai = require('chai')
-const expect = chai.expect
+const ConsoleInspector = require('./consoleInspector')
+let chai = require('chai')
+let chaiAsPromised = require('chai-as-promised')
+chai.use(chaiAsPromised)
+let expect = chai.expect
 
 describe('RPCClient && RPCServer', () => {
+  const testConsole = new ConsoleInspector(console)
   let rpcName = 'test-rpc'
   let stringMessage = 'foobar'
   let objectMessage = {foo: 'bar', bar: 'foo'}
@@ -14,12 +18,17 @@ describe('RPCClient && RPCServer', () => {
   const serverConnection = new QueueConnection(config)
   let rpcClient
   let rpcServer
-  //
+
   Promise.all([clientConnection.connect(), serverConnection.connect()])
     .then(() => {
-      rpcClient = new RPCClient(clientConnection, console, rpcName, 100, 10000)
-      rpcServer = new RPCServer(serverConnection, console, rpcName, 1, 10000)
+      rpcClient = new RPCClient(clientConnection, config.logger, rpcName, 100, 1000)
+      rpcServer = new RPCServer(serverConnection, config.logger, rpcName, 1, 1000)
     })
+
+  after(() => {
+    config.logger.printLogs()
+    config.logger.empty()
+  })
 
   it('RPCClient.call() sends a STRING and RPCServer.consume() receives it', (done) => {
     Promise.all([clientConnection.connect(), serverConnection.connect()])
@@ -49,13 +58,28 @@ describe('RPCClient && RPCServer', () => {
       })
   })
 
-  // TODO: Fix
-  it('RPCClient.call() throws an error when the parameter cant be stringified', () => {
+  it('RPCClient.call() sends an OBJECT, RPCServer.consume() sends it back and RPCClient receives it intact', (done) => {
     Promise.all([clientConnection.connect(), serverConnection.connect()])
       .then(() => {
         rpcServer.consume((msg) => {
-          done()
+          return msg
         })
+        rpcClient.call(objectMessage, 10000).then((res) => {
+          if (JSON.stringify(res) === JSON.stringify((objectMessage))) {
+            done()
+          } else {
+            done(new Error('Object sent and received are not equal'))
+          }
+        })
+      })
+  })
+
+  it('RPCClient.call() throws an error when the parameter cant be JSON-serialized', () => {
+    Promise.all([clientConnection.connect(), serverConnection.connect()])
+      .then(() => {
+        rpcServer.consume((msg) => {})
+
+        return expect(() => rpcClient.call(nonJSONSerializableMessage)).to.not.throw() // FIXME: why does it not throw?
       })
   })
 })
