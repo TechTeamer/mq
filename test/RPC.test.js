@@ -1,18 +1,9 @@
 const RPCClient = require('../src/RPCClient')
 const RPCServer = require('../src/RPCServer')
 const QueueConnection = require('../src/QueueConnection')
-const ConsoleInspector = require('./consoleInspector')
-let chai = require('chai')
-let chaiAsPromised = require('chai-as-promised')
-chai.use(chaiAsPromised)
-let expect = chai.expect
 
 describe('RPCClient && RPCServer', () => {
-  const testConsole = new ConsoleInspector(console)
   let rpcName = 'test-rpc'
-  let stringMessage = 'foobar'
-  let objectMessage = {foo: 'bar', bar: 'foo'}
-  let nonJSONSerializableMessage = {}
   const config = require('./fixtures/TestConfig')
   const clientConnection = new QueueConnection(config)
   const serverConnection = new QueueConnection(config)
@@ -31,6 +22,7 @@ describe('RPCClient && RPCServer', () => {
   })
 
   it('RPCClient.call() sends a STRING and RPCServer.consume() receives it', (done) => {
+    let stringMessage = 'foobar'
     Promise.all([clientConnection.connect(), serverConnection.connect()])
       .then(() => {
         rpcServer.consume((msg) => {
@@ -45,6 +37,7 @@ describe('RPCClient && RPCServer', () => {
   })
 
   it('RPCClient.call() sends an OBJECT and RPCServer.consume() receives it', (done) => {
+    let objectMessage = {foo: 'bar', bar: 'foo'}
     Promise.all([clientConnection.connect(), serverConnection.connect()])
       .then(() => {
         rpcServer.consume((msg) => {
@@ -59,6 +52,7 @@ describe('RPCClient && RPCServer', () => {
   })
 
   it('RPCClient.call() sends an OBJECT, RPCServer.consume() sends it back and RPCClient receives it intact', (done) => {
+    let objectMessage = {foo: 'bar', bar: 'foo'}
     Promise.all([clientConnection.connect(), serverConnection.connect()])
       .then(() => {
         rpcServer.consume((msg) => {
@@ -74,12 +68,16 @@ describe('RPCClient && RPCServer', () => {
       })
   })
 
-  it('RPCClient.call() throws an error when the parameter cant be JSON-serialized', () => {
+  it('RPCClient.call() throws an error when the parameter cant be JSON-serialized', (done) => {
+    let nonJSONSerializableMessage = {}
+    nonJSONSerializableMessage.a = {b: nonJSONSerializableMessage}
     Promise.all([clientConnection.connect(), serverConnection.connect()])
       .then(() => {
-        rpcServer.consume((msg) => {})
-
-        return expect(() => rpcClient.call(nonJSONSerializableMessage)).to.not.throw() // FIXME: why does it not throw?
+        rpcServer.consume((msg) => {
+        })
+        rpcClient.call(nonJSONSerializableMessage)
+          .then(() => done('Did not throw an error'))
+          .catch(() => done())
       })
   })
 })
