@@ -1,9 +1,24 @@
 const QueueClient = require('../src/QueueClient')
 const QueueServer = require('../src/QueueServer')
 const QueueConnection = require('../src/QueueConnection')
-const config = require('./fixtures/TestConfig')
 const ConsoleInspector = require('./consoleInspector')
 const logger = new ConsoleInspector(console)
+let config = require('./fixtures/TestConfig')
+
+if (typeof config === 'undefined') {
+  let QueueConfig = require('../src/QueueConfig')
+  config = new QueueConfig({
+    url: 'amqps://localhost:5671',
+    options: {
+      rejectUnauthorized: false,
+      cert: '',
+      key: '',
+      ca: []
+    },
+    rpcTimeoutMs: 10000,
+    rpcQueueMaxSize: 100
+  })
+}
 
 describe('QueueClient && QueueServer', () => {
   let queueName = 'test-queue'
