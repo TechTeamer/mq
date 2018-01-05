@@ -10,17 +10,7 @@ if (fs.existsSync('./fixtures/TestConfig.js')) {
   config = require('./fixtures/TestConfig')
 } else {
   let QueueConfig = require('../src/QueueConfig')
-  config = new QueueConfig({
-    url: 'amqps://localhost:5672',
-    options: {
-      rejectUnauthorized: false,
-      cert: '',
-      key: '',
-      ca: []
-    },
-    rpcTimeoutMs: 10000,
-    rpcQueueMaxSize: 100
-  })
+  config = new QueueConfig()
 }
 
 describe('RPCClient && RPCServer', () => {
