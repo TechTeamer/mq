@@ -1,6 +1,6 @@
 node_modules/
 local_tests/
-test/TestConfig.js
+test/fixtures/TestConfig.js
 
 .npm
 .eslintcache

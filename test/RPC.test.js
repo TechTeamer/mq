@@ -1,24 +1,28 @@
 const RPCClient = require('../src/RPCClient')
 const RPCServer = require('../src/RPCServer')
 const QueueConnection = require('../src/QueueConnection')
+const ConsoleInspector = require('./consoleInspector')
+const logger = new ConsoleInspector(console)
 
 describe('RPCClient && RPCServer', () => {
   let rpcName = 'test-rpc'
   const config = require('./fixtures/TestConfig')
   const clientConnection = new QueueConnection(config)
   const serverConnection = new QueueConnection(config)
+  clientConnection.setLogger(logger)
+  serverConnection.setLogger(logger)
   let rpcClient
   let rpcServer
 
   Promise.all([clientConnection.connect(), serverConnection.connect()])
     .then(() => {
-      rpcClient = new RPCClient(clientConnection, config.logger, rpcName, 100, 1000)
-      rpcServer = new RPCServer(serverConnection, config.logger, rpcName, 1, 1000)
+      rpcClient = new RPCClient(clientConnection, logger, rpcName, 100, 1000)
+      rpcServer = new RPCServer(serverConnection, logger, rpcName, 1, 1000)
     })
 
   after(() => {
-    config.logger.printLogs()
-    config.logger.empty()
+    logger.printLogs()
+    logger.empty()
   })
 
   it('RPCClient.call() sends a STRING and RPCServer.consume() receives it', (done) => {

@@ -2,22 +2,26 @@ const QueueClient = require('../src/QueueClient')
 const QueueServer = require('../src/QueueServer')
 const QueueConnection = require('../src/QueueConnection')
 const config = require('./fixtures/TestConfig')
+const ConsoleInspector = require('./consoleInspector')
+const logger = new ConsoleInspector(console)
 
 describe('QueueClient && QueueServer', () => {
   let queueName = 'test-queue'
   let clientConnection = new QueueConnection(config)
   let serverConnection = new QueueConnection(config)
+  clientConnection.setLogger(logger)
+  serverConnection.setLogger(logger)
   let queueClient
   let queueServer
   Promise.all([clientConnection.connect(), serverConnection.connect()])
     .then(() => {
-      queueClient = new QueueClient(clientConnection, config.logger, queueName)
-      queueServer = new QueueServer(serverConnection, config.logger, queueName, 1, 5, 10000)
+      queueClient = new QueueClient(clientConnection, logger, queueName)
+      queueServer = new QueueServer(serverConnection, logger, queueName, 1, 5, 10000)
     })
 
   after(() => {
-    config.logger.printLogs()
-    config.logger.empty()
+    logger.printLogs()
+    logger.empty()
   })
 
   it('QueueClient.send() sends a STRING and QueueServer.consume() receives it', (done) => {
