@@ -3,9 +3,11 @@ const QueueServer = require('../src/QueueServer')
 const QueueConnection = require('../src/QueueConnection')
 const ConsoleInspector = require('./consoleInspector')
 const logger = new ConsoleInspector(console)
-let config = require('./fixtures/TestConfig')
+let config
 
-if (typeof config === 'undefined') {
+try {
+  config = require('./fixtures/TestConfig')
+} catch (e) {
   config = require('./fixtures/DefaultConfig')
 }
 

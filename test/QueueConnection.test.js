@@ -1,7 +1,9 @@
 const QueueConnection = require('../src/QueueConnection')
-let config = require('./fixtures/TestConfig')
+let config
 
-if (typeof config === 'undefined') {
+try {
+  config = require('./fixtures/TestConfig')
+} catch (e) {
   config = require('./fixtures/DefaultConfig')
 }
 
