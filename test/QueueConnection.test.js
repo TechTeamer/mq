@@ -1,12 +1,8 @@
 const QueueConnection = require('../src/QueueConnection')
-const fs = require('fs')
-let config
+let config = require('./fixtures/TestConfig')
 
-if (fs.existsSync('./fixtures/TestConfig.js')) {
-  config = require('./fixtures/TestConfig')
-} else {
-  let QueueConfig = require('../src/QueueConfig')
-  config = new QueueConfig()
+if (typeof config === 'undefined') {
+  config = require('./fixtures/DefaultConfig')
 }
 
 describe('QueueConnection', () => {
