@@ -7,7 +7,7 @@ if (fs.existsSync('./fixtures/TestConfig.js')) {
 } else {
   let QueueConfig = require('../src/QueueConfig')
   config = new QueueConfig({
-    url: 'amqps://localhost:5671',
+    url: 'amqps://localhost:5672',
     options: {
       rejectUnauthorized: false,
       cert: '',
