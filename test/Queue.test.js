@@ -2,19 +2,13 @@ const QueueClient = require('../src/QueueClient')
 const QueueServer = require('../src/QueueServer')
 const QueueConnection = require('../src/QueueConnection')
 const ConsoleInspector = require('./consoleInspector')
-const logger = new ConsoleInspector(console)
-let config
-
-try {
-  config = require('./fixtures/TestConfig')
-} catch (e) {
-  config = require('./fixtures/DefaultConfig')
-}
+let config = require('./config/LoadConfig')
 
 describe('QueueClient && QueueServer', () => {
   let queueName = 'test-queue'
   let clientConnection = new QueueConnection(config)
   let serverConnection = new QueueConnection(config)
+  const logger = new ConsoleInspector(console)
   clientConnection.setLogger(logger)
   serverConnection.setLogger(logger)
   let queueClient

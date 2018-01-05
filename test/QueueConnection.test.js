@@ -1,11 +1,5 @@
 const QueueConnection = require('../src/QueueConnection')
-let config
-
-try {
-  config = require('./fixtures/TestConfig')
-} catch (e) {
-  config = require('./fixtures/DefaultConfig')
-}
+let config = require('./config/LoadConfig')
 
 describe('QueueConnection', () => {
   let connection = new QueueConnection(config)

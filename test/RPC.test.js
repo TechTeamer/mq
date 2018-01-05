@@ -2,19 +2,13 @@ const RPCClient = require('../src/RPCClient')
 const RPCServer = require('../src/RPCServer')
 const QueueConnection = require('../src/QueueConnection')
 const ConsoleInspector = require('./consoleInspector')
-const logger = new ConsoleInspector(console)
-let config
-
-try {
-  config = require('./fixtures/TestConfig')
-} catch (e) {
-  config = require('./fixtures/DefaultConfig')
-}
+let config = require('./config/LoadConfig')
 
 describe('RPCClient && RPCServer', () => {
   let rpcName = 'test-rpc'
   const clientConnection = new QueueConnection(config)
   const serverConnection = new QueueConnection(config)
+  const logger = new ConsoleInspector(console)
   clientConnection.setLogger(logger)
   serverConnection.setLogger(logger)
   let rpcClient
