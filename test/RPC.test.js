@@ -3,9 +3,12 @@ const RPCServer = require('../src/RPCServer')
 const QueueConnection = require('../src/QueueConnection')
 const ConsoleInspector = require('./consoleInspector')
 const logger = new ConsoleInspector(console)
-let config = require('./fixtures/TestConfig')
+const fs = require('fs')
+let config
 
-if (typeof config === 'undefined') {
+if (fs.existsSync('./fixtures/TestConfig.js')) {
+  config = require('./fixtures/TestConfig')
+} else {
   let QueueConfig = require('../src/QueueConfig')
   config = new QueueConfig({
     url: 'amqps://localhost:5671',
