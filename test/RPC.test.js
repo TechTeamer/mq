@@ -3,10 +3,25 @@ const RPCServer = require('../src/RPCServer')
 const QueueConnection = require('../src/QueueConnection')
 const ConsoleInspector = require('./consoleInspector')
 const logger = new ConsoleInspector(console)
+let config = require('./fixtures/TestConfig')
+
+if (typeof config === 'undefined') {
+  let QueueConfig = require('../src/QueueConfig')
+  config = new QueueConfig({
+    url: 'amqps://localhost:5671',
+    options: {
+      rejectUnauthorized: false,
+      cert: '',
+      key: '',
+      ca: []
+    },
+    rpcTimeoutMs: 10000,
+    rpcQueueMaxSize: 100
+  })
+}
 
 describe('RPCClient && RPCServer', () => {
   let rpcName = 'test-rpc'
-  const config = require('./fixtures/TestConfig')
   const clientConnection = new QueueConnection(config)
   const serverConnection = new QueueConnection(config)
   clientConnection.setLogger(logger)
