@@ -1,7 +1,7 @@
 const QueueConfig = require('../../src/QueueConfig')
 
 module.exports = new QueueConfig({
-  url: 'amqps://localhost:5671',
+  url: 'amqps://localhost:5672',
   options: {
     rejectUnauthorized: false
   },
