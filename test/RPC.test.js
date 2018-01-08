@@ -13,11 +13,12 @@ describe('RPCClient && RPCServer', () => {
   serverConnection.setLogger(logger)
   let rpcClient
   let rpcServer
+  let timeOut = 1000
 
   Promise.all([clientConnection.connect(), serverConnection.connect()])
     .then(() => {
-      rpcClient = new RPCClient(clientConnection, logger, rpcName, 100, 1000)
-      rpcServer = new RPCServer(serverConnection, logger, rpcName, 1, 1000)
+      rpcClient = new RPCClient(clientConnection, logger, rpcName, 100, timeOut)
+      rpcServer = new RPCServer(serverConnection, logger, rpcName, 1, timeOut)
     })
 
   after(() => {
@@ -80,6 +81,21 @@ describe('RPCClient && RPCServer', () => {
         rpcServer.consume((msg) => {
         })
         rpcClient.call(nonJSONSerializableMessage)
+          .then(() => done('Did not throw an error'))
+          .catch(() => done())
+      })
+  })
+
+  it('RPCClient.call() throws an error if it doesnt receive a response sooner than timeOut', (done) => {
+    let objectMessage = {foo: 'bar', bar: 'foo'}
+    Promise.all([clientConnection.connect(), serverConnection.connect()])
+      .then(() => {
+        rpcServer.consume((msg) => {
+          let now = new Date().getTime()
+          while (new Date().getTime() < now + timeOut + 100) { }
+          return msg
+        })
+        rpcClient.call(objectMessage)
           .then(() => done('Did not throw an error'))
           .catch(() => done())
       })
