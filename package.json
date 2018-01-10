@@ -10,8 +10,8 @@
   ],
   "license": "MIT",
   "repository" : {
-    "type" : "git"
-  , "url" : "https://github.com/TechTeamer/techteamer_mq"
+    "type" : "git",
+    "url" : "https://github.com/TechTeamer/techteamer_mq"
   },
   "engines": {
     "node": ">=6"
