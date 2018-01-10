@@ -9,6 +9,10 @@
     "Zoltán Nagy <zoltan.nagy@techteamer.com>"
   ],
   "license": "MIT",
+  "repository" : {
+    "type" : "git"
+  , "url" : "https://github.com/TechTeamer/techteamer_mq"
+  },
   "engines": {
     "node": ">=6"
   },
