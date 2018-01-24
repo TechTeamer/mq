@@ -93,7 +93,7 @@ class QueueServer {
 
       if (counter > this._maxRetry) {
         this._logger.error('QUEUESERVER TRIED TOO MANY TIMES', this.name, request, msg)
-        this._ack(msg)
+        this._ack(channel, msg)
         if (msg.fields.consumerTag) {
           this._retryMap.delete(msg.fields.consumerTag)
         }

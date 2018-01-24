@@ -11,12 +11,13 @@ describe('QueueClient && QueueServer', () => {
   const logger = new ConsoleInspector(console)
   clientConnection.setLogger(logger)
   serverConnection.setLogger(logger)
+  let attempts = 5
   let queueClient
   let queueServer
   Promise.all([clientConnection.connect(), serverConnection.connect()])
     .then(() => {
       queueClient = new QueueClient(clientConnection, logger, queueName)
-      queueServer = new QueueServer(serverConnection, logger, queueName, 1, 5, 10000)
+      queueServer = new QueueServer(serverConnection, logger, queueName, 1, attempts, 10000)
     })
 
   after(() => {
@@ -67,6 +68,21 @@ describe('QueueClient && QueueServer', () => {
         try {
           queueClient.send(nonJSONSerializableMessage)
           done(new Error('Sending a non-json-serializeable object did not throw an error'))
+        } catch (e) {
+          done()
+        }
+      })
+  })
+
+  it(`QueueClient.send() stops trying after ${attempts} attempts`, (done) => {
+    Promise.all([clientConnection.connect(), serverConnection.connect()])
+      .then(() => {
+        let objectMessage = {foo: 'bar', bar: 'foo'}
+        queueServer.consume((msg) => {
+          throw new Error('Asdf')
+        })
+        try {
+          queueClient.send(objectMessage)
         } catch (e) {
           done()
         }
