@@ -1,3 +1,4 @@
+const assert = require('assert')
 const QueueClient = require('../src/QueueClient')
 const QueueServer = require('../src/QueueServer')
 const QueueConnection = require('../src/QueueConnection')
@@ -11,13 +12,13 @@ describe('QueueClient && QueueServer', () => {
   const logger = new ConsoleInspector(console)
   clientConnection.setLogger(logger)
   serverConnection.setLogger(logger)
-  let attempts = 5
+  let maxRetry = 5
   let queueClient
   let queueServer
   Promise.all([clientConnection.connect(), serverConnection.connect()])
     .then(() => {
       queueClient = new QueueClient(clientConnection, logger, queueName)
-      queueServer = new QueueServer(serverConnection, logger, queueName, 1, attempts, 10000)
+      queueServer = new QueueServer(serverConnection, logger, queueName, 1, maxRetry, 10000)
     })
 
   after(() => {
@@ -74,18 +75,22 @@ describe('QueueClient && QueueServer', () => {
       })
   })
 
-  it(`QueueClient.send() stops trying after ${attempts} attempts`, (done) => {
+  it(`QueueClient.send() tries to deliver message for ${maxRetry + 1} times`, (done) => {
     Promise.all([clientConnection.connect(), serverConnection.connect()])
       .then(() => {
+        let consumeCalled = 0
         let objectMessage = {foo: 'bar', bar: 'foo'}
         queueServer.consume((msg) => {
-          throw new Error('Asdf')
+          consumeCalled++
+          throw new Error('message not processed well')
         })
-        try {
-          queueClient.send(objectMessage)
-        } catch (e) {
+
+        queueClient.send(objectMessage)
+
+        setTimeout(() => {
+          assert.equal(consumeCalled, maxRetry + 1, '')
           done()
-        }
+        }, 1000)
       })
   })
 })
