@@ -14,7 +14,7 @@
     "url" : "https://github.com/TechTeamer/techteamer_mq"
   },
   "engines": {
-    "node": ">=4"
+    "node": ">=6"
   },
   "scripts": {
     "test": "eslint . && mocha --exit"
