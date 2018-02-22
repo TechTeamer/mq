@@ -20,23 +20,23 @@ class QueueClient {
   send (message, correlationId) {
     let options = {}
     let channel
-    let param
 
     if (correlationId) {
       options.correlationId = correlationId
-    }
-
-    try {
-      param = JSON.stringify(new QueueMessage('ok', message))
-    } catch (err) {
-      this._logger.error('CANNOT SEND QUEUE MESSAGE %s #%s', this.name, err)
-      throw err
     }
 
     return this._connection.getChannel().then((ch) => {
       channel = ch
       return channel.assertQueue(this.name, {durable: true})
     }).then(() => {
+      let param
+      try {
+        param = JSON.stringify(new QueueMessage('ok', message))
+      } catch (err) {
+        this._logger.error('CANNOT SEND QUEUE MESSAGE %s #%s', this.name, err)
+        throw err
+      }
+
       let isResolved = false
 
       return new Promise((resolve, reject) => {
