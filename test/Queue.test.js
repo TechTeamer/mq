@@ -75,13 +75,18 @@ describe('QueueClient && QueueServer', () => {
       })
   })
 
-  it(`QueueClient.send() tries to deliver message for ${maxRetry + 1} times`, (done) => {
+  it(`QueueServer.consume() tries to receive message for ${maxRetry + 1} times`, (done) => {
     Promise.all([clientConnection.connect(), serverConnection.connect()])
       .then(() => {
         let consumeCalled = 0
         let objectMessage = {foo: 'bar', bar: 'foo'}
+
         queueServer.consume((msg) => {
           consumeCalled++
+          if (consumeCalled > maxRetry + 1) {
+            done(new Error(`Tried more times than limit: ${maxRetry}`))
+            return
+          }
           throw new Error('message not processed well')
         })
 
