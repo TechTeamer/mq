@@ -21,8 +21,6 @@ class RPCServer {
     this._timeoutMs = timeoutMs
 
     this._callback = () => Promise.resolve()
-
-    this.initialize()
   }
 
   /**
