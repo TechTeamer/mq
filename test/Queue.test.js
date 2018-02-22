@@ -70,12 +70,10 @@ describe('QueueClient && QueueServer', () => {
       queueServer.consume((msg) => {
         done(new Error('Should not receive the message'))
       })
-      try {
-        queueClient.send(nonJSONSerializableMessage)
-        done(new Error('Sending a non-json-serializeable object did not throw an error'))
-      } catch (e) {
-        done()
-      }
+
+      queueClient.send(nonJSONSerializableMessage)
+        .then(() => done(new Error('Sending a non-json-serializeable object did not throw an error')))
+        .catch(() => done())
     })
   })
 
