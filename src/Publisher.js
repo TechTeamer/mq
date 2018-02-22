@@ -35,7 +35,7 @@ class Publisher {
 
     return this._connection.getChannel().then((ch) => {
       channel = ch
-      return channel.assertExchange(this.name, 'fanout', {durable: false})
+      return channel.assertExchange(this.name, 'fanout', {durable: true})
     }).then(() => {
       let isResolved = false
 
@@ -47,7 +47,7 @@ class Publisher {
           }
         }
 
-        let isWriteBufferEmpty = channel.publish(this.name, Buffer.from(param), options, (err, ok) => {
+        let isWriteBufferEmpty = channel.publish(this.name, '', Buffer.from(param), options, (err, ok) => {
           if (err) {
             reject(err)
           } else {

@@ -30,7 +30,7 @@ class Subscriber {
 
     return this._connection.getChannel().then(c => {
       channel = c
-      return channel.assertExchange(this.name, 'fanout', {durable: false})
+      return channel.assertExchange(this.name, 'fanout', {durable: true})
     }).then(() => {
       return channel.assertQueue('', {exclusive: true})
     }).then(q => {
