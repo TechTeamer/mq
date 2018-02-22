@@ -48,7 +48,7 @@ class QueueConnection {
 
       conn.on('error', (err) => {
         if (err.message !== 'Connection closing') {
-          this._logger.warn('RabbitMQ error', err)
+          this._logger.error('RabbitMQ error', err)
         }
       })
       conn.on('close', () => {
@@ -56,10 +56,10 @@ class QueueConnection {
         process.exit(2)
       })
       conn.on('blocked', (reason) => {
-        this._logger.warn('RabbitMQ blocked', reason)
+        this._logger.error('RabbitMQ blocked', reason)
       })
       conn.on('unblocked', (reason) => {
-        this._logger.warn('RabbitMQ unblocked', reason)
+        this._logger.error('RabbitMQ unblocked', reason)
       })
 
       this._connection = conn
