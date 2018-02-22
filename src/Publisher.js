@@ -4,12 +4,23 @@ class Publisher {
   /**
    * @param {QueueConnection} queueConnection
    * @param {Console} logger
-   * @param {String} name
+   * @param {String} exchange
    */
-  constructor (queueConnection, logger, name) {
+  constructor (queueConnection, logger, exchange) {
     this._connection = queueConnection
     this._logger = logger
-    this.name = name
+    this.exchange = exchange
+    this.routingKey = ''
+  }
+
+  /**
+   * Overridden in queueClient to assertQueue instead of exchange
+   *
+   * @param channel
+   * @returns {Promise}
+   */
+  assertExchangeOrQueue (channel) {
+    return channel.assertExchange(this.exchange, 'fanout', {durable: true})
   }
 
   /**
@@ -27,18 +38,18 @@ class Publisher {
 
     return this._connection.getChannel().then((ch) => {
       channel = ch
-      return channel.assertExchange(this.name, 'fanout', {durable: true})
+      return this.assertExchangeOrQueue(channel)
     }).then(() => {
       let param
       try {
         param = JSON.stringify(new QueueMessage('ok', message))
       } catch (err) {
-        this._logger.error('CANNOT PUBLISH MESSAGE %s #%s', this.name, err)
+        this._logger.error('CANNOT PUBLISH MESSAGE', this.exchange, err)
         throw err
       }
 
       return new Promise((resolve, reject) => {
-        let isWriteBufferEmpty = channel.publish(this.name, '', Buffer.from(param), options, (err, ok) => {
+        let isWriteBufferEmpty = channel.publish(this.exchange, this.routingKey, Buffer.from(param), options, (err, ok) => {
           if (err) {
             reject(err)
           } else {

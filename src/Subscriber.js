@@ -5,16 +5,18 @@ class Subscriber {
    * @param {QueueConnection} queueConnection
    * @param {Console} logger
    * @param {String} name
-   * @param {Number} maxRetry
-   * @param {Number} timeoutMs
+   * @param {Object} options
    */
-  constructor (queueConnection, logger, name, maxRetry, timeoutMs) {
+  constructor (queueConnection, logger, name, options) {
     this._connection = queueConnection
     this._logger = logger
     this.name = name
+
+    let {maxRetry, timeoutMs} = options
     this._maxRetry = maxRetry
-    this._retryMap = new Map()
     this._timeoutMs = timeoutMs
+
+    this._retryMap = new Map()
 
     this._callback = () => Promise.resolve()
   }
@@ -80,7 +82,7 @@ class Subscriber {
   _processMessage (channel, msg) {
     let request = QueueMessage.fromJSON(msg.content)
     if (request.status !== 'ok') {
-      this._logger.error('CANNOT GET QUEUE MESSAGE PARAMS %s #%s', this.name, request)
+      this._logger.error('CANNOT GET QUEUE MESSAGE PARAMS', this.name, request)
       this._ack(channel, msg)
       return
     }
@@ -95,7 +97,7 @@ class Subscriber {
       }
 
       if (counter > this._maxRetry) {
-        this._logger.error('QUEUESERVER TRIED TOO MANY TIMES', this.name, request, msg)
+        this._logger.error('SUBSCRIBER TRIED TOO MANY TIMES', this.name, request, msg)
         this._ack(channel, msg)
         if (msg.fields.consumerTag) {
           this._retryMap.delete(msg.fields.consumerTag)
@@ -107,7 +109,7 @@ class Subscriber {
     let timedOut = false
     const timer = setTimeout(() => {
       timedOut = true
-      this._logger.error('Timeout in QueueServer', this.name, request.data)
+      this._logger.error('Timeout in Subscriber', this.name, request.data)
       this._nack(channel, msg)
     }, this._timeoutMs)
 
@@ -124,7 +126,7 @@ class Subscriber {
     }).catch((err) => {
       if (!timedOut) {
         clearTimeout(timer)
-        this._logger.error('Cannot process QueueServer consume', err)
+        this._logger.error('Cannot process Subscriber consume', err)
         this._nack(channel, msg)
       }
     })
