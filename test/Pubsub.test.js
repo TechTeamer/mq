@@ -8,17 +8,16 @@ let config = require('./config/LoadConfig')
 describe('Publisher && Subscriber', () => {
   let publisherName = 'test-publisher'
   const logger = new ConsoleInspector(console)
+  let maxRetry = 5
 
   let publisherConnection = new QueueConnection(config)
   publisherConnection.setLogger(logger)
+  let publisher = new Publisher(publisherConnection, logger, publisherName)
 
   let subscriberConnection = new QueueConnection(config)
   subscriberConnection.setLogger(logger)
+  let subscriber = new Subscriber(subscriberConnection, logger, publisherName, maxRetry, 10000)
 
-  let maxRetry = 5
-
-  let publisher
-  let subscriber
   let initialized = false
 
   const setupConnections = () => {
@@ -26,17 +25,8 @@ describe('Publisher && Subscriber', () => {
       return Promise.resolve()
     }
 
-    return Promise.all([
-      publisherConnection.connect(),
-      subscriberConnection.connect()
-    ]).then(() => {
-      publisher = new Publisher(publisherConnection, logger, publisherName)
-      subscriber = new Subscriber(subscriberConnection, logger, publisherName, maxRetry, 10000)
-    }).then(() => {
-      return subscriber.initialize()
-    }).then(() => {
-      initialized = true
-    })
+    initialized = true
+    return subscriber.initialize()
   }
 
   after(() => {
@@ -103,7 +93,7 @@ describe('Publisher && Subscriber', () => {
       subscriber.consume((msg) => {
         consumeCalled++
         if (consumeCalled > maxRetry + 1) {
-          done(new Error(`Tried more times than limit: ${maxRetry}`))
+          done(new Error(`Retried more times than limit: ${maxRetry}`))
           return
         }
         throw new Error('message not processed well')
