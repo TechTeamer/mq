@@ -50,7 +50,7 @@ class RPCClient {
         try {
           param = JSON.stringify(new QueueMessage('ok', message))
         } catch (err) {
-          this._logger.error('CANNOT SEND RPC CALL %s #%s', this.name, err)
+          this._logger.error('CANNOT SEND RPC CALL', this.name, err)
           reject(err)
           return
         }
@@ -142,7 +142,7 @@ class RPCClient {
       if (replyContent.status === 'ok') {
         resolve(replyContent.data)
       } else {
-        this._logger.error('RPC CLIENT GOT ERROR %s #%s', this.name, reply.properties.correlationId, replyContent)
+        this._logger.error('RPC CLIENT GOT ERROR', this.name, reply.properties.correlationId, replyContent)
         reject(replyContent.data)
       }
     } else {
