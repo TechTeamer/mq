@@ -16,7 +16,7 @@ describe('Publisher && Subscriber', () => {
 
   let subscriberConnection = new QueueConnection(config)
   subscriberConnection.setLogger(logger)
-  let subscriber = new Subscriber(subscriberConnection, logger, publisherName, maxRetry, 10000)
+  let subscriber = new Subscriber(subscriberConnection, logger, publisherName, {maxRetry, timeoutMs: 10000})
 
   let initialized = false
 
@@ -112,7 +112,7 @@ describe('Publisher && Subscriber', () => {
       otherSubscriberConnection.setLogger(logger)
       return otherSubscriberConnection.connect()
     }).then(() => {
-      otherSubscriber = new Subscriber(subscriberConnection, logger, publisherName, maxRetry, 10000)
+      otherSubscriber = new Subscriber(subscriberConnection, logger, publisherName, {maxRetry, timeoutMs: 10000})
       return otherSubscriber.initialize()
     }).then(() => {
       let stringMessage = 'foobar'

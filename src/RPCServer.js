@@ -64,7 +64,7 @@ class RPCServer {
     let request = QueueMessage.fromJSON(msg.content)
 
     if (request.status !== 'ok') {
-      this._logger.error('CANNOT GET RPC CALL PARAMS %s #%s', this.name, request)
+      this._logger.error('CANNOT GET RPC CALL PARAMS', this.name, request)
 
       ch.sendToQueue(msg.properties.replyTo, Buffer.from(JSON.stringify(new QueueMessage('error', 'cannot decode parameters'))), {correlationId: msg.properties.correlationId})
       this._ack(ch, msg)

@@ -16,7 +16,8 @@ describe('QueueClient && QueueServer', () => {
 
   let serverConnection = new QueueConnection(config)
   serverConnection.setLogger(logger)
-  let queueServer = new QueueServer(serverConnection, logger, queueName, 1, maxRetry, 10000)
+  let options = {prefetchCount: 1, maxRetry, timeoutMs: 10000}
+  let queueServer = new QueueServer(serverConnection, logger, queueName, options)
 
   let initialized = false
   const setupConnections = () => {
