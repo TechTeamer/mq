@@ -6,20 +6,26 @@ let config = require('./config/LoadConfig')
 
 describe('RPCClient && RPCServer', () => {
   let rpcName = 'test-rpc'
-  const clientConnection = new QueueConnection(config)
-  const serverConnection = new QueueConnection(config)
   const logger = new ConsoleInspector(console)
-  clientConnection.setLogger(logger)
-  serverConnection.setLogger(logger)
-  let rpcClient
-  let rpcServer
   let timeOut = 1000
 
-  Promise.all([clientConnection.connect(), serverConnection.connect()])
-    .then(() => {
-      rpcClient = new RPCClient(clientConnection, logger, rpcName, 100, timeOut)
-      rpcServer = new RPCServer(serverConnection, logger, rpcName, 1, timeOut)
-    })
+  const clientConnection = new QueueConnection(config)
+  clientConnection.setLogger(logger)
+  let rpcClient = new RPCClient(clientConnection, logger, rpcName, 100, timeOut)
+
+  const serverConnection = new QueueConnection(config)
+  serverConnection.setLogger(logger)
+  let rpcServer = new RPCServer(serverConnection, logger, rpcName, 1, timeOut)
+
+  let initialized = false
+  const setupConnections = () => {
+    if (initialized) {
+      return Promise.resolve()
+    }
+
+    initialized = true
+    return rpcServer.initialize()
+  }
 
   after(() => {
     logger.printLogs()
@@ -27,77 +33,77 @@ describe('RPCClient && RPCServer', () => {
   })
 
   it('RPCClient.call() sends a STRING and RPCServer.consume() receives it', (done) => {
-    let stringMessage = 'foobar'
-    Promise.all([clientConnection.connect(), serverConnection.connect()])
-      .then(() => {
-        rpcServer.consume((msg) => {
-          if (msg === stringMessage) {
-            done()
-          } else {
-            done(new Error('String received is not the same as the String sent'))
-          }
-        })
-        rpcClient.call(stringMessage, 10000)
+    setupConnections().then(() => {
+      let stringMessage = 'foobar'
+      rpcServer.consume((msg) => {
+        if (msg === stringMessage) {
+          done()
+        } else {
+          done(new Error('String received is not the same as the String sent'))
+        }
       })
+      rpcClient.call(stringMessage, 10000)
+    })
   })
 
   it('RPCClient.call() sends an OBJECT and RPCServer.consume() receives it', (done) => {
-    let objectMessage = {foo: 'bar', bar: 'foo'}
-    Promise.all([clientConnection.connect(), serverConnection.connect()])
-      .then(() => {
-        rpcServer.consume((msg) => {
-          if (JSON.stringify(msg) === JSON.stringify(objectMessage)) {
-            done()
-          } else {
-            done(new Error('The send OBJECT is not equal to the received one'))
-          }
-        })
-        rpcClient.call(objectMessage, 10000)
+    setupConnections().then(() => {
+      let objectMessage = {foo: 'bar', bar: 'foo'}
+      rpcServer.consume((msg) => {
+        if (JSON.stringify(msg) === JSON.stringify(objectMessage)) {
+          done()
+        } else {
+          done(new Error('The send OBJECT is not equal to the received one'))
+        }
       })
+      rpcClient.call(objectMessage, 10000)
+    })
   })
 
   it('RPCClient.call() sends an OBJECT, RPCServer.consume() sends it back and RPCClient receives it intact', (done) => {
-    let objectMessage = {foo: 'bar', bar: 'foo'}
-    Promise.all([clientConnection.connect(), serverConnection.connect()])
-      .then(() => {
-        rpcServer.consume((msg) => {
-          return msg
-        })
-        rpcClient.call(objectMessage, 10000).then((res) => {
-          if (JSON.stringify(res) === JSON.stringify((objectMessage))) {
-            done()
-          } else {
-            done(new Error('Object sent and received are not equal'))
-          }
-        })
+    setupConnections().then(() => {
+      let objectMessage = {foo: 'bar', bar: 'foo'}
+      rpcServer.consume((msg) => {
+        return msg
       })
+      rpcClient.call(objectMessage, 10000).then((res) => {
+        if (JSON.stringify(res) === JSON.stringify(objectMessage)) {
+          done()
+        } else {
+          done(new Error('Object sent and received are not equal'))
+        }
+      })
+    })
   })
 
   it('RPCClient.call() throws an error when the parameter cant be JSON-serialized', (done) => {
-    let nonJSONSerializableMessage = {}
-    nonJSONSerializableMessage.a = {b: nonJSONSerializableMessage}
-    Promise.all([clientConnection.connect(), serverConnection.connect()])
-      .then(() => {
-        rpcServer.consume((msg) => {
-        })
-        rpcClient.call(nonJSONSerializableMessage)
-          .then(() => done('Did not throw an error'))
-          .catch(() => done())
+    setupConnections().then(() => {
+      let nonJSONSerializableMessage = {}
+      nonJSONSerializableMessage.a = {b: nonJSONSerializableMessage}
+
+      rpcServer.consume((msg) => {
+        done(new Error('Should not receive the message'))
       })
+
+      rpcClient.call(nonJSONSerializableMessage)
+        .then(() => done('Did not throw an error'))
+        .catch(() => done())
+    })
   })
 
   it('RPCClient.call() throws an error if it doesnt receive a response sooner than timeOut', (done) => {
-    let objectMessage = {foo: 'bar', bar: 'foo'}
-    Promise.all([clientConnection.connect(), serverConnection.connect()])
-      .then(() => {
-        rpcServer.consume((msg) => {
-          let now = new Date().getTime()
-          while (new Date().getTime() < now + timeOut + 100) { }
-          return msg
-        })
-        rpcClient.call(objectMessage)
-          .then(() => done('Did not throw an error'))
-          .catch(() => done())
+    setupConnections().then(() => {
+      let objectMessage = {foo: 'bar', bar: 'foo'}
+
+      rpcServer.consume((msg) => {
+        let now = new Date().getTime()
+        while (new Date().getTime() < now + timeOut + 100) { }
+        return msg
       })
+
+      rpcClient.call(objectMessage)
+        .then(() => done('Did not throw an error'))
+        .catch(() => done())
+    })
   })
 })
