@@ -75,12 +75,9 @@ describe('Publisher && Subscriber', () => {
         done(new Error('Should not receive the message'))
       })
 
-      try {
-        publisher.send(nonJSONSerializableMessage)
-        done(new Error('Sending a non-json-serializeable object did not throw an error'))
-      } catch (e) {
-        done()
-      }
+      publisher.send(nonJSONSerializableMessage)
+        .then(() => done('Did not throw an error'))
+        .catch(() => done())
     })
   })
 

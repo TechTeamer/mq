@@ -20,43 +20,34 @@ class Publisher {
   send (message, correlationId) {
     let options = {}
     let channel
-    let param
 
     if (correlationId) {
       options.correlationId = correlationId
-    }
-
-    try {
-      param = JSON.stringify(new QueueMessage('ok', message))
-    } catch (err) {
-      this._logger.error('CANNOT PUBLISH MESSAGE %s #%s', this.name, err)
-      throw err
     }
 
     return this._connection.getChannel().then((ch) => {
       channel = ch
       return channel.assertExchange(this.name, 'fanout', {durable: true})
     }).then(() => {
-      let isResolved = false
+      let param
+      try {
+        param = JSON.stringify(new QueueMessage('ok', message))
+      } catch (err) {
+        this._logger.error('CANNOT PUBLISH MESSAGE %s #%s', this.name, err)
+        throw err
+      }
 
       return new Promise((resolve, reject) => {
-        let callResolve = () => {
-          if (!isResolved) {
-            isResolved = true
-            resolve()
-          }
-        }
-
         let isWriteBufferEmpty = channel.publish(this.name, '', Buffer.from(param), options, (err, ok) => {
           if (err) {
             reject(err)
           } else {
-            callResolve()
+            resolve()
           }
         })
 
         if (!isWriteBufferEmpty) { // http://www.squaremobius.net/amqp.node/channel_api.html#channel_publish
-          channel.on('drain', callResolve)
+          channel.on('drain', resolve)
         }
       })
     }).catch((err) => {
