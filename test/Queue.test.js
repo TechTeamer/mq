@@ -82,14 +82,11 @@ describe('QueueClient && QueueServer', () => {
   it(`QueueServer.consume() tries to receive message for ${maxRetry + 1} times`, (done) => {
     setupConnections().then(() => {
       let consumeCalled = 0
-      console.log('SETUP CONSUME CALLED', consumeCalled)
       let objectMessage = {foo: 'bar', bar: 'foo'}
 
       queueServer.consume((msg) => {
         consumeCalled++
-        console.log('CONSUME CALLED', consumeCalled)
         if (consumeCalled > maxRetry + 1) {
-        console.log('CONSUME CALLED TOO MANY', consumeCalled)
           done(new Error(`Tried more times than limit: ${maxRetry}`))
           return
         }
