@@ -37,26 +37,17 @@ class QueueClient {
         throw err
       }
 
-      let isResolved = false
-
       return new Promise((resolve, reject) => {
-        let callResolve = () => {
-          if (!isResolved) {
-            isResolved = true
-            resolve()
-          }
-        }
-
         let isWriteBufferEmpty = channel.sendToQueue(this.name, Buffer.from(param), options, (err, ok) => {
           if (err) {
             reject(err)
           } else {
-            callResolve()
+            resolve()
           }
         })
 
         if (!isWriteBufferEmpty) { // http://www.squaremobius.net/amqp.node/channel_api.html#channel_publish
-          channel.on('drain', callResolve)
+          channel.on('drain', resolve)
         }
       })
     }).catch((err) => {
