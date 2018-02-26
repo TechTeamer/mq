@@ -22,13 +22,18 @@ class RPCServer {
     this._timeoutMs = timeoutMs
 
     this._callback = () => Promise.resolve()
+    this._initializePromise = undefined
   }
 
   /**
    * @return {Promise}
    */
   initialize () {
-    return this._connection.getChannel().then((channel) => {
+    if (this._initializePromise) {
+      return this._initializePromise
+    }
+
+    this._initializePromise = this._connection.getChannel().then((channel) => {
       return channel.assertQueue(this.name, {durable: true}).then(() => {
         channel.prefetch(this._prefetchCount)
       }).then(() => {
@@ -39,6 +44,8 @@ class RPCServer {
     }).catch((err) => {
       this._logger.error('CANNOT CREATE RPC SERVER CHANNEL', err)
     })
+
+    return this._initializePromise
   }
 
   /**

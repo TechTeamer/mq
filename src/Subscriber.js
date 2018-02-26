@@ -19,16 +19,21 @@ class Subscriber {
     this._retryMap = new Map()
 
     this._callback = () => Promise.resolve()
+    this._initializePromise = undefined
   }
 
   /**
    * @return {Promise}
    */
   initialize () {
+    if (this._initializePromise) {
+      return this._initializePromise
+    }
+
     let channel
     let queue
 
-    return this._connection.getChannel().then(c => {
+    this._initializePromise = this._connection.getChannel().then(c => {
       channel = c
       return channel.assertExchange(this.name, 'fanout', {durable: true})
     }).then(() => {
@@ -43,6 +48,8 @@ class Subscriber {
     }).catch(err => {
       this._logger.error('CANNOT INITIALIZE SUBSCRIBER', err)
     })
+
+    return this._initializePromise
   }
 
   /**
