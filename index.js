@@ -7,6 +7,8 @@ const QueueManager = require('./src/QueueManager')
 const RPCClient = require('./src/RPCClient')
 const RPCError = require('./src/RPCError')
 const RPCServer = require('./src/RPCServer')
+const Publisher = require('./src/Publisher')
+const Subscriber = require('./src/Subscriber')
 
 module.exports.QueueClient = QueueClient
 module.exports.QueueConfig = QueueConfig
@@ -17,3 +19,5 @@ module.exports.QueueManager = QueueManager
 module.exports.RPCClient = RPCClient
 module.exports.RPCError = RPCError
 module.exports.RPCServer = RPCServer
+module.exports.Publisher = Publisher
+module.exports.Subscriber = Subscriber
