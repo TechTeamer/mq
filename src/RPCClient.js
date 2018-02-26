@@ -10,17 +10,18 @@ class RPCClient {
    * @param {QueueConnection} queueConnection
    * @param {Console} logger
    * @param {String} rpcName
-   * @param {Number} rpcQueueMaxSize
-   * @param {Number} rpcTimeoutMs
+   * @param {Object} options
    */
-  constructor (queueConnection, logger, rpcName, rpcQueueMaxSize, rpcTimeoutMs) {
+  constructor (queueConnection, logger, rpcName, options) {
     this._connection = queueConnection
     this._logger = logger
     this.name = rpcName
-    this._rpcQueueMaxSize = rpcQueueMaxSize
-    this._rpcTimeoutMs = rpcTimeoutMs
     this._replyQueue = ''
     this._correlationIdMap = new Map()
+
+    let {queueMaxSize, timeoutMs} = options
+    this._rpcQueueMaxSize = queueMaxSize
+    this._rpcTimeoutMs = timeoutMs
   }
 
   /**

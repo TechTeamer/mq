@@ -9,15 +9,16 @@ class RPCServer {
    * @param {QueueConnection} queueConnection
    * @param {Console} logger
    * @param {String} rpcName
-   * @param {Number} prefetchCount
-   * @param {Number} timeoutMs
+   * @param {Object} options
    */
-  constructor (queueConnection, logger, rpcName, prefetchCount, timeoutMs) {
+  constructor (queueConnection, logger, rpcName, options) {
     this._connection = queueConnection
     this._logger = logger
     this.name = rpcName
-    this._prefetchCount = prefetchCount
     this._replyQueue = ''
+
+    let {prefetchCount, timeoutMs} = options
+    this._prefetchCount = prefetchCount
     this._timeoutMs = timeoutMs
 
     this._callback = () => Promise.resolve()
