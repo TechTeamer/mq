@@ -17,7 +17,11 @@ class QueueServer extends Subscriber {
    * @return {Promise}
    */
   initialize () {
-    return this._connection.getChannel().then((channel) => {
+    if (this._initializePromise) {
+      return this._initializePromise
+    }
+
+    this._initializePromise = this._connection.getChannel().then((channel) => {
       return channel.assertQueue(this.name, {durable: true}).then(() => {
         return channel.prefetch(this._prefetchCount)
       }).then(() => {
@@ -28,6 +32,8 @@ class QueueServer extends Subscriber {
     }).catch((err) => {
       this._logger.error('CANNOT INITIALIZE QUEUE SERVER', err)
     })
+
+    return this._initializePromise
   }
 }
 
