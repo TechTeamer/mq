@@ -17,7 +17,7 @@ class QueueManager {
   constructor (config) {
     this.connection = new QueueConnection(config)
     this._config = new QueueConfig(config)
-    this._logger = console
+    this._logger = this._config.logger
 
     this.rpcClients = new Map()
     this.rpcServers = new Map()
@@ -103,7 +103,7 @@ class QueueManager {
   /**
    * @param {String} exchangeName
    * @param {Object} [options]
-   * @return QueueServer
+   * @return Subscriber
    */
   getSubscriber (exchangeName, options) {
     if (this.subscribers.has(exchangeName)) {
