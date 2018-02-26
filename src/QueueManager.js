@@ -2,9 +2,10 @@ const QueueConfig = require('./QueueConfig')
 const QueueConnection = require('./QueueConnection')
 const RPCClient = require('./RPCClient')
 const RPCServer = require('./RPCServer')
+const Publisher = require('./Publisher')
+const Subscriber = require('./Subscriber')
 const QueueClient = require('./QueueClient')
 const QueueServer = require('./QueueServer')
-
 /**
  * @class QueueManager
  * @param {QueueConnection} connection
@@ -17,8 +18,11 @@ class QueueManager {
     this.connection = new QueueConnection(config)
     this._config = new QueueConfig(config)
     this._logger = console
+
     this.rpcClients = new Map()
     this.rpcServers = new Map()
+    this.publishers = new Map()
+    this.subscribers = new Map()
     this.queueClients = new Map()
     this.queueServers = new Map()
   }
@@ -38,14 +42,20 @@ class QueueManager {
 
   /**
    * @param {String} rpcName
+   * @param {Object} [options]
    * @return RPCClient
    * */
-  getRPCClient (rpcName) {
+  getRPCClient (rpcName, options) {
     if (this.rpcClients.has(rpcName)) {
       return this.rpcClients.get(rpcName)
     }
 
-    const rpcClient = new RPCClient(this.connection, this._logger, rpcName, this._config.rpcQueueMaxSize, this._config.rpcTimeoutMs)
+    let settings = Object.assign({
+      queueMaxSize: this._config.rpcQueueMaxSize,
+      timeoutMs: this._config.rpcTimeoutMs
+    }, options)
+
+    const rpcClient = new RPCClient(this.connection, this._logger, rpcName, settings)
 
     this.rpcClients.set(rpcName, rpcClient)
 
@@ -54,20 +64,63 @@ class QueueManager {
 
   /**
    * @param {String} rpcName
-   * @param {Number} [prefetchCount]
-   * @param {Number} [timeoutMs]
+   * @param {Object} [options]
    * @return RPCServer
    */
-  getRPCServer (rpcName, prefetchCount = 1, timeoutMs = this._config.rpcTimeoutMs) {
+  getRPCServer (rpcName, options) {
     if (this.rpcServers.has(rpcName)) {
       return this.rpcServers.get(rpcName)
     }
 
-    const rpcServer = new RPCServer(this.connection, this._logger, rpcName, prefetchCount, timeoutMs)
+    let settings = Object.assign({
+      prefetchCount: 1,
+      timeoutMs: this._config.rpcTimeoutMs
+    }, options)
+
+    const rpcServer = new RPCServer(this.connection, this._logger, rpcName, settings)
 
     this.rpcServers.set(rpcName, rpcServer)
 
     return rpcServer
+  }
+
+  /**
+   * @param {String} exchangeName
+   * @return Publisher
+   */
+  getPublisher (exchangeName) {
+    if (this.publishers.has(exchangeName)) {
+      return this.publishers.get(exchangeName)
+    }
+
+    const publisher = new Publisher(this.connection, this._logger, exchangeName)
+
+    this.publishers.set(exchangeName, publisher)
+
+    return publisher
+  }
+
+  /**
+   * @param {String} exchangeName
+   * @param {Object} [options]
+   * @return QueueServer
+   */
+  getSubscriber (exchangeName, options) {
+    if (this.subscribers.has(exchangeName)) {
+      return this.subscribers.get(exchangeName)
+    }
+
+    let settings = Object.assign({
+      prefetchCount: 1,
+      maxRetry: 5,
+      timeoutMs: this._config.rpcTimeoutMs
+    }, options)
+
+    const subscriber = new Subscriber(this.connection, this._logger, exchangeName, settings)
+
+    this.subscribers.set(exchangeName, subscriber)
+
+    return subscriber
   }
 
   /**
@@ -88,17 +141,21 @@ class QueueManager {
 
   /**
    * @param {String} queueName
-   * @param {Number} [prefetchCount]
-   * @param {Number} [maxRetry]
-   * @param {Number} [timeoutMs]
+   * @param {Object} [options]
    * @return QueueServer
    */
-  getQueueServer (queueName, prefetchCount = 1, maxRetry = 5, timeoutMs = this._config.rpcTimeoutMs) {
+  getQueueServer (queueName, options) {
     if (this.queueServers.has(queueName)) {
       return this.queueServers.get(queueName)
     }
 
-    const queueServer = new QueueServer(this.connection, this._logger, queueName, prefetchCount, maxRetry, timeoutMs)
+    let settings = Object.assign({
+      prefetchCount: 1,
+      maxRetry: 5,
+      timeoutMs: this._config.rpcTimeoutMs
+    }, options)
+
+    const queueServer = new QueueServer(this.connection, this._logger, queueName, settings)
 
     this.queueServers.set(queueName, queueServer)
 
