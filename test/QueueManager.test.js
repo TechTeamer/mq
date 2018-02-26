@@ -24,11 +24,11 @@ describe('QueueManager', () => {
     let subscriber = manager.getSubscriber(exchange)
 
     if (!(publisher instanceof Publisher)) {
-      done(new Error(`Couldn't get a Publisher`))
+      return done(new Error(`Couldn't get a Publisher`))
     }
 
     if (!(subscriber instanceof Subscriber)) {
-      done(new Error(`Couldn't get a Subscriber`))
+      return done(new Error(`Couldn't get a Subscriber`))
     }
 
     done()
@@ -40,11 +40,11 @@ describe('QueueManager', () => {
     let queueClient = manager.getQueueClient(queue)
 
     if (!(queueClient instanceof QueueClient)) {
-      done(new Error(`Couldn't get a QueueClient`))
+      return done(new Error(`Couldn't get a QueueClient`))
     }
 
     if (!(queueServer instanceof QueueServer)) {
-      done(new Error(`Couldn't get a QueueServer`))
+      return done(new Error(`Couldn't get a QueueServer`))
     }
 
     done()
