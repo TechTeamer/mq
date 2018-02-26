@@ -1,3 +1,6 @@
+2.0.1
+- Prevent simultaneous initializations
+
 2.0.0
 - Implemented Publish / Subscribe
 - `QueueClient` extends `Publisher`
