@@ -7,15 +7,15 @@ let config = require('./config/LoadConfig')
 describe('RPCClient && RPCServer', () => {
   let rpcName = 'test-rpc'
   const logger = new ConsoleInspector(console)
-  let timeOut = 1000
+  let timeoutMs = 1000
 
   const clientConnection = new QueueConnection(config)
   clientConnection.setLogger(logger)
-  let rpcClient = new RPCClient(clientConnection, logger, rpcName, 100, timeOut)
+  let rpcClient = new RPCClient(clientConnection, logger, rpcName, {queueMaxSize: 100, timeoutMs})
 
   const serverConnection = new QueueConnection(config)
   serverConnection.setLogger(logger)
-  let rpcServer = new RPCServer(serverConnection, logger, rpcName, 1, timeOut)
+  let rpcServer = new RPCServer(serverConnection, logger, rpcName, {prefetchCount: 1, timeoutMs})
 
   let initialized = false
   const setupConnections = () => {
@@ -91,13 +91,13 @@ describe('RPCClient && RPCServer', () => {
     })
   })
 
-  it('RPCClient.call() throws an error if it doesnt receive a response sooner than timeOut', (done) => {
+  it(`RPCClient.call() throws an error if it doesn't receive a response sooner than ${timeoutMs}ms`, (done) => {
     setupConnections().then(() => {
       let objectMessage = {foo: 'bar', bar: 'foo'}
 
       rpcServer.consume((msg) => {
         let now = new Date().getTime()
-        while (new Date().getTime() < now + timeOut + 100) { }
+        while (new Date().getTime() < now + timeoutMs + 100) { }
         return msg
       })
 
