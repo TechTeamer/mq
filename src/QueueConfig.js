@@ -21,7 +21,8 @@ class QueueConfig {
       url = 'amqps://localhost:5672',
       options = {},
       rpcTimeoutMs = 10000,
-      rpcQueueMaxSize = 100
+      rpcQueueMaxSize = 100,
+      logger = console
     } = config
 
     let rabbitMqOptions = new RabbitMqOptions(options)
@@ -29,6 +30,7 @@ class QueueConfig {
     this.options = rabbitMqOptions
     this.rpcTimeoutMs = rpcTimeoutMs
     this.rpcQueueMaxSize = rpcQueueMaxSize
+    this.logger = logger
   }
 }
 

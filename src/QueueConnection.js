@@ -11,7 +11,7 @@ class QueueConnection {
    */
   constructor (config) {
     this._config = new QueueConfig(config)
-    this._logger = console
+    this._logger = this._config.logger
     this._connection = null
     this._connectionPromise = null
     this._channel = null
