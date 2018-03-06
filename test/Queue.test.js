@@ -63,6 +63,51 @@ describe('QueueClient && QueueServer', () => {
     })
   })
 
+  it('QueueClient.send() sends a BUFFER, QueueServer.consume() sends it back and QueueClient receives it intact', (done) => {
+    setupConnections().then(() => {
+      let buffer = Buffer.from('test content')
+      queueServer.consume((msg) => {
+        if (Buffer.isBuffer(msg) && msg.toString('base64') === buffer.toString('base64') && buffer.toString('utf8') === 'test content') {
+          done()
+        } else {
+          done(new Error('Object sent and received are not equal'))
+        }
+      })
+      queueClient.send(buffer)
+    })
+  })
+
+  it('QueueClient.call() sends a COMPLEX object, QueueServer.consume() sends it back and QueueClient receives it intact', (done) => {
+    setupConnections().then(() => {
+      let buffer = Buffer.from('test content')
+      let object = {
+        foo: 'bar',
+        bar: {
+          baz: true,
+          arr: [0, 1, 2, 3],
+          buff: buffer
+        }
+      }
+      queueServer.consume((msg) => {
+        if (
+          !msg || typeof msg !== 'object' ||
+          msg.foo !== 'bar' ||
+          !msg.bar ||
+          msg.bar.baz !== true ||
+          !Array.isArray(msg.bar.arr) ||
+          msg.bar.arr.length !== 4 ||
+          msg.bar.arr[0] !== 0 || msg.bar.arr[1] !== 1 || msg.bar.arr[2] !== 2 || msg.bar.arr[3] !== 3 ||
+          !Buffer.isBuffer(msg.bar.buff) || msg.bar.buff.toString('base64') !== buffer.toString('base64') || buffer.toString('utf8') !== 'test content'
+        ) {
+          done(new Error('Object sent and received are not equal'))
+        } else {
+          done()
+        }
+      })
+      queueClient.send(object)
+    })
+  })
+
   it('QueueClient.send() throws an error when the parameter is not json-serializeable', (done) => {
     setupConnections().then(() => {
       let nonJSONSerializableMessage = {}
