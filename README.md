@@ -6,3 +6,19 @@ TechTeamer MQ
 
 
 A RabbitMQ wrapper for node
+
+## Install
+
+```
+yarn add @techteamer/mq
+```
+
+## Tests
+
+To run tests you need to rename `test/config/TestConfig.js.config` to `TestConfig.js` and provide valid configurations.
+
+Then run:
+
+```
+yarn test
+```
