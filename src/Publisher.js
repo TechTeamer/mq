@@ -42,14 +42,14 @@ class Publisher {
     }).then(() => {
       let param
       try {
-        param = JSON.stringify(new QueueMessage('ok', message))
+        param = new QueueMessage('ok', message).serialize()
       } catch (err) {
         this._logger.error('CANNOT PUBLISH MESSAGE', this.exchange, err)
         throw err
       }
 
       return new Promise((resolve, reject) => {
-        let isWriteBufferEmpty = channel.publish(this.exchange, this.routingKey, Buffer.from(param), options, (err, ok) => {
+        let isWriteBufferEmpty = channel.publish(this.exchange, this.routingKey, param, options, (err, ok) => {
           if (err) {
             reject(err)
           } else {

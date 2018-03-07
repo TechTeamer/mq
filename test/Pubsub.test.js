@@ -66,6 +66,51 @@ describe('Publisher && Subscriber', () => {
     })
   })
 
+  it('Publisher.send() sends a BUFFER, Subscriber.consume() sends it back and Publisher receives it intact', (done) => {
+    setupConnections().then(() => {
+      let buffer = Buffer.from('test content')
+      subscriber.consume((msg) => {
+        if (Buffer.isBuffer(msg) && msg.toString('base64') === buffer.toString('base64') && buffer.toString('utf8') === 'test content') {
+          done()
+        } else {
+          done(new Error('Object sent and received are not equal'))
+        }
+      })
+      publisher.send(buffer)
+    })
+  })
+
+  it('Publisher.call() sends a COMPLEX object, Subscriber.consume() sends it back and Publisher receives it intact', (done) => {
+    setupConnections().then(() => {
+      let buffer = Buffer.from('test content')
+      let object = {
+        foo: 'bar',
+        bar: {
+          baz: true,
+          arr: [0, 1, 2, 3],
+          buff: buffer
+        }
+      }
+      subscriber.consume((msg) => {
+        if (
+          !msg || typeof msg !== 'object' ||
+          msg.foo !== 'bar' ||
+          !msg.bar ||
+          msg.bar.baz !== true ||
+          !Array.isArray(msg.bar.arr) ||
+          msg.bar.arr.length !== 4 ||
+          msg.bar.arr[0] !== 0 || msg.bar.arr[1] !== 1 || msg.bar.arr[2] !== 2 || msg.bar.arr[3] !== 3 ||
+          !Buffer.isBuffer(msg.bar.buff) || msg.bar.buff.toString('base64') !== buffer.toString('base64') || buffer.toString('utf8') !== 'test content'
+        ) {
+          done(new Error('Object sent and received are not equal'))
+        } else {
+          done()
+        }
+      })
+      publisher.send(object)
+    })
+  })
+
   it('Publisher.send() throws an error when the parameter is not json-serializeable', (done) => {
     setupConnections().then(() => {
       let nonJSONSerializableMessage = {}

@@ -87,7 +87,7 @@ class Subscriber {
    * @private
    */
   _processMessage (channel, msg) {
-    let request = QueueMessage.fromJSON(msg.content)
+    let request = QueueMessage.deserialize(msg.content)
     if (request.status !== 'ok') {
       this._logger.error('CANNOT GET QUEUE MESSAGE PARAMS', this.name, request)
       this._ack(channel, msg)

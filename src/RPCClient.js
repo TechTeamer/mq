@@ -49,7 +49,7 @@ class RPCClient {
       return new Promise((resolve, reject) => {
         let param
         try {
-          param = JSON.stringify(new QueueMessage('ok', message))
+          param = new QueueMessage('ok', message).serialize()
         } catch (err) {
           this._logger.error('CANNOT SEND RPC CALL', this.name, err)
           reject(err)
@@ -87,7 +87,7 @@ class RPCClient {
           }
         }, timeoutMs || this._rpcTimeoutMs)
 
-        channel.sendToQueue(this.name, Buffer.from(param), {
+        channel.sendToQueue(this.name, param, {
           correlationId: correlationId,
           replyTo: replyQueue
         })
@@ -138,7 +138,7 @@ class RPCClient {
 
       this._correlationIdMap.delete(reply.properties.correlationId)
 
-      const replyContent = QueueMessage.fromJSON(reply.content.toString())
+      const replyContent = QueueMessage.deserialize(reply.content)
 
       if (replyContent.status === 'ok') {
         resolve(replyContent.data)

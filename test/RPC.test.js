@@ -76,6 +76,55 @@ describe('RPCClient && RPCServer', () => {
     })
   })
 
+  it('RPCClient.call() sends a BUFFER, RPCServer.consume() sends it back and RPCClient receives it intact', (done) => {
+    setupConnections().then(() => {
+      let buffer = Buffer.from('test content')
+      rpcServer.consume((msg) => {
+        return msg
+      })
+      rpcClient.call(buffer, 10000).then((res) => {
+        if (Buffer.isBuffer(res) && res.toString('base64') === buffer.toString('base64') && buffer.toString('utf8') === 'test content') {
+          done()
+        } else {
+          done(new Error('Object sent and received are not equal'))
+        }
+      })
+    })
+  })
+
+  it('RPCClient.call() sends a COMPLEX object, RPCServer.consume() sends it back and RPCClient receives it intact', (done) => {
+    setupConnections().then(() => {
+      let buffer = Buffer.from('test content')
+      let object = {
+        foo: 'bar',
+        bar: {
+          baz: true,
+          arr: [0, 1, 2, 3],
+          buff: buffer
+        }
+      }
+      rpcServer.consume((msg) => {
+        return msg
+      })
+      rpcClient.call(object, 10000).then((res) => {
+        if (
+          !res || typeof res !== 'object' ||
+          res.foo !== 'bar' ||
+          !res.bar ||
+          res.bar.baz !== true ||
+          !Array.isArray(res.bar.arr) ||
+          res.bar.arr.length !== 4 ||
+          res.bar.arr[0] !== 0 || res.bar.arr[1] !== 1 || res.bar.arr[2] !== 2 || res.bar.arr[3] !== 3 ||
+          !Buffer.isBuffer(res.bar.buff) || res.bar.buff.toString('base64') !== buffer.toString('base64') || buffer.toString('utf8') !== 'test content'
+        ) {
+          done(new Error('Object sent and received are not equal'))
+        } else {
+          done()
+        }
+      })
+    })
+  })
+
   it('RPCClient.call() throws an error when the parameter cant be JSON-serialized', (done) => {
     setupConnections().then(() => {
       let nonJSONSerializableMessage = {}
