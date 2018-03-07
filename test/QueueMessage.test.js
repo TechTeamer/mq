@@ -10,15 +10,15 @@ describe('QueueMessage', () => {
   let badQueueMessage = 'thisIsNotAQueueMessage'
   let goodQueueMessage = new QueueMessage(status, data).serialize()
 
-  it('#fromJSON() returns a QueueMessage with status "error" if it receives an invalid QueueMessage', () => {
+  it('#deserialize() returns a QueueMessage with status "error" if it receives an invalid QueueMessage', () => {
     return expect((QueueMessage.deserialize(badQueueMessage)).status).to.equal('error')
   })
 
-  it('#fromJSON() parses the serialized QueueMessage with the correct status', () => {
+  it('#deserialize() parses the serialized QueueMessage with the correct status', () => {
     return expect((QueueMessage.deserialize(goodQueueMessage)).status).to.equal(status)
   })
 
-  it('#fromJSON() parses the serialized QueueMessage with the correct data', () => {
+  it('#deserialize() parses the serialized QueueMessage with the correct data', () => {
     return expect((QueueMessage.deserialize(goodQueueMessage)).data).to.equal(data)
   })
 })
