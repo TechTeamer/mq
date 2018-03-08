@@ -28,7 +28,27 @@ class QueueManager {
   }
 
   connect () {
-    return this.connection.connect()
+    return Promise.resolve().then(() => {
+      return this.connection.connect()
+    }).catch((err) => {
+      this._logger.error('Filed to connect to queue server', err)
+      throw err
+    }).then(() => {
+      return Promise.all([...this.rpcServers.values()].map((rpcServer) => {
+        return rpcServer.initialize()
+      }))
+    }).then(() => {
+      return Promise.all([...this.subscribers.values()].map((subscriber) => {
+        return subscriber.initialize()
+      }))
+    }).then(() => {
+      return Promise.all([...this.queueServers.values()].map((queueServer) => {
+        return queueServer.initialize()
+      }))
+    }).catch((err) => {
+      this._logger.error('Failed to initialize servers', err)
+      throw err
+    })
   }
 
   getChannel () {
