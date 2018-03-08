@@ -62,12 +62,22 @@ class QueueManager {
 
   /**
    * @param {String} rpcName
+   * @param {RPCClient|function() : RPCClient} OverrideClass
    * @param {Object} [options]
    * @return RPCClient
    * */
-  getRPCClient (rpcName, options) {
+  getRPCClient (rpcName, OverrideClass = RPCClient, options = {}) {
     if (this.rpcClients.has(rpcName)) {
       return this.rpcClients.get(rpcName)
+    }
+
+    if (arguments.length === 2 && typeof OverrideClass !== 'function') {
+      options = OverrideClass
+      OverrideClass = RPCClient
+    }
+
+    if (OverrideClass !== RPCClient && !(OverrideClass.prototype instanceof RPCClient)) {
+      throw new Error('Override must be a subclass of RPCClient')
     }
 
     let settings = Object.assign({
@@ -75,7 +85,7 @@ class QueueManager {
       timeoutMs: this._config.rpcTimeoutMs
     }, options)
 
-    const rpcClient = new RPCClient(this.connection, this._logger, rpcName, settings)
+    const rpcClient = new OverrideClass(this.connection, this._logger, rpcName, settings)
 
     this.rpcClients.set(rpcName, rpcClient)
 
@@ -84,12 +94,22 @@ class QueueManager {
 
   /**
    * @param {String} rpcName
+   * @param {RPCServer|function() : RPCServer} OverrideClass
    * @param {Object} [options]
    * @return RPCServer
    */
-  getRPCServer (rpcName, options) {
+  getRPCServer (rpcName, OverrideClass = RPCServer, options = {}) {
     if (this.rpcServers.has(rpcName)) {
       return this.rpcServers.get(rpcName)
+    }
+
+    if (arguments.length === 2 && typeof OverrideClass !== 'function') {
+      options = OverrideClass
+      OverrideClass = RPCServer
+    }
+
+    if (OverrideClass !== RPCServer && !(OverrideClass.prototype instanceof RPCServer)) {
+      throw new Error('Override must be a subclass of RPCServer')
     }
 
     let settings = Object.assign({
@@ -97,7 +117,7 @@ class QueueManager {
       timeoutMs: this._config.rpcTimeoutMs
     }, options)
 
-    const rpcServer = new RPCServer(this.connection, this._logger, rpcName, settings)
+    const rpcServer = new OverrideClass(this.connection, this._logger, rpcName, settings)
 
     this.rpcServers.set(rpcName, rpcServer)
 
@@ -106,14 +126,19 @@ class QueueManager {
 
   /**
    * @param {String} exchangeName
+   * @param {Publisher|function() : Publisher} OverrideClass
    * @return Publisher
    */
-  getPublisher (exchangeName) {
+  getPublisher (exchangeName, OverrideClass = Publisher) {
     if (this.publishers.has(exchangeName)) {
       return this.publishers.get(exchangeName)
     }
 
-    const publisher = new Publisher(this.connection, this._logger, exchangeName)
+    if (OverrideClass !== Publisher && !(OverrideClass.prototype instanceof Publisher)) {
+      throw new Error('Override must be a subclass of Publisher')
+    }
+
+    const publisher = new OverrideClass(this.connection, this._logger, exchangeName)
 
     this.publishers.set(exchangeName, publisher)
 
@@ -122,12 +147,22 @@ class QueueManager {
 
   /**
    * @param {String} exchangeName
+   * @param {Subscriber|function() : Subscriber} OverrideClass
    * @param {Object} [options]
    * @return Subscriber
    */
-  getSubscriber (exchangeName, options) {
+  getSubscriber (exchangeName, OverrideClass = Subscriber, options = {}) {
     if (this.subscribers.has(exchangeName)) {
       return this.subscribers.get(exchangeName)
+    }
+
+    if (arguments.length === 2 && typeof OverrideClass !== 'function') {
+      options = OverrideClass
+      OverrideClass = Subscriber
+    }
+
+    if (OverrideClass !== Subscriber && !(OverrideClass.prototype instanceof Subscriber)) {
+      throw new Error('Override must be a subclass of Subscriber')
     }
 
     let settings = Object.assign({
@@ -136,7 +171,7 @@ class QueueManager {
       timeoutMs: this._config.rpcTimeoutMs
     }, options)
 
-    const subscriber = new Subscriber(this.connection, this._logger, exchangeName, settings)
+    const subscriber = new OverrideClass(this.connection, this._logger, exchangeName, settings)
 
     this.subscribers.set(exchangeName, subscriber)
 
@@ -145,14 +180,19 @@ class QueueManager {
 
   /**
    * @param {String} queueName
+   * @param {QueueClient|function() : QueueClient} OverrideClass
    * @return QueueClient
    */
-  getQueueClient (queueName) {
+  getQueueClient (queueName, OverrideClass = QueueClient) {
     if (this.queueClients.has(queueName)) {
       return this.queueClients.get(queueName)
     }
 
-    const queueClient = new QueueClient(this.connection, this._logger, queueName)
+    if (OverrideClass !== QueueClient && !(OverrideClass.prototype instanceof QueueClient)) {
+      throw new Error('Override must be a subclass of QueueClient')
+    }
+
+    const queueClient = new OverrideClass(this.connection, this._logger, queueName)
 
     this.queueClients.set(queueName, queueClient)
 
@@ -161,12 +201,22 @@ class QueueManager {
 
   /**
    * @param {String} queueName
+   * @param {QueueServer|function() : QueueServer} OverrideClass
    * @param {Object} [options]
    * @return QueueServer
    */
-  getQueueServer (queueName, options) {
+  getQueueServer (queueName, OverrideClass = QueueServer, options = {}) {
     if (this.queueServers.has(queueName)) {
       return this.queueServers.get(queueName)
+    }
+
+    if (arguments.length === 2 && typeof OverrideClass !== 'function') {
+      options = OverrideClass
+      OverrideClass = QueueServer
+    }
+
+    if (OverrideClass !== QueueServer && !(OverrideClass.prototype instanceof QueueServer)) {
+      throw new Error('Override must be a subclass of QueueServer')
     }
 
     let settings = Object.assign({
@@ -175,7 +225,7 @@ class QueueManager {
       timeoutMs: this._config.rpcTimeoutMs
     }, options)
 
-    const queueServer = new QueueServer(this.connection, this._logger, queueName, settings)
+    const queueServer = new OverrideClass(this.connection, this._logger, queueName, settings)
 
     this.queueServers.set(queueName, queueServer)
 
