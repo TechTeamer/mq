@@ -1,7 +1,5 @@
 const assert = require('assert')
-const Publisher = require('../src/Publisher')
-const Subscriber = require('../src/Subscriber')
-const QueueConnection = require('../src/QueueConnection')
+const QueueManager = require('../src/QueueManager')
 const ConsoleInspector = require('./consoleInspector')
 let config = require('./config/LoadConfig')
 
@@ -10,111 +8,99 @@ describe('Publisher && Subscriber', () => {
   const logger = new ConsoleInspector(console)
   let maxRetry = 5
 
-  let publisherConnection = new QueueConnection(config)
-  publisherConnection.setLogger(logger)
-  let publisher = new Publisher(publisherConnection, logger, publisherName)
+  let publisherManager = new QueueManager(config)
+  publisherManager.setLogger(logger)
+  let publisher = publisherManager.getPublisher(publisherName)
 
-  let subscriberConnection = new QueueConnection(config)
-  subscriberConnection.setLogger(logger)
-  let subscriber = new Subscriber(subscriberConnection, logger, publisherName, {maxRetry, timeoutMs: 10000})
+  let subscriberManager = new QueueManager(config)
+  subscriberManager.setLogger(logger)
+  let subscriber = subscriberManager.getSubscriber(publisherName, {maxRetry, timeoutMs: 10000})
 
-  let initialized = false
-
-  const setupConnections = () => {
-    if (initialized) {
-      return Promise.resolve()
-    }
-
-    initialized = true
-    return subscriber.initialize()
-  }
+  before(() => {
+    return publisherManager.connect().then(() => {
+      return subscriberManager.connect()
+    })
+  })
 
   after(() => {
-    logger.printLogs()
     logger.empty()
   })
 
   it('Publisher.send() sends a STRING and Subscriber.consume() receives it', (done) => {
-    setupConnections().then(() => {
-      let stringMessage = 'foobar'
+    let stringMessage = 'foobar'
 
-      subscriber.consume((msg) => {
-        if (msg !== stringMessage) {
-          done(new Error('String received is not the same as the String sent'))
-          return
-        }
-        done()
-      })
+    subscriber.consume((msg) => {
+      if (msg !== stringMessage) {
+        done(new Error('String received is not the same as the String sent'))
+        return
+      }
+      done()
+    })
 
-      publisher.send(stringMessage)
+    publisher.send(stringMessage).catch((err) => {
+      done(err)
     })
   })
 
   it('Publisher.send() sends an OBJECT and Subscriber.consume() receives it', (done) => {
-    setupConnections().then(() => {
-      let objectMessage = {foo: 'bar', bar: 'foo'}
+    let objectMessage = {foo: 'bar', bar: 'foo'}
 
-      subscriber.consume((msg) => {
-        if (JSON.stringify(msg) !== JSON.stringify(objectMessage)) {
-          done(new Error('The send OBJECT is not equal to the received one'))
-          return
-        }
-        done()
-      })
+    subscriber.consume((msg) => {
+      if (JSON.stringify(msg) !== JSON.stringify(objectMessage)) {
+        done(new Error('The send OBJECT is not equal to the received one'))
+        return
+      }
+      done()
+    })
 
-      publisher.send(objectMessage)
+    publisher.send(objectMessage).catch((err) => {
+      done(err)
     })
   })
 
   it('Publisher.send() throws an error when the parameter is not json-serializeable', (done) => {
-    setupConnections().then(() => {
-      let nonJSONSerializableMessage = {}
-      nonJSONSerializableMessage.a = {b: nonJSONSerializableMessage}
+    let nonJSONSerializableMessage = {}
+    nonJSONSerializableMessage.a = {b: nonJSONSerializableMessage}
 
-      subscriber.consume((msg) => {
-        done(new Error('Should not receive the message'))
-      })
-
-      publisher.send(nonJSONSerializableMessage)
-        .then(() => done('Did not throw an error'))
-        .catch(() => done())
+    subscriber.consume((msg) => {
+      done(new Error('Should not receive the message'))
     })
+
+    publisher.send(nonJSONSerializableMessage)
+      .then(() => done('Did not throw an error'))
+      .catch(() => done())
   })
 
   // The "+ 1" in the line below is the first try (which is not a "re"-try)
   it(`QueueServer.consume() tries to receive message for ${maxRetry + 1} times`, (done) => {
-    setupConnections().then(() => {
-      let consumeCalled = 0
-      let objectMessage = {foo: 'bar', bar: 'foo'}
+    let consumeCalled = 0
+    let objectMessage = {foo: 'bar', bar: 'foo'}
 
-      subscriber.consume((msg) => {
-        consumeCalled++
-        if (consumeCalled > maxRetry + 1) {
-          done(new Error(`Retried more times than limit: ${maxRetry}`))
-          return
-        }
-        throw new Error('message not processed well')
-      })
-
-      publisher.send(objectMessage)
-
-      setTimeout(() => {
-        assert.equal(consumeCalled, maxRetry + 1, '')
-        done()
-      }, 1000)
+    subscriber.consume((msg) => {
+      consumeCalled++
+      if (consumeCalled > maxRetry + 1) {
+        done(new Error(`Retried more times than limit: ${maxRetry}`))
+        return
+      }
+      throw new Error('message not processed well')
     })
+
+    publisher.send(objectMessage).catch((err) => {
+      done(err)
+    })
+
+    setTimeout(() => {
+      assert.equal(consumeCalled, maxRetry + 1, '')
+      done()
+    }, 1000)
   })
 
   it('Publisher.send() sends a message and each subscriber receives it', (done) => {
-    let otherSubscriber
-    setupConnections().then(() => {
-      let otherSubscriberConnection = new QueueConnection(config)
-      otherSubscriberConnection.setLogger(logger)
-      return otherSubscriberConnection.connect()
-    }).then(() => {
-      otherSubscriber = new Subscriber(subscriberConnection, logger, publisherName, {maxRetry, timeoutMs: 10000})
-      return otherSubscriber.initialize()
-    }).then(() => {
+    let otherManager = new QueueManager(config)
+    otherManager.setLogger(logger)
+    let otherSubscriber = otherManager.getSubscriber(publisherName, {maxRetry, timeoutMs: 10000})
+
+    otherManager.connect().then(() => {
       let stringMessage = 'foobar'
 
       let ack1 = false
@@ -142,7 +128,11 @@ describe('Publisher && Subscriber', () => {
         ack2 = true
       })
 
-      publisher.send(stringMessage)
+      publisher.send(stringMessage).catch((err) => {
+        done(err)
+      })
+    }).catch((err) => {
+      done(err)
     })
   })
 })

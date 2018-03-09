@@ -16,7 +16,6 @@ describe('QueueManager', () => {
   const manager = new QueueManager(config)
 
   after(() => {
-    logger.printLogs()
     logger.empty()
   })
 
