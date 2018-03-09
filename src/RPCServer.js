@@ -81,7 +81,7 @@ class RPCServer {
       errorReply.setError(QueueReply.ERROR_MESSAGE_MALFORMED)
       let payload = errorReply.serialize()
 
-      ch.sendToQueue(msg.properties.replyTo, payload, {
+      ch.sendToQueue(msg.properties.replyTo, Buffer.from(payload), {
         correlationId: msg.properties.correlationId
       })
       this._ack(ch, msg)
@@ -98,15 +98,15 @@ class RPCServer {
       errorReply.setError(errorReply.ERROR_REPLY_TIMED_OUT)
       let payload = errorReply.serialize()
 
-      ch.sendToQueue(msg.properties.replyTo, payload, {
+      ch.sendToQueue(msg.properties.replyTo, Buffer.from(payload), {
         correlationId: msg.properties.correlationId
       })
       this._ack(ch, msg)
     }, this._timeoutMs)
 
     return Promise.resolve().then(() => {
-      return this.consume(message, reply)
-    }).then(() => {
+      return this._callback(message, reply)
+    }).then((body) => {
       if (timedOut) {
         return
       }
@@ -114,6 +114,14 @@ class RPCServer {
       clearTimeout(timer)
 
       let payload
+
+      if (!reply.status) {
+        reply.setStatus(QueueReply.STATUS_SUCCESS)
+      }
+
+      if (typeof body !== 'undefined') {
+        reply.setBody(body)
+      }
 
       try {
         payload = reply.serialize()
@@ -127,7 +135,7 @@ class RPCServer {
         // or throw new error
       }
 
-      ch.sendToQueue(msg.properties.replyTo, payload, {
+      ch.sendToQueue(msg.properties.replyTo, Buffer.from(payload), {
         correlationId: msg.properties.correlationId
       })
       this._ack(ch, msg)
@@ -145,7 +153,7 @@ class RPCServer {
 
       this._logger.error('RPC REPLY FAILED %s', this.name, err)
 
-      ch.sendToQueue(msg.properties.replyTo, payload, {
+      ch.sendToQueue(msg.properties.replyTo, Buffer.from(payload), {
         correlationId: msg.properties.correlationId
       })
       this._ack(ch, msg)
@@ -153,10 +161,19 @@ class RPCServer {
   }
 
   /**
-   * @param {Function} cb
+   * @param {function(QueueMessage|*, QueueReply)} cb
+   * @param {Object} [options]
+   * @param {boolean} [options.consumeWholeMessage=false] consume only the body part of the message
    */
-  consume (cb) {
-    this._callback = cb
+  consume (cb, options) {
+    let {consumeWholeMessage = false} = options || {}
+    this._callback = (message, reply) => {
+      if (consumeWholeMessage) {
+        return cb(message, reply)
+      } else {
+        return cb(message.body, reply)
+      }
+    }
   }
 }
 

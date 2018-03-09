@@ -113,14 +113,14 @@ class RPCClient {
 
         let correlationId = this._registerMessage(resolve, reject, timeoutMs, options)
 
-        channel.sendToQueue(this.name, payload, {
+        channel.sendToQueue(this.name, Buffer.from(payload), {
           correlationId: correlationId,
           replyTo: replyQueue
         })
       })
     }).catch((err) => {
       this._logger.error('RPCCLIENT: cannot make rpc call', err)
-      throw new Error('RPCCLIENT: cannot make rpc call')
+      throw err
     })
   }
 
@@ -143,7 +143,11 @@ class RPCClient {
       this._replyQueuePromise = null
 
       ch.consume(this._replyQueue, (msg) => {
-        return this._onReply(msg)
+        return Promise.resolve().then(() => {
+          return this._onReply(msg)
+        }).catch((err) => {
+          this._logger.error('CANNOT CONSUME RPC CLIENT QUEUE', err)
+        })
       }, {noAck: true}).catch((err) => {
         this._logger.error('CANNOT CONSUME RPC CLIENT QUEUE', err)
       })

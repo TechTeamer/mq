@@ -1,4 +1,10 @@
+const ERROR_MESSAGE_MALFORMED = 'messag_malformed'
+
 class QueueMessage {
+  static get ERROR_MESSAGE_MALFORMED () {
+    return ERROR_MESSAGE_MALFORMED
+  }
+
   /**
    * @param {String} content
    * @return {QueueMessage}
@@ -10,22 +16,28 @@ class QueueMessage {
     try {
       json = JSON.parse(content)
     } catch (e) {
-      message.setError('ERR_MESSAGE_MALFORMED')
+      message.setError(ERROR_MESSAGE_MALFORMED)
       return message
     }
 
-    let {body, headers} = json
-    this.setBody(body)
-    this.setHeaders(headers)
+    let {body, headers, error} = json
+    message.setBody(body)
+    message.setError(error)
+    message.setHeaders(headers)
 
     return message
   }
 
-  constructor () {
+  constructor (body, headers) {
     this.body = null
     this.headers = new Map()
     this.error = null
     this._sent = false
+
+    this.ERROR_MESSAGE_MALFORMED = ERROR_MESSAGE_MALFORMED
+
+    this.setBody(body)
+    this.setHeaders(headers)
   }
 
   setBody (body) {
@@ -41,7 +53,7 @@ class QueueMessage {
   }
 
   setHeaders (headers) {
-    if (!this._sent) {
+    if (!this._sent && headers) {
       Object.keys(headers).forEach((name) => {
         this.setHeader(name, headers[name])
       })
@@ -57,7 +69,7 @@ class QueueMessage {
   }
 
   /**
-   * @return {Buffer}
+   * @return {String}
    */
   serialize () {
     let json = this.toJSON()
