@@ -1,5 +1,6 @@
 const QueueMessage = require('./QueueMessage')
-const RPCError = require('./RPCError')
+const QueueReply = require('./QueueReply')
+// const RPCError = require('./RPCError')
 
 /**
  * @class RPCServer
@@ -69,45 +70,66 @@ class RPCServer {
    * @private
    */
   _processMessage (ch, msg) {
-    let request = QueueMessage.fromJSON(msg.content)
+    let reply = new QueueReply()
+    let message
 
-    if (request.status !== 'ok') {
-      this._logger.error('CANNOT GET RPC CALL PARAMS', this.name, request)
+    try {
+      message = QueueMessage.deserialize(msg.content)
+    } catch (ex) {
+      let errorReply = new QueueReply()
+      errorReply.setStatus(QueueReply.STATUS_ERROR)
+      errorReply.setError(QueueReply.ERROR_MESSAGE_MALFORMED)
+      let payload = errorReply.serialize()
 
-      ch.sendToQueue(msg.properties.replyTo, Buffer.from(JSON.stringify(new QueueMessage('error', 'cannot decode parameters'))), {correlationId: msg.properties.correlationId})
+      ch.sendToQueue(msg.properties.replyTo, payload, {
+        correlationId: msg.properties.correlationId
+      })
       this._ack(ch, msg)
+
       return
     }
 
     let timedOut = false
     const timer = setTimeout(() => {
       timedOut = true
-      this._logger.error('timeout in RPCServer', this.name, request.data)
-      ch.sendToQueue(msg.properties.replyTo, Buffer.from(JSON.stringify(new QueueMessage('error', 'timeout'))), {correlationId: msg.properties.correlationId})
+      this._logger.error('timeout in RPCServer', this.name, message)
+      let errorReply = new QueueReply()
+      errorReply.setStatus(errorReply.STATUS_ERROR)
+      errorReply.setError(errorReply.ERROR_REPLY_TIMED_OUT)
+      let payload = errorReply.serialize()
+
+      ch.sendToQueue(msg.properties.replyTo, payload, {
+        correlationId: msg.properties.correlationId
+      })
       this._ack(ch, msg)
     }, this._timeoutMs)
 
     return Promise.resolve().then(() => {
-      return this._callback(request.data)
-    }).then((answer) => {
+      return this.consume(message, reply)
+    }).then(() => {
       if (timedOut) {
         return
       }
 
       clearTimeout(timer)
-      let reply
+
+      let payload
+
       try {
-        reply = JSON.stringify(new QueueMessage('ok', answer))
-      } catch (err) {
-        this._logger.error('CANNOT SEND RPC REPLY', this.name, err)
+        payload = reply.serialize()
+      } catch (e) {
+        this._logger.error('RPC REPLY FAILED: MALFORMED_CONTENT', this.name, e)
 
-        ch.sendToQueue(msg.properties.replyTo, Buffer.from(JSON.stringify(new QueueMessage('error', 'cannot encode anwser'))), {correlationId: msg.properties.correlationId})
-        this._ack(ch, msg)
-
-        return
+        let errorReply = new QueueReply()
+        errorReply.setStatus(QueueReply.STATUS_ERROR)
+        errorReply.setError(QueueReply.ERROR_REPLY_MALFORMED)
+        payload = errorReply.serialize()
+        // or throw new error
       }
 
-      ch.sendToQueue(msg.properties.replyTo, Buffer.from(reply), {correlationId: msg.properties.correlationId})
+      ch.sendToQueue(msg.properties.replyTo, payload, {
+        correlationId: msg.properties.correlationId
+      })
       this._ack(ch, msg)
     }).catch((err) => {
       if (timedOut) {
@@ -115,15 +137,17 @@ class RPCServer {
       }
 
       clearTimeout(timer)
-      let message = 'cannot answer to rpc call'
 
-      if (!(err instanceof RPCError)) {
-        this._logger.error('RPC REPLY FAILED %s', this.name, err)
-      } else {
-        message = err.message
-      }
+      let errorReply = new QueueReply()
+      errorReply.setStatus(QueueReply.STATUS_ERROR)
+      errorReply.setError(QueueReply.ERROR_INTERNAL)
+      let payload = errorReply.serialize()
 
-      ch.sendToQueue(msg.properties.replyTo, Buffer.from(JSON.stringify(new QueueMessage('error', message))), {correlationId: msg.properties.correlationId})
+      this._logger.error('RPC REPLY FAILED %s', this.name, err)
+
+      ch.sendToQueue(msg.properties.replyTo, payload, {
+        correlationId: msg.properties.correlationId
+      })
       this._ack(ch, msg)
     })
   }

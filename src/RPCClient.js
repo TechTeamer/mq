@@ -1,5 +1,6 @@
 const uuid = require('uuid/v4')
 const QueueMessage = require('./QueueMessage')
+const QueueReply = require('./QueueReply')
 
 /**
  * A queue handler
@@ -17,6 +18,7 @@ class RPCClient {
     this._logger = logger
     this.name = rpcName
     this._replyQueue = ''
+    this._replyQueuePromise = null
     this._correlationIdMap = new Map()
 
     let {queueMaxSize, timeoutMs} = options
@@ -25,11 +27,63 @@ class RPCClient {
   }
 
   /**
-   * @param {*} message
+   * @param {Function} resolve
+   * @param {Function} reject
    * @param {Number} timeoutMs
+   * @param {Object} options
+   * @param {Boolean} options.resolveBody
+   * @param {Boolean} options.rejectErrors
+   * @return {Number} correlation id
+   * @private
+   */
+  _registerMessage (resolve, reject, timeoutMs, options) {
+    let correlationId
+    let timeoutId
+    let timedOut = false
+
+    do {
+      correlationId = uuid()
+    } while (this._correlationIdMap.has(correlationId))
+
+    this._correlationIdMap.set(correlationId, {
+      options,
+      resolve: (result) => {
+        if (!timedOut) {
+          clearTimeout(timeoutId)
+          timeoutId = null
+          resolve(result)
+        }
+      },
+      reject: (err) => {
+        if (!timedOut) {
+          clearTimeout(timeoutId)
+          timeoutId = null
+          reject(err)
+        }
+      }
+    })
+
+    timeoutId = setTimeout(() => {
+      timedOut = true
+      if (this._correlationIdMap.has(correlationId)) {
+        this._correlationIdMap.delete(correlationId)
+
+        reject(new Error('RCPCLIENT MESSAGE TIMEOUT ' + this.name))
+      }
+    }, timeoutMs || this._rpcTimeoutMs)
+
+    return correlationId
+  }
+
+  /**
+   * @param {*} content
+   * @param {Number} timeoutMs
+   * @param {Object} [options] set how reply behaves
+   * @param {Boolean} [options.resolveBody=true] resolves with reply body
+   * @param {Boolean} [options.rejectErrors=true] rejects reply errors
    * @return {Promise}
    * */
-  call (message, timeoutMs) {
+  call (content, timeoutMs, options) {
     let channel
 
     return Promise.resolve().then(() => {
@@ -41,53 +95,25 @@ class RPCClient {
         channel = ch
       })
     }).then(() => {
-      return this._getReplyQueue(channel).catch((err) => {
-        this._logger.error('RPCCLIENT: cannot get reply queue', err)
-        throw new Error('Cannot get reply queue')
-      })
+      return this._getReplyQueue(channel)
     }).then((replyQueue) => {
       return new Promise((resolve, reject) => {
-        let param
+        let payload
+        let message = new QueueMessage()
+
+        message.setBody(content)
+
         try {
-          param = JSON.stringify(new QueueMessage('ok', message))
+          payload = message.serialize()
         } catch (err) {
-          this._logger.error('CANNOT SEND RPC CALL', this.name, err)
+          this._logger.error('CANNOT SEND RPC CALL: Malformed message', this.name, err)
           reject(err)
           return
         }
 
-        let correlationId
-        do {
-          correlationId = uuid()
-        } while (this._correlationIdMap.has(correlationId))
+        let correlationId = this._registerMessage(resolve, reject, timeoutMs, options)
 
-        this._correlationIdMap.set(correlationId, {
-          resolve: (result) => {
-            if (!timedOut) {
-              clearTimeout(timeoutId)
-              timeoutId = null
-              resolve(result)
-            }
-          },
-          reject: (err) => {
-            if (!timedOut) {
-              clearTimeout(timeoutId)
-              timeoutId = null
-              reject(err)
-            }
-          },
-          isTimedOut: () => timedOut
-        })
-
-        let timedOut = false
-        let timeoutId = setTimeout(() => {
-          timedOut = true
-          if (this._correlationIdMap.has(correlationId)) {
-            reject(new Error('RCPCLIENT TIMEOUT ' + this.name))
-          }
-        }, timeoutMs || this._rpcTimeoutMs)
-
-        channel.sendToQueue(this.name, Buffer.from(param), {
+        channel.sendToQueue(this.name, payload, {
           correlationId: correlationId,
           replyTo: replyQueue
         })
@@ -108,8 +134,13 @@ class RPCClient {
       return Promise.resolve(this._replyQueue)
     }
 
-    return ch.assertQueue('', {exclusive: true}).then((replyQueue) => {
+    if (this._replyQueuePromise) {
+      return this._replyQueuePromise
+    }
+
+    this._replyQueuePromise = ch.assertQueue('', {exclusive: true}).then((replyQueue) => {
       this._replyQueue = replyQueue.queue
+      this._replyQueuePromise = null
 
       ch.consume(this._replyQueue, (msg) => {
         return this._onReply(msg)
@@ -120,34 +151,54 @@ class RPCClient {
       return this._replyQueue
     }).catch(err => {
       this._logger.error('CANNOT ASSERT RPC REPLY QUEUE', err)
+      throw err
     })
+
+    return this._replyQueuePromise
   }
 
   /**
    * This method is called when consuming replies
-   * @param {Object} reply see: http://www.squaremobius.net/amqp.node/channel_api.html#channel_consume
+   * @param {Object} message see: http://www.squaremobius.net/amqp.node/channel_api.html#channel_consume
    * @private
    * */
-  _onReply (reply) {
-    if (reply && reply.properties && reply.properties.correlationId && this._correlationIdMap.has(reply.properties.correlationId)) {
-      const {resolve, reject, isTimedOut} = this._correlationIdMap.get(reply.properties.correlationId)
+  _onReply (message) {
+    if (!message || !message.properties || !message.properties.correlationId) {
+      this._logger.error('UNKNOWN RPC REPLY FOR %s', this.name, message)
+      return
+    }
 
-      if (isTimedOut && isTimedOut()) {
-        return
-      }
+    if (!this._correlationIdMap.has(message.properties.correlationId)) {
+      this._logger.warn('UNABLE TO MATCH RPC REPLY WITH MESSAGE SENT ON %s (possibly timed out)', this.name, message)
+      return
+    }
 
-      this._correlationIdMap.delete(reply.properties.correlationId)
+    const {resolve, reject, options} = this._correlationIdMap.get(message.properties.correlationId)
+    let {resolveBody = true, rejectErrors = true} = options || {}
 
-      const replyContent = QueueMessage.fromJSON(reply.content.toString())
+    this._correlationIdMap.delete(message.properties.correlationId)
 
-      if (replyContent.status === 'ok') {
-        resolve(replyContent.data)
+    let reply = QueueReply.deserialize(message.content)
+
+    if (reply.status === reply.STATUS_SUCCESS) {
+      if (resolveBody) {
+        resolve(reply.body)
       } else {
-        this._logger.error('RPC CLIENT GOT ERROR', this.name, reply.properties.correlationId, replyContent)
-        reject(replyContent.data)
+        resolve(reply)
       }
     } else {
-      this._logger.error('UNKNOWN RPC REPLY FOR %s', this.name, reply, reply.content.toString())
+      if (rejectErrors) {
+        this._logger.error('RPC CLIENT GOT ERROR', this.name, message.properties.correlationId, reply.error)
+        let error = new Error(reply.error)
+        error.reply = reply
+        reject(error)
+      } else {
+        if (resolveBody) {
+          resolve(reply.body)
+        } else {
+          resolve(reply)
+        }
+      }
     }
   }
 }
