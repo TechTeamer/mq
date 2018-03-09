@@ -1,61 +1,45 @@
+const loggerMethods = [
+  'debug', 'error', 'info', 'log', 'warn', 'dir', 'dirxml', 'table', 'trace', 'group',
+  'groupCollapsed', 'groupEnd', 'clear', 'count', 'assert', 'markTimeline', 'profile',
+  'profileEnd', 'timeline', 'timelineEnd', 'time', 'timeEnd', 'timeStamp', 'context', 'memory'
+]
+
 class ConsoleInspector {
-  constructor (logger) {
+  constructor (logger, options) {
+    let {storeLines = true, silent = true} = options || {}
     this.logger = logger
-    this.logArray = []
-    this.infoArray = []
-    this.errorArray = []
+    this.lines = []
+    this.storeLines = storeLines
+    this.silent = silent
   }
 
-  printLogs () {
-    if (this.logArray.length !== 0) {
-      this.logger.log('.log calls:')
-      this.logArray.forEach((l) => {
-        this.logger.log(l)
-      })
-    }
+  printLogs (methods) {
+    let {whitelist, blacklist} = methods || {}
 
-    if (this.infoArray.length !== 0) {
-      this.logger.log('\n.info calls:')
-      this.infoArray.forEach((i) => {
-        this.logger.log(i)
-      })
-    }
-
-    if (this.errorArray.length !== 0) {
-      this.logger.log('\n.error calls:')
-      this.errorArray.forEach((e) => {
-        this.logger.log(e)
-      })
-    }
-  }
-
-  log (l) {
-    this.logArray.push(l)
-  }
-  info (i) {
-    this.infoArray.push(i)
-  }
-  error (e) {
-    this.errorArray.push(e)
-  }
-
-  emptyLog () {
-    this.logArray = []
-  }
-
-  emptyInfo () {
-    this.infoArray = []
-  }
-
-  emptyError () {
-    this.errorArray = []
+    this.lines.forEach(({method, args}) => {
+      if (Array.isArray(blacklist) && blacklist.includes(method)) {
+        return
+      }
+      if (!Array.isArray(whitelist) || whitelist.includes(method)) {
+        this.logger[method](...args)
+      }
+    })
   }
 
   empty () {
-    this.emptyLog()
-    this.emptyInfo()
-    this.emptyError()
+    this.lines = []
   }
 }
+
+loggerMethods.forEach((method) => {
+  ConsoleInspector.prototype[method] = function () {
+    if (this.storeLines) {
+      this.lines.push({method, args: arguments})
+    }
+    if (!this.silent) {
+      this.logger[method](...arguments)
+    }
+  }
+})
 
 module.exports = ConsoleInspector
