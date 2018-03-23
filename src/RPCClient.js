@@ -17,11 +17,57 @@ class RPCClient {
     this._logger = logger
     this.name = rpcName
     this._replyQueue = ''
+    this._replyQueuePromise = null
     this._correlationIdMap = new Map()
 
     let {queueMaxSize, timeoutMs} = options
     this._rpcQueueMaxSize = queueMaxSize
     this._rpcTimeoutMs = timeoutMs
+  }
+
+  /**
+   * @param {Function} resolve
+   * @param {Function} reject
+   * @param {Number} timeoutMs
+   * @return {Number} correlation id
+   * @private
+   */
+  _registerMessage (resolve, reject, timeoutMs) {
+    let correlationId
+    let timeoutId
+    let timedOut = false
+
+    do {
+      correlationId = uuid()
+    } while (this._correlationIdMap.has(correlationId))
+
+    this._correlationIdMap.set(correlationId, {
+      resolve: (result) => {
+        if (!timedOut) {
+          clearTimeout(timeoutId)
+          timeoutId = null
+          resolve(result)
+        }
+      },
+      reject: (err) => {
+        if (!timedOut) {
+          clearTimeout(timeoutId)
+          timeoutId = null
+          reject(err)
+        }
+      }
+    })
+
+    timeoutId = setTimeout(() => {
+      timedOut = true
+      if (this._correlationIdMap.has(correlationId)) {
+        this._correlationIdMap.delete(correlationId)
+
+        reject(new Error('RCPCLIENT MESSAGE TIMEOUT ' + this.name))
+      }
+    }, timeoutMs || this._rpcTimeoutMs)
+
+    return correlationId
   }
 
   /**
@@ -41,10 +87,7 @@ class RPCClient {
         channel = ch
       })
     }).then(() => {
-      return this._getReplyQueue(channel).catch((err) => {
-        this._logger.error('RPCCLIENT: cannot get reply queue', err)
-        throw new Error('Cannot get reply queue')
-      })
+      return this._getReplyQueue(channel)
     }).then((replyQueue) => {
       return new Promise((resolve, reject) => {
         let param
@@ -56,36 +99,7 @@ class RPCClient {
           return
         }
 
-        let correlationId
-        do {
-          correlationId = uuid()
-        } while (this._correlationIdMap.has(correlationId))
-
-        this._correlationIdMap.set(correlationId, {
-          resolve: (result) => {
-            if (!timedOut) {
-              clearTimeout(timeoutId)
-              timeoutId = null
-              resolve(result)
-            }
-          },
-          reject: (err) => {
-            if (!timedOut) {
-              clearTimeout(timeoutId)
-              timeoutId = null
-              reject(err)
-            }
-          },
-          isTimedOut: () => timedOut
-        })
-
-        let timedOut = false
-        let timeoutId = setTimeout(() => {
-          timedOut = true
-          if (this._correlationIdMap.has(correlationId)) {
-            reject(new Error('RCPCLIENT TIMEOUT ' + this.name))
-          }
-        }, timeoutMs || this._rpcTimeoutMs)
+        let correlationId = this._registerMessage(resolve, reject, timeoutMs)
 
         channel.sendToQueue(this.name, Buffer.from(param), {
           correlationId: correlationId,
@@ -108,19 +122,31 @@ class RPCClient {
       return Promise.resolve(this._replyQueue)
     }
 
-    return ch.assertQueue('', {exclusive: true}).then((replyQueue) => {
+    if (this._replyQueuePromise) {
+      return this._replyQueuePromise
+    }
+
+    this._replyQueuePromise = ch.assertQueue('', {exclusive: true}).then((replyQueue) => {
       this._replyQueue = replyQueue.queue
+      this._replyQueuePromise = null
 
       ch.consume(this._replyQueue, (msg) => {
-        return this._onReply(msg)
+        return Promise.resolve().then(() => {
+          return this._onReply(msg)
+        }).catch((err) => {
+          this._logger.error('CANNOT CONSUME RPC CLIENT QUEUE', err)
+        })
       }, {noAck: true}).catch((err) => {
-        this._logger.error('CANNOT CONSUME RPC CLIENT QUEUE', err)
+        this._logger.error('CANNOT SET RPC CLIENT QUEUE CONSUMER', err)
       })
 
       return this._replyQueue
     }).catch(err => {
       this._logger.error('CANNOT ASSERT RPC REPLY QUEUE', err)
+      throw err
     })
+
+    return this._replyQueuePromise
   }
 
   /**
@@ -129,25 +155,31 @@ class RPCClient {
    * @private
    * */
   _onReply (reply) {
-    if (reply && reply.properties && reply.properties.correlationId && this._correlationIdMap.has(reply.properties.correlationId)) {
-      const {resolve, reject, isTimedOut} = this._correlationIdMap.get(reply.properties.correlationId)
+    if (!reply || !reply.properties || !reply.properties.correlationId) {
+      this._logger.error('UNKNOWN RPC REPLY FOR %s', this.name, reply)
+      return
+    }
 
-      if (isTimedOut && isTimedOut()) {
-        return
-      }
+    if (!this._correlationIdMap.has(reply.properties.correlationId)) {
+      this._logger.warn('UNABLE TO MATCH RPC REPLY WITH MESSAGE SENT ON %s (possibly timed out)', this.name, reply)
+      return
+    }
 
-      this._correlationIdMap.delete(reply.properties.correlationId)
+    const {resolve, reject, isTimedOut} = this._correlationIdMap.get(reply.properties.correlationId)
 
-      const replyContent = QueueMessage.fromJSON(reply.content.toString())
+    if (isTimedOut && isTimedOut()) {
+      return
+    }
 
-      if (replyContent.status === 'ok') {
-        resolve(replyContent.data)
-      } else {
-        this._logger.error('RPC CLIENT GOT ERROR', this.name, reply.properties.correlationId, replyContent)
-        reject(replyContent.data)
-      }
+    this._correlationIdMap.delete(reply.properties.correlationId)
+
+    const replyContent = QueueMessage.fromJSON(reply.content.toString())
+
+    if (replyContent.status === 'ok') {
+      resolve(replyContent.data)
     } else {
-      this._logger.error('UNKNOWN RPC REPLY FOR %s', this.name, reply, reply.content.toString())
+      this._logger.error('RPC CLIENT GOT ERROR', this.name, reply.properties.correlationId, replyContent)
+      reject(replyContent.data)
     }
   }
 }
