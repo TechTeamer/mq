@@ -165,11 +165,7 @@ class RPCClient {
       return
     }
 
-    const {resolve, reject, isTimedOut} = this._correlationIdMap.get(reply.properties.correlationId)
-
-    if (isTimedOut && isTimedOut()) {
-      return
-    }
+    const {resolve, reject} = this._correlationIdMap.get(reply.properties.correlationId)
 
     this._correlationIdMap.delete(reply.properties.correlationId)
 
