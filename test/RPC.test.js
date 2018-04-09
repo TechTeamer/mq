@@ -4,21 +4,20 @@ let config = require('./config/LoadConfig')
 
 describe('RPCClient && RPCServer', () => {
   let rpcName = 'test-rpc'
+  let shortRpcName = 'short-test-rpc'
   const logger = new ConsoleInspector(console)
   let timeoutMs = 1000
 
-  const clientManager = new QueueManager(config)
-  clientManager.setLogger(logger)
-  let rpcClient = clientManager.getRPCClient(rpcName, {queueMaxSize: 100, timeoutMs})
+  const queueManager = new QueueManager(config)
+  queueManager.setLogger(logger)
 
-  const serverManager = new QueueManager(config)
-  serverManager.setLogger(logger)
-  let rpcServer = clientManager.getRPCServer(rpcName, {prefetchCount: 1, timeoutMs})
+  let rpcClient = queueManager.getRPCClient(rpcName, {queueMaxSize: 100, timeoutMs})
+  let rpcServer = queueManager.getRPCServer(rpcName, {prefetchCount: 1, timeoutMs})
+  let shortRpcClient = queueManager.getRPCClient(shortRpcName, {queueMaxSize: 1, timeoutMs})
+  let shortRpcServer = queueManager.getRPCServer(shortRpcName, {prefetchCount: 1, timeoutMs})
 
   before(() => {
-    return clientManager.connect().then(() => {
-      return serverManager.connect()
-    })
+    return queueManager.connect()
   })
 
   after(() => {
@@ -78,7 +77,7 @@ describe('RPCClient && RPCServer', () => {
     })
 
     rpcClient.call(nonJSONSerializableMessage)
-      .then(() => done('Did not throw an error'))
+      .then(() => done(new Error('Did not throw an error')))
       .catch(() => done())
   })
 
@@ -92,7 +91,29 @@ describe('RPCClient && RPCServer', () => {
     })
 
     rpcClient.call(objectMessage)
-      .then(() => done('Did not throw an error'))
+      .then(() => done(new Error('Did not throw a timeout error')))
       .catch(() => done())
+  })
+
+  it(`RPCClient frees up memory after timeout`, (done) => {
+    let objectMessage = {foo: 'bar', bar: 'foo'}
+
+    let first = true
+    shortRpcServer.consume((msg) => {
+      if (first) {
+        let now = new Date().getTime()
+        while (new Date().getTime() < now + timeoutMs + 100) { }
+        first = false
+      }
+      return msg
+    })
+
+    shortRpcClient.call(objectMessage)
+      .then(() => done(new Error('Did not throw a timeout error')))
+      .catch(() => {
+        return shortRpcClient.call(objectMessage)
+      })
+      .then(() => done())
+      .catch(err => done(err))
   })
 })
