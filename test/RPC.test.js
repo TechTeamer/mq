@@ -85,7 +85,7 @@ describe('RPCClient && RPCServer', () => {
     let objectMessage = {foo: 'bar', bar: 'foo'}
 
     rpcServer.consume((msg) => {
-      let now = new Date().getTime()
+      let now = Date.now()
       while (new Date().getTime() < now + timeoutMs + 100) { }
       return msg
     })
@@ -98,19 +98,18 @@ describe('RPCClient && RPCServer', () => {
   it(`RPCClient frees up memory after timeout`, (done) => {
     let objectMessage = {foo: 'bar', bar: 'foo'}
 
-    let first = true
-    shortRpcServer.consume((msg) => {
-      if (first) {
-        let now = new Date().getTime()
-        while (new Date().getTime() < now + timeoutMs + 100) { }
-        first = false
+    let waitForTimeout = true
+    shortRpcServer.consume(() => {
+      if (waitForTimeout) {
+        return new Promise(resolve => setTimeout(resolve, timeoutMs + 100))
       }
-      return msg
+      return Promise.resolve()
     })
 
     shortRpcClient.call(objectMessage)
       .then(() => done(new Error('Did not throw a timeout error')))
       .catch(() => {
+        waitForTimeout = false
         return shortRpcClient.call(objectMessage)
       })
       .then(() => done())
