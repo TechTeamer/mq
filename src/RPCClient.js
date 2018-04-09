@@ -63,7 +63,7 @@ class RPCClient {
       if (this._correlationIdMap.has(correlationId)) {
         this._correlationIdMap.delete(correlationId)
 
-        reject(new Error('RCPCLIENT MESSAGE TIMEOUT ' + this.name))
+        reject(new Error('RPCCLIENT MESSAGE TIMEOUT ' + this.name))
       }
     }, timeoutMs || this._rpcTimeoutMs)
 
@@ -80,7 +80,7 @@ class RPCClient {
 
     return Promise.resolve().then(() => {
       if (this._correlationIdMap.size > this._rpcQueueMaxSize) {
-        throw new Error('RCPCLIENT QUEUE FULL ' + this.name)
+        throw new Error('RPCCLIENT QUEUE FULL ' + this.name)
       }
     }).then(() => {
       return this._connection.getChannel().then((ch) => {
