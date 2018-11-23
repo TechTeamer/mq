@@ -1,7 +1,8 @@
 class QueueMessage {
-  constructor (status, data) {
+  constructor (status, data, timeOut) {
     this.status = status
     this.data = data
+    this.timeOut = timeOut
   }
 
   static fromJSON (jsonString) {

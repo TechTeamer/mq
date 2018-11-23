@@ -26,9 +26,10 @@ class Publisher {
   /**
    * @param {String} message
    * @param {String} correlationId
+   * @param {Number} timeOut
    * @return {Promise}
    */
-  send (message, correlationId) {
+  send (message, correlationId, timeOut = null) {
     let options = {}
     let channel
 
@@ -42,14 +43,14 @@ class Publisher {
     }).then(() => {
       let param
       try {
-        param = JSON.stringify(new QueueMessage('ok', message))
+        param = JSON.stringify(new QueueMessage('ok', message, timeOut))
       } catch (err) {
         this._logger.error('CANNOT PUBLISH MESSAGE', this.exchange, err)
         throw err
       }
 
       return new Promise((resolve, reject) => {
-        let isWriteBufferEmpty = channel.publish(this.exchange, this.routingKey, Buffer.from(param), options, (err, ok) => {
+        let isWriteBufferEmpty = channel.publish(this.exchange, this.routingKey, Buffer.from(param), options, (err) => {
           if (err) {
             reject(err)
           } else {
