@@ -12,7 +12,7 @@ class QueueMessage {
         return new QueueMessage('error', 'cannot decode JSON string')
       }
 
-      return new QueueMessage(param.status, param.data)
+      return new QueueMessage(param.status, param.data, param.timeOut)
     } catch (err) {
       return new QueueMessage('error', err)
     }

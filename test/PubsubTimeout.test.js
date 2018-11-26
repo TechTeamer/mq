@@ -25,6 +25,8 @@ describe('Publisher && Subscriber with message timeout', function () {
     logger.empty()
   })
 
+  this.timeout(10000)
+
   it('Publisher.send() sends a STRING with a timeout and Subscriber.consume() receives it', (done) => {
     let stringMessage = 'foobar'
 

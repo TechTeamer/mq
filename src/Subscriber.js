@@ -114,20 +114,12 @@ class Subscriber {
     }
 
     let timedOut = false
-    let timer
-    if (msg.timeOut) {
-      timer = setTimeout(() => {
-        timedOut = true
-        this._logger.error('Timeout in Subscriber', this.name, request.data)
-        this._nack(channel, msg)
-      }, msg.timeOut)
-    } else {
-      timer = setTimeout(() => {
-        timedOut = true
-        this._logger.error('Timeout in Subscriber', this.name, request.data)
-        this._nack(channel, msg)
-      }, this._timeoutMs)
-    }
+    let timeoutMs = typeof request.timeOut === 'number' ? request.timeOut : this._timeoutMs
+    const timer = setTimeout(() => {
+      timedOut = true
+      this._logger.error('Timeout in Subscriber', this.name, request.data)
+      this._nack(channel, msg)
+    }, timeoutMs)
 
     return Promise.resolve().then(() => {
       return this._callback(request.data, msg.properties)
