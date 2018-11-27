@@ -18,10 +18,28 @@ class Subscriber {
 
     this._retryMap = new Map()
 
-    this._callback = () => Promise.resolve()
     this._initializePromise = undefined
+
+    this.actions = new Map()
   }
 
+  _callback (msg) {
+    let {action, data} = typeof msg === 'object' ? msg : {}
+    if (!this.actions.has(action)) {
+      return Promise.resolve()
+    }
+
+    let handler = this.actions.get(action)
+    return handler(data)
+  }
+
+  /**
+   * @param {string} action
+   * @param {Function} handler
+   */
+  registerAction (action, handler) {
+    this.actions.set(action, handler)
+  }
   /**
    * @return {Promise}
    */
