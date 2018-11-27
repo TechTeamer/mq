@@ -25,7 +25,7 @@ describe('Publisher && Subscriber actions', () => {
     logger.empty()
   })
 
-  it('subscriber.registerAction() registers all the actions, publisher.callAction() sends an object and subscriber.consume() process it', (done) => {
+  it('subscriber.registerAction() registers the action, publisher.callAction() sends a STRING and the registered callback for the action receives it', (done) => {
     let stringMessage = 'foobar'
 
     subscriber.registerAction('compareString', (msg) => {

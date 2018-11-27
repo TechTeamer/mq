@@ -33,7 +33,7 @@ class RPCServer {
     }
 
     let handler = this.actions.get(action)
-    return handler(data)
+    return Promise.resolve(handler(data))
   }
 
   /**

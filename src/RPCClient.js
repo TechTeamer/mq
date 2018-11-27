@@ -119,41 +119,7 @@ class RPCClient {
    * @return {Promise}
    * */
   callAction (action, data, timeoutMs) {
-    let channel
-
-    return Promise.resolve().then(() => {
-      if (this._correlationIdMap.size > this._rpcQueueMaxSize) {
-        throw new Error('RPCCLIENT QUEUE FULL ' + this.name)
-      }
-    }).then(() => {
-      return this._connection.getChannel().then((ch) => {
-        channel = ch
-      })
-    }).then(() => {
-      return this._getReplyQueue(channel)
-    }).then((replyQueue) => {
-      return new Promise((resolve, reject) => {
-        let param
-        try {
-          let message = {action, data}
-          param = JSON.stringify(new QueueMessage('ok', message))
-        } catch (err) {
-          this._logger.error('CANNOT SEND RPC CALL', this.name, err)
-          reject(err)
-          return
-        }
-
-        let correlationId = this._registerMessage(resolve, reject, timeoutMs)
-
-        channel.sendToQueue(this.name, Buffer.from(param), {
-          correlationId: correlationId,
-          replyTo: replyQueue
-        })
-      })
-    }).catch((err) => {
-      this._logger.error('RPCCLIENT: cannot make rpc call', err)
-      throw new Error('RPCCLIENT: cannot make rpc call')
-    })
+    return this.call({action, data}, timeoutMs)
   }
 
   /**

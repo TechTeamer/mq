@@ -21,7 +21,7 @@ describe('RPCClient && RPCServer actions', function () {
     logger.empty()
   })
 
-  it('RPCServer.registerAction() registers all the actions, RPCClient.callAction() sends an object and RPCServer.consume() process it', (done) => {
+  it('RPCServer.registerAction() registers the action, RPCClient.callAction() sends a STRING and the registered callback for the action receives it', (done) => {
     let stringMessage = 'foobar'
 
     rpcServer.registerAction('compareString', (msg) => {
