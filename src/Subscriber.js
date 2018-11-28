@@ -18,8 +18,31 @@ class Subscriber {
 
     this._retryMap = new Map()
 
-    this._callback = () => Promise.resolve()
     this._initializePromise = undefined
+
+    this.actions = new Map()
+  }
+
+  _callback (msg) {
+    let {action, data} = typeof msg === 'object' ? msg : {}
+    if (!this.actions.has(action)) {
+      return Promise.resolve()
+    }
+
+    let handler = this.actions.get(action)
+    return Promise.resolve(handler(data))
+  }
+
+  /**
+   * @param {string} action
+   * @param {Function} handler
+   */
+  registerAction (action, handler) {
+    if (this.actions.has(action)) {
+      this._logger.log(`WARNING: actions-handlers map already contains an action named ${action}`)
+    } else {
+      this.actions.set(action, handler)
+    }
   }
 
   /**

@@ -24,6 +24,17 @@ class Publisher {
   }
 
   /**
+   * @param {String} action
+   * @param {*} data
+   * @param {String} correlationId
+   * @param {Number} timeOut
+   * @return {Promise}
+   * */
+  sendAction (action, data, correlationId, timeOut = null) {
+    return this.send({action, data}, correlationId, timeOut)
+  }
+
+  /**
    * @param {String} message
    * @param {String} correlationId
    * @param {Number} timeOut

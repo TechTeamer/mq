@@ -113,6 +113,16 @@ class RPCClient {
   }
 
   /**
+   * @param {String} action
+   * @param {*} data
+   * @param {Number} timeoutMs
+   * @return {Promise}
+   * */
+  callAction (action, data, timeoutMs) {
+    return this.call({action, data}, timeoutMs)
+  }
+
+  /**
    * Returns a promise that resolves to the reply queue's name.
    * @return Promise<String>
    * @private
