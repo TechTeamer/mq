@@ -21,10 +21,11 @@ class Subscriber {
     this._initializePromise = undefined
 
     this.actions = new Map()
+
   }
 
   _callback (msg) {
-    let {action, data} = typeof msg === 'object' ? msg : {}
+    let {action, data} = msg || {}
     if (!this.actions.has(action)) {
       return Promise.resolve()
     }
@@ -39,7 +40,7 @@ class Subscriber {
    */
   registerAction (action, handler) {
     if (this.actions.has(action)) {
-      this._logger.log(`WARNING: actions-handlers map already contains an action named ${action}`)
+      this._logger.warn(`Actions-handlers map already contains an action named ${action}`)
     } else {
       this.actions.set(action, handler)
     }

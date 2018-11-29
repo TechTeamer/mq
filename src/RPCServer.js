@@ -27,13 +27,13 @@ class RPCServer {
   }
 
   _callback (msg) {
-    let {action, data} = typeof msg === 'object' ? msg : {}
+    let {action, data} = msg || {}
     if (!this.actions.has(action)) {
       return Promise.resolve()
     }
 
     let handler = this.actions.get(action)
-    return Promise.resolve(handler(data))
+    return Promise.resolve().then(() => handler.call(this, data))
   }
 
   /**
@@ -42,7 +42,7 @@ class RPCServer {
    */
   registerAction (action, handler) {
     if (this.actions.has(action)) {
-      this._logger.log(`WARNING: actions-handlers map already contains an action named ${action}`)
+      this._logger.warn(`Actions-handlers map already contains an action named ${action}`)
     } else {
       this.actions.set(action, handler)
     }
