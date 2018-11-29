@@ -21,7 +21,6 @@ class Subscriber {
     this._initializePromise = undefined
 
     this.actions = new Map()
-
   }
 
   _callback (msg) {
