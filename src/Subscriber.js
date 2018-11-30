@@ -30,7 +30,7 @@ class Subscriber {
     }
 
     let handler = this.actions.get(action)
-    return Promise.resolve(handler(data))
+    return Promise.resolve().then(() => handler.call(this, data))
   }
 
   /**
