@@ -75,7 +75,7 @@ class RPCClient {
    * @param {Number} timeoutMs
    * @return {Promise}
    * */
-  call (message, timeoutMs, messageTimeOut = null) {
+  call (message, timeoutMs = null) {
     let channel
 
     return Promise.resolve().then(() => {
@@ -92,7 +92,7 @@ class RPCClient {
       return new Promise((resolve, reject) => {
         let param
         try {
-          param = JSON.stringify(new QueueMessage('ok', message, messageTimeOut))
+          param = JSON.stringify(new QueueMessage('ok', message, timeoutMs))
         } catch (err) {
           this._logger.error('CANNOT SEND RPC CALL', this.name, err)
           reject(err)
