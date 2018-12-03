@@ -80,12 +80,13 @@ class RPCServer {
     }
 
     let timedOut = false
+    let timeoutMs = typeof request.timeOut === 'number' ? request.timeOut : this._timeoutMs
     const timer = setTimeout(() => {
       timedOut = true
       this._logger.error('timeout in RPCServer', this.name, request.data)
       ch.sendToQueue(msg.properties.replyTo, Buffer.from(JSON.stringify(new QueueMessage('error', 'timeout'))), {correlationId: msg.properties.correlationId})
       this._ack(ch, msg)
-    }, this._timeoutMs)
+    }, timeoutMs)
 
     return Promise.resolve().then(() => {
       return this._callback(request.data)
