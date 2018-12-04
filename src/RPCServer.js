@@ -41,7 +41,9 @@ class RPCServer {
    * @param {Function} handler
    */
   registerAction (action, handler) {
-    if (this.actions.has(action)) {
+    if (typeof handler !== 'function') {
+      throw new TypeError(`${typeof handler} is not a Function`)
+    } else if (this.actions.has(action)) {
       this._logger.warn(`Actions-handlers map already contains an action named ${action}`)
     } else {
       this.actions.set(action, handler)
