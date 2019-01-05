@@ -12,7 +12,7 @@ class Subscriber {
     this._logger = logger
     this.name = name
 
-    let {maxRetry, timeoutMs} = options
+    let { maxRetry, timeoutMs } = options
     this._maxRetry = maxRetry
     this._timeoutMs = timeoutMs
 
@@ -24,7 +24,7 @@ class Subscriber {
   }
 
   _callback (msg) {
-    let {action, data} = msg || {}
+    let { action, data } = msg || {}
     if (!this.actions.has(action)) {
       return Promise.resolve()
     }
@@ -60,9 +60,9 @@ class Subscriber {
 
     this._initializePromise = this._connection.getChannel().then(c => {
       channel = c
-      return channel.assertExchange(this.name, 'fanout', {durable: true})
+      return channel.assertExchange(this.name, 'fanout', { durable: true })
     }).then(() => {
-      return channel.assertQueue('', {exclusive: true})
+      return channel.assertQueue('', { exclusive: true })
     }).then(q => {
       queue = q
       return channel.bindQueue(queue.queue, this.name, '')

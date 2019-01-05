@@ -14,7 +14,7 @@ describe('QueueClient && QueueServer', () => {
 
   let serverManager = new QueueManager(config)
   serverManager.setLogger(logger)
-  let options = {prefetchCount: 1, maxRetry, timeoutMs: 10000}
+  let options = { prefetchCount: 1, maxRetry, timeoutMs: 10000 }
   let queueServer = serverManager.getQueueServer(queueName, options)
 
   before(() => {
@@ -43,7 +43,7 @@ describe('QueueClient && QueueServer', () => {
   })
 
   it('QueueClient.send() sends an OBJECT and QueueServer.consume() receives it', (done) => {
-    let objectMessage = {foo: 'bar', bar: 'foo'}
+    let objectMessage = { foo: 'bar', bar: 'foo' }
     queueServer.consume((msg) => {
       if (JSON.stringify(msg) !== JSON.stringify(objectMessage)) {
         done(new Error('The send OBJECT is not equal to the received one'))
@@ -58,7 +58,7 @@ describe('QueueClient && QueueServer', () => {
 
   it('QueueClient.send() throws an error when the parameter is not json-serializeable', (done) => {
     let nonJSONSerializableMessage = {}
-    nonJSONSerializableMessage.a = {b: nonJSONSerializableMessage}
+    nonJSONSerializableMessage.a = { b: nonJSONSerializableMessage }
 
     queueServer.consume((msg) => {
       done(new Error('Should not receive the message'))
@@ -71,7 +71,7 @@ describe('QueueClient && QueueServer', () => {
 
   it(`QueueServer.consume() tries to receive message for ${maxRetry + 1} times`, (done) => {
     let consumeCalled = 0
-    let objectMessage = {foo: 'bar', bar: 'foo'}
+    let objectMessage = { foo: 'bar', bar: 'foo' }
 
     queueServer.consume((msg) => {
       consumeCalled++
@@ -87,7 +87,7 @@ describe('QueueClient && QueueServer', () => {
     })
 
     setTimeout(() => {
-      assert.equal(consumeCalled, maxRetry + 1, '')
+      assert.strictEqual(consumeCalled, maxRetry + 1, '')
       done()
     }, 1000)
   })

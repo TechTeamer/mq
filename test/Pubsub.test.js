@@ -14,7 +14,7 @@ describe('Publisher && Subscriber', () => {
 
   let subscriberManager = new QueueManager(config)
   subscriberManager.setLogger(logger)
-  let subscriber = subscriberManager.getSubscriber(publisherName, {maxRetry, timeoutMs: 10000})
+  let subscriber = subscriberManager.getSubscriber(publisherName, { maxRetry, timeoutMs: 10000 })
 
   before(() => {
     return publisherManager.connect().then(() => {
@@ -43,7 +43,7 @@ describe('Publisher && Subscriber', () => {
   })
 
   it('Publisher.send() sends an OBJECT and Subscriber.consume() receives it', (done) => {
-    let objectMessage = {foo: 'bar', bar: 'foo'}
+    let objectMessage = { foo: 'bar', bar: 'foo' }
 
     subscriber.consume((msg) => {
       if (JSON.stringify(msg) !== JSON.stringify(objectMessage)) {
@@ -60,7 +60,7 @@ describe('Publisher && Subscriber', () => {
 
   it('Publisher.send() throws an error when the parameter is not json-serializeable', (done) => {
     let nonJSONSerializableMessage = {}
-    nonJSONSerializableMessage.a = {b: nonJSONSerializableMessage}
+    nonJSONSerializableMessage.a = { b: nonJSONSerializableMessage }
 
     subscriber.consume((msg) => {
       done(new Error('Should not receive the message'))
@@ -74,7 +74,7 @@ describe('Publisher && Subscriber', () => {
   // The "+ 1" in the line below is the first try (which is not a "re"-try)
   it(`QueueServer.consume() tries to receive message for ${maxRetry + 1} times`, (done) => {
     let consumeCalled = 0
-    let objectMessage = {foo: 'bar', bar: 'foo'}
+    let objectMessage = { foo: 'bar', bar: 'foo' }
 
     subscriber.consume((msg) => {
       consumeCalled++
@@ -90,7 +90,7 @@ describe('Publisher && Subscriber', () => {
     })
 
     setTimeout(() => {
-      assert.equal(consumeCalled, maxRetry + 1, '')
+      assert.strictEqual(consumeCalled, maxRetry + 1, '')
       done()
     }, 1000)
   })
@@ -98,7 +98,7 @@ describe('Publisher && Subscriber', () => {
   it('Publisher.send() sends a message and each subscriber receives it', (done) => {
     let otherManager = new QueueManager(config)
     otherManager.setLogger(logger)
-    let otherSubscriber = otherManager.getSubscriber(publisherName, {maxRetry, timeoutMs: 10000})
+    let otherSubscriber = otherManager.getSubscriber(publisherName, { maxRetry, timeoutMs: 10000 })
 
     otherManager.connect().then(() => {
       let stringMessage = 'foobar'

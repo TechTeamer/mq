@@ -17,7 +17,7 @@ class RPCServer {
     this.name = rpcName
     this._replyQueue = ''
 
-    let {prefetchCount, timeoutMs} = options
+    let { prefetchCount, timeoutMs } = options
     this._prefetchCount = prefetchCount
     this._timeoutMs = timeoutMs
 
@@ -27,7 +27,7 @@ class RPCServer {
   }
 
   _callback (msg) {
-    let {action, data} = msg || {}
+    let { action, data } = msg || {}
     if (!this.actions.has(action)) {
       return Promise.resolve()
     }
@@ -59,7 +59,7 @@ class RPCServer {
     }
 
     this._initializePromise = this._connection.getChannel().then((channel) => {
-      return channel.assertQueue(this.name, {durable: true}).then(() => {
+      return channel.assertQueue(this.name, { durable: true }).then(() => {
         channel.prefetch(this._prefetchCount)
       }).then(() => {
         channel.consume(this.name, (msg) => {
@@ -99,7 +99,7 @@ class RPCServer {
     if (request.status !== 'ok') {
       this._logger.error('CANNOT GET RPC CALL PARAMS', this.name, request)
 
-      ch.sendToQueue(msg.properties.replyTo, Buffer.from(JSON.stringify(new QueueMessage('error', 'cannot decode parameters'))), {correlationId: msg.properties.correlationId})
+      ch.sendToQueue(msg.properties.replyTo, Buffer.from(JSON.stringify(new QueueMessage('error', 'cannot decode parameters'))), { correlationId: msg.properties.correlationId })
       this._ack(ch, msg)
       return
     }
@@ -109,7 +109,7 @@ class RPCServer {
     const timer = setTimeout(() => {
       timedOut = true
       this._logger.error('timeout in RPCServer', this.name, request.data)
-      ch.sendToQueue(msg.properties.replyTo, Buffer.from(JSON.stringify(new QueueMessage('error', 'timeout'))), {correlationId: msg.properties.correlationId})
+      ch.sendToQueue(msg.properties.replyTo, Buffer.from(JSON.stringify(new QueueMessage('error', 'timeout'))), { correlationId: msg.properties.correlationId })
       this._ack(ch, msg)
     }, timeoutMs)
 
@@ -127,13 +127,13 @@ class RPCServer {
       } catch (err) {
         this._logger.error('CANNOT SEND RPC REPLY', this.name, err)
 
-        ch.sendToQueue(msg.properties.replyTo, Buffer.from(JSON.stringify(new QueueMessage('error', 'cannot encode anwser'))), {correlationId: msg.properties.correlationId})
+        ch.sendToQueue(msg.properties.replyTo, Buffer.from(JSON.stringify(new QueueMessage('error', 'cannot encode anwser'))), { correlationId: msg.properties.correlationId })
         this._ack(ch, msg)
 
         return
       }
 
-      ch.sendToQueue(msg.properties.replyTo, Buffer.from(reply), {correlationId: msg.properties.correlationId})
+      ch.sendToQueue(msg.properties.replyTo, Buffer.from(reply), { correlationId: msg.properties.correlationId })
       this._ack(ch, msg)
     }).catch((err) => {
       if (timedOut) {
@@ -149,7 +149,7 @@ class RPCServer {
         message = err.message
       }
 
-      ch.sendToQueue(msg.properties.replyTo, Buffer.from(JSON.stringify(new QueueMessage('error', message))), {correlationId: msg.properties.correlationId})
+      ch.sendToQueue(msg.properties.replyTo, Buffer.from(JSON.stringify(new QueueMessage('error', message))), { correlationId: msg.properties.correlationId })
       this._ack(ch, msg)
     })
   }

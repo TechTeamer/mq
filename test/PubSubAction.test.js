@@ -13,7 +13,7 @@ describe('Publisher && Subscriber actions', () => {
 
   let subscriberManager = new QueueManager(config)
   subscriberManager.setLogger(logger)
-  let subscriber = subscriberManager.getSubscriber(publisherName, {maxRetry, timeoutMs: 10000})
+  let subscriber = subscriberManager.getSubscriber(publisherName, { maxRetry, timeoutMs: 10000 })
 
   before(() => {
     return publisherManager.connect().then(() => {

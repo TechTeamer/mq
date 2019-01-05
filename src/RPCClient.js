@@ -20,7 +20,7 @@ class RPCClient {
     this._replyQueuePromise = null
     this._correlationIdMap = new Map()
 
-    let {queueMaxSize, timeoutMs} = options
+    let { queueMaxSize, timeoutMs } = options
     this._rpcQueueMaxSize = queueMaxSize
     this._rpcTimeoutMs = timeoutMs
   }
@@ -119,7 +119,7 @@ class RPCClient {
    * @return {Promise}
    * */
   callAction (action, data, timeoutMs) {
-    return this.call({action, data}, timeoutMs)
+    return this.call({ action, data }, timeoutMs)
   }
 
   /**
@@ -136,7 +136,7 @@ class RPCClient {
       return this._replyQueuePromise
     }
 
-    this._replyQueuePromise = ch.assertQueue('', {exclusive: true}).then((replyQueue) => {
+    this._replyQueuePromise = ch.assertQueue('', { exclusive: true }).then((replyQueue) => {
       this._replyQueue = replyQueue.queue
       this._replyQueuePromise = null
 
@@ -146,7 +146,7 @@ class RPCClient {
         }).catch((err) => {
           this._logger.error('CANNOT CONSUME RPC CLIENT QUEUE', err)
         })
-      }, {noAck: true}).catch((err) => {
+      }, { noAck: true }).catch((err) => {
         this._logger.error('CANNOT SET RPC CLIENT QUEUE CONSUMER', err)
       })
 
@@ -175,7 +175,7 @@ class RPCClient {
       return
     }
 
-    const {resolve, reject} = this._correlationIdMap.get(reply.properties.correlationId)
+    const { resolve, reject } = this._correlationIdMap.get(reply.properties.correlationId)
 
     this._correlationIdMap.delete(reply.properties.correlationId)
 

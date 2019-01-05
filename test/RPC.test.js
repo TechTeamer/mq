@@ -11,10 +11,10 @@ describe('RPCClient && RPCServer', () => {
   const queueManager = new QueueManager(config)
   queueManager.setLogger(logger)
 
-  let rpcClient = queueManager.getRPCClient(rpcName, {queueMaxSize: 100, timeoutMs})
-  let rpcServer = queueManager.getRPCServer(rpcName, {prefetchCount: 1, timeoutMs})
-  let shortRpcClient = queueManager.getRPCClient(shortRpcName, {queueMaxSize: 1, timeoutMs})
-  let shortRpcServer = queueManager.getRPCServer(shortRpcName, {prefetchCount: 1, timeoutMs})
+  let rpcClient = queueManager.getRPCClient(rpcName, { queueMaxSize: 100, timeoutMs })
+  let rpcServer = queueManager.getRPCServer(rpcName, { prefetchCount: 1, timeoutMs })
+  let shortRpcClient = queueManager.getRPCClient(shortRpcName, { queueMaxSize: 1, timeoutMs })
+  let shortRpcServer = queueManager.getRPCServer(shortRpcName, { prefetchCount: 1, timeoutMs })
 
   before(() => {
     return queueManager.connect()
@@ -39,7 +39,7 @@ describe('RPCClient && RPCServer', () => {
   })
 
   it('RPCClient.call() sends an OBJECT and RPCServer.consume() receives it', (done) => {
-    let objectMessage = {foo: 'bar', bar: 'foo'}
+    let objectMessage = { foo: 'bar', bar: 'foo' }
     rpcServer.consume((msg) => {
       if (JSON.stringify(msg) === JSON.stringify(objectMessage)) {
         done()
@@ -53,7 +53,7 @@ describe('RPCClient && RPCServer', () => {
   })
 
   it('RPCClient.call() sends an OBJECT, RPCServer.consume() sends it back and RPCClient receives it intact', (done) => {
-    let objectMessage = {foo: 'bar', bar: 'foo'}
+    let objectMessage = { foo: 'bar', bar: 'foo' }
     rpcServer.consume((msg) => {
       return msg
     })
@@ -70,7 +70,7 @@ describe('RPCClient && RPCServer', () => {
 
   it('RPCClient.call() throws an error when the parameter cant be JSON-serialized', (done) => {
     let nonJSONSerializableMessage = {}
-    nonJSONSerializableMessage.a = {b: nonJSONSerializableMessage}
+    nonJSONSerializableMessage.a = { b: nonJSONSerializableMessage }
 
     rpcServer.consume((msg) => {
       done(new Error('Should not receive the message'))
@@ -82,7 +82,7 @@ describe('RPCClient && RPCServer', () => {
   })
 
   it(`RPCClient.call() throws an error if it doesn't receive a response sooner than ${timeoutMs}ms`, (done) => {
-    let objectMessage = {foo: 'bar', bar: 'foo'}
+    let objectMessage = { foo: 'bar', bar: 'foo' }
 
     rpcServer.consume((msg) => {
       let now = Date.now()
@@ -96,7 +96,7 @@ describe('RPCClient && RPCServer', () => {
   })
 
   it(`RPCClient frees up memory after timeout`, (done) => {
-    let objectMessage = {foo: 'bar', bar: 'foo'}
+    let objectMessage = { foo: 'bar', bar: 'foo' }
 
     let waitForTimeout = true
     shortRpcServer.consume(() => {

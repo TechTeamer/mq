@@ -22,7 +22,7 @@ class QueueServer extends Subscriber {
     }
 
     this._initializePromise = this._connection.getChannel().then((channel) => {
-      return channel.assertQueue(this.name, {durable: true}).then(() => {
+      return channel.assertQueue(this.name, { durable: true }).then(() => {
         return channel.prefetch(this._prefetchCount)
       }).then(() => {
         return channel.consume(this.name, (msg) => {

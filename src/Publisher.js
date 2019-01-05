@@ -20,7 +20,7 @@ class Publisher {
    * @returns {Promise}
    */
   assertExchangeOrQueue (channel) {
-    return channel.assertExchange(this.exchange, 'fanout', {durable: true})
+    return channel.assertExchange(this.exchange, 'fanout', { durable: true })
   }
 
   /**
@@ -31,7 +31,7 @@ class Publisher {
    * @return {Promise}
    * */
   sendAction (action, data, correlationId, timeOut = null) {
-    return this.send({action, data}, correlationId, timeOut)
+    return this.send({ action, data }, correlationId, timeOut)
   }
 
   /**

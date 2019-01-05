@@ -16,7 +16,7 @@ class QueueClient extends Publisher {
    * @returns {Promise}
    */
   assertExchangeOrQueue (channel) {
-    return channel.assertQueue(this.routingKey, {durable: true})
+    return channel.assertQueue(this.routingKey, { durable: true })
   }
 }
 
