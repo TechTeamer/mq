@@ -62,4 +62,45 @@ describe('QueueMessage', () => {
     let buffer = Buffer.from(data.buffer)
     assert.strictEqual(buffer.toString('utf8'), 'test buffer', 'buffer content not match')
   })
+
+  //TODO test
+
+  it('#serialize() serialize the QueueMessage to a Buffer', () => {
+    let queueMessage = JSON.stringify(new QueueMessage(okStatus, object))
+    let data = QueueMessage.fromJSON(queueMessage).data
+    assert.isObject(data, 'not an object')
+    assert.hasAllKeys(data, ['number', 'string', 'array', 'buffer'], 'object members not match')
+    assert.strictEqual(data.number, number, 'number not match')
+    assert.strictEqual(data.string, string, 'string not match')
+    assert.isArray(data.array, array, 'not an array')
+    assert.sameMembers(data.array, array, 'array members not match')
+    let buffer = Buffer.from(data.buffer)
+    assert.strictEqual(buffer.toString('utf8'), 'test buffer', 'buffer content not match')
+  })
+
+  it('#unserialize() deserialize the QueueMessage to the original QueueMessage', () => {
+    let queueMessage = JSON.stringify(new QueueMessage(okStatus, object))
+    let data = QueueMessage.fromJSON(queueMessage).data
+    assert.isObject(data, 'not an object')
+    assert.hasAllKeys(data, ['number', 'string', 'array', 'buffer'], 'object members not match')
+    assert.strictEqual(data.number, number, 'number not match')
+    assert.strictEqual(data.string, string, 'string not match')
+    assert.isArray(data.array, array, 'not an array')
+    assert.sameMembers(data.array, array, 'array members not match')
+    let buffer = Buffer.from(data.buffer)
+    assert.strictEqual(buffer.toString('utf8'), 'test buffer', 'buffer content not match')
+  })
+
+  it('#unserialize() deserialize the QueueMessage with big attachments (100MB) to the original QueueMessage', () => {
+    let queueMessage = JSON.stringify(new QueueMessage(okStatus, object))
+    let data = QueueMessage.fromJSON(queueMessage).data
+    assert.isObject(data, 'not an object')
+    assert.hasAllKeys(data, ['number', 'string', 'array', 'buffer'], 'object members not match')
+    assert.strictEqual(data.number, number, 'number not match')
+    assert.strictEqual(data.string, string, 'string not match')
+    assert.isArray(data.array, array, 'not an array')
+    assert.sameMembers(data.array, array, 'array members not match')
+    let buffer = Buffer.from(data.buffer)
+    assert.strictEqual(buffer.toString('utf8'), 'test buffer', 'buffer content not match')
+  })
 })
