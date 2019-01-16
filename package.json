@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "amqplib": "^0.5.2",
+    "seed-random": "^2.2.0",
     "uuid": "^3.1.0"
   },
   "devDependencies": {

@@ -24,7 +24,7 @@ class Subscriber {
   }
 
   _callback (msg) {
-    let { action, data } = msg || {}
+    let { action, data } = msg.data || {}
     if (!this.actions.has(action)) {
       return Promise.resolve()
     }
@@ -112,7 +112,7 @@ class Subscriber {
    * @private
    */
   _processMessage (channel, msg) {
-    let request = QueueMessage.fromJSON(msg.content)
+    let request = QueueMessage.unserialize(msg.content)
     if (request.status !== 'ok') {
       this._logger.error('CANNOT GET QUEUE MESSAGE PARAMS', this.name, request)
       this._ack(channel, msg)
@@ -147,7 +147,7 @@ class Subscriber {
     }, timeoutMs)
 
     return Promise.resolve().then(() => {
-      return this._callback(request.data, msg.properties)
+      return this._callback(request, msg.properties)
     }).then(() => {
       if (!timedOut) {
         clearTimeout(timer)

@@ -1,4 +1,3 @@
-// const QueueMessage = require('./QueueMessage')
 const Subscriber = require('./Subscriber')
 
 class QueueServer extends Subscriber {

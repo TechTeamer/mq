@@ -27,7 +27,7 @@ describe('RPCClient && RPCServer', () => {
   it('RPCClient.call() sends a STRING and RPCServer.consume() receives it', (done) => {
     let stringMessage = 'foobar'
     rpcServer.consume((msg) => {
-      if (msg === stringMessage) {
+      if (msg.data === stringMessage) {
         done()
       } else {
         done(new Error('String received is not the same as the String sent'))
@@ -41,7 +41,7 @@ describe('RPCClient && RPCServer', () => {
   it('RPCClient.call() sends an OBJECT and RPCServer.consume() receives it', (done) => {
     let objectMessage = { foo: 'bar', bar: 'foo' }
     rpcServer.consume((msg) => {
-      if (JSON.stringify(msg) === JSON.stringify(objectMessage)) {
+      if (JSON.stringify(msg.data) === JSON.stringify(objectMessage)) {
         done()
       } else {
         done(new Error('The send OBJECT is not equal to the received one'))
@@ -58,7 +58,7 @@ describe('RPCClient && RPCServer', () => {
       return msg
     })
     rpcClient.call(objectMessage, 10000).then((res) => {
-      if (JSON.stringify(res) === JSON.stringify(objectMessage)) {
+      if (JSON.stringify(res.data) === JSON.stringify(objectMessage)) {
         done()
       } else {
         done(new Error('Object sent and received are not equal'))
@@ -87,7 +87,7 @@ describe('RPCClient && RPCServer', () => {
     rpcServer.consume((msg) => {
       let now = Date.now()
       while (new Date().getTime() < now + timeoutMs + 100) { }
-      return msg
+      return msg.data
     })
 
     rpcClient.call(objectMessage)

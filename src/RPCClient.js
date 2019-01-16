@@ -73,9 +73,10 @@ class RPCClient {
   /**
    * @param {*} message
    * @param {Number} timeoutMs
+   * @param {Map} attachments
    * @return {Promise}
    * */
-  call (message, timeoutMs = null) {
+  call (message, timeoutMs = null, attachments = null) {
     let channel
 
     return Promise.resolve().then(() => {
@@ -92,7 +93,12 @@ class RPCClient {
       return new Promise((resolve, reject) => {
         let param
         try {
-          param = JSON.stringify(new QueueMessage('ok', message, timeoutMs))
+          param = new QueueMessage('ok', message, timeoutMs)
+          if (attachments !== null) {
+            for (const [key, value] of attachments) {
+              param.addAttachment(key, value)
+            }
+          }
         } catch (err) {
           this._logger.error('CANNOT SEND RPC CALL', this.name, err)
           reject(err)
@@ -101,14 +107,14 @@ class RPCClient {
 
         let correlationId = this._registerMessage(resolve, reject, timeoutMs)
 
-        channel.sendToQueue(this.name, Buffer.from(param), {
+        channel.sendToQueue(this.name, param.serialize(), {
           correlationId: correlationId,
           replyTo: replyQueue
         })
       })
     }).catch((err) => {
       this._logger.error('RPCCLIENT: cannot make rpc call', err)
-      throw new Error('RPCCLIENT: cannot make rpc call')
+      throw new Error(`RPCCLIENT: cannot make rpc call ${err}`)
     })
   }
 
@@ -116,10 +122,11 @@ class RPCClient {
    * @param {String} action
    * @param {*} data
    * @param {Number} timeoutMs
+   * @param {Map} attachments
    * @return {Promise}
    * */
-  callAction (action, data, timeoutMs) {
-    return this.call({ action, data }, timeoutMs)
+  callAction (action, data, timeoutMs, attachments) {
+    return this.call({ action, data }, timeoutMs, attachments)
   }
 
   /**
@@ -179,7 +186,7 @@ class RPCClient {
 
     this._correlationIdMap.delete(reply.properties.correlationId)
 
-    const replyContent = QueueMessage.fromJSON(reply.content.toString())
+    const replyContent = QueueMessage.unserialize(reply.content)
 
     if (replyContent.status === 'ok') {
       resolve(replyContent.data)
