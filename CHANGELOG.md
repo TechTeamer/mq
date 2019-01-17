@@ -1,3 +1,6 @@
+2.2.0
+- Binary sending is available
+
 2.1.0
 - auto init existing servers on connection
 - Constructor overrides
