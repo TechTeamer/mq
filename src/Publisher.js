@@ -28,19 +28,21 @@ class Publisher {
    * @param {*} data
    * @param {String} correlationId
    * @param {Number} timeOut
+   * @param {Map} attachments
    * @return {Promise}
    * */
-  sendAction (action, data, correlationId, timeOut = null) {
-    return this.send({ action, data }, correlationId, timeOut)
+  sendAction (action, data, correlationId, timeOut = null, attachments) {
+    return this.send({ action, data }, correlationId, timeOut, attachments)
   }
 
   /**
    * @param {String} message
    * @param {String} correlationId
    * @param {Number} timeOut
+   * @param {Map} attachments
    * @return {Promise}
    */
-  send (message, correlationId, timeOut = null) {
+  send (message, correlationId, timeOut = null, attachments = null) {
     let options = {}
     let channel
 
@@ -54,14 +56,19 @@ class Publisher {
     }).then(() => {
       let param
       try {
-        param = JSON.stringify(new QueueMessage('ok', message, timeOut))
+        param = new QueueMessage('ok', message, timeOut)
+        if (attachments !== null) {
+          for (const [key, value] of attachments) {
+            param.addAttachment(key, value)
+          }
+        }
       } catch (err) {
         this._logger.error('CANNOT PUBLISH MESSAGE', this.exchange, err)
         throw err
       }
 
       return new Promise((resolve, reject) => {
-        let isWriteBufferEmpty = channel.publish(this.exchange, this.routingKey, Buffer.from(param), options, (err) => {
+        let isWriteBufferEmpty = channel.publish(this.exchange, this.routingKey, param.serialize(), options, (err) => {
           if (err) {
             reject(err)
           } else {

@@ -1,6 +1,7 @@
 const assert = require('assert')
 const QueueManager = require('../src/QueueManager')
 const ConsoleInspector = require('./consoleInspector')
+const SeedRandom = require('seed-random')
 let config = require('./config/LoadConfig')
 
 describe('QueueClient && QueueServer', () => {
@@ -67,6 +68,32 @@ describe('QueueClient && QueueServer', () => {
     queueClient.send(nonJSONSerializableMessage)
       .then(() => done(new Error('Sending a non-json-serializeable object did not throw an error')))
       .catch(() => done())
+  })
+
+  it('QueueClient.send() sends a message with a 100MB random generated buffer and QueueServer.consume() receives it', function (done) {
+    let stringMessage = 'foobar'
+    let attachments = new Map()
+
+    var rand = SeedRandom()
+    let buf = Buffer.alloc(102400)
+
+    for (let i = 0; i < 102400; ++i) {
+      buf[i] = (rand() * 255) << 0
+    }
+
+    attachments.set('test', buf)
+
+    queueServer.consume((msg, msgProp, queueMessage) => {
+      if (queueMessage.getAttachments().get('test').toString() !== buf.toString()) {
+        done(new Error('String received is not the same as the String sent'))
+        return
+      }
+      done()
+    })
+
+    queueClient.send(stringMessage, null, null, attachments).catch((err) => {
+      done(err)
+    })
   })
 
   it(`QueueServer.consume() tries to receive message for ${maxRetry + 1} times`, (done) => {
