@@ -31,7 +31,7 @@ describe('Publisher && Subscriber', () => {
     let stringMessage = 'foobar'
 
     subscriber.consume((msg) => {
-      if (msg.data !== stringMessage) {
+      if (msg !== stringMessage) {
         done(new Error('String received is not the same as the String sent'))
         return
       }
@@ -47,7 +47,7 @@ describe('Publisher && Subscriber', () => {
     let objectMessage = { foo: 'bar', bar: 'foo' }
 
     subscriber.consume((msg) => {
-      if (JSON.stringify(msg.data) !== JSON.stringify(objectMessage)) {
+      if (JSON.stringify(msg) !== JSON.stringify(objectMessage)) {
         done(new Error('The send OBJECT is not equal to the received one'))
         return
       }
@@ -72,8 +72,8 @@ describe('Publisher && Subscriber', () => {
 
     attachments.set('test', buf)
 
-    subscriber.consume((msg) => {
-      if (msg.getAttachments().get('test').toString() !== buf.toString()) {
+    subscriber.consume((msg, msgProp, queueMessage) => {
+      if (queueMessage.getAttachments().get('test').toString() !== buf.toString()) {
         done(new Error('String received is not the same as the String sent'))
         return
       }
@@ -134,7 +134,7 @@ describe('Publisher && Subscriber', () => {
       let ack2 = false
 
       subscriber.consume((msg) => {
-        if (msg.data !== stringMessage) {
+        if (msg !== stringMessage) {
           done(new Error('String received is not the same as the String sent'))
           return
         }
@@ -145,7 +145,7 @@ describe('Publisher && Subscriber', () => {
       })
 
       otherSubscriber.consume((msg) => {
-        if (msg.data !== stringMessage) {
+        if (msg !== stringMessage) {
           done(new Error('String received is not the same as the String sent'))
           return
         }

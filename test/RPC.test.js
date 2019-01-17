@@ -1,5 +1,6 @@
 const QueueManager = require('../src/QueueManager')
 const ConsoleInspector = require('./consoleInspector')
+const SeedRandom = require('seed-random')
 let config = require('./config/LoadConfig')
 
 describe('RPCClient && RPCServer', () => {
@@ -27,7 +28,7 @@ describe('RPCClient && RPCServer', () => {
   it('RPCClient.call() sends a STRING and RPCServer.consume() receives it', (done) => {
     let stringMessage = 'foobar'
     rpcServer.consume((msg) => {
-      if (msg.data === stringMessage) {
+      if (msg === stringMessage) {
         done()
       } else {
         done(new Error('String received is not the same as the String sent'))
@@ -41,7 +42,7 @@ describe('RPCClient && RPCServer', () => {
   it('RPCClient.call() sends an OBJECT and RPCServer.consume() receives it', (done) => {
     let objectMessage = { foo: 'bar', bar: 'foo' }
     rpcServer.consume((msg) => {
-      if (JSON.stringify(msg.data) === JSON.stringify(objectMessage)) {
+      if (JSON.stringify(msg) === JSON.stringify(objectMessage)) {
         done()
       } else {
         done(new Error('The send OBJECT is not equal to the received one'))
@@ -58,12 +59,38 @@ describe('RPCClient && RPCServer', () => {
       return msg
     })
     rpcClient.call(objectMessage, 10000).then((res) => {
-      if (JSON.stringify(res.data) === JSON.stringify(objectMessage)) {
+      if (JSON.stringify(res) === JSON.stringify(objectMessage)) {
         done()
       } else {
         done(new Error('Object sent and received are not equal'))
       }
     }).catch((err) => {
+      done(err)
+    })
+  })
+
+  it('rpcClient.call() sends a message with a 100MB random generated buffer and rpcServer.consume() receives it', function (done) {
+    let stringMessage = 'foobar'
+    let attachments = new Map()
+
+    var rand = SeedRandom()
+    let buf = Buffer.alloc(102400)
+
+    for (let i = 0; i < 102400; ++i) {
+      buf[i] = (rand() * 255) << 0
+    }
+
+    attachments.set('test', buf)
+
+    rpcServer.consume((msg, queueMessage) => {
+      if (queueMessage.getAttachments().get('test').toString() !== buf.toString()) {
+        done(new Error('String received is not the same as the String sent'))
+        return
+      }
+      done()
+    })
+
+    rpcClient.call(stringMessage, null, attachments).catch((err) => {
       done(err)
     })
   })
@@ -87,7 +114,7 @@ describe('RPCClient && RPCServer', () => {
     rpcServer.consume((msg) => {
       let now = Date.now()
       while (new Date().getTime() < now + timeoutMs + 100) { }
-      return msg.data
+      return msg
     })
 
     rpcClient.call(objectMessage)

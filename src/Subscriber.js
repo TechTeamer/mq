@@ -24,7 +24,7 @@ class Subscriber {
   }
 
   _callback (msg) {
-    let { action, data } = msg.data || {}
+    let { action, data } = msg || {}
     if (!this.actions.has(action)) {
       return Promise.resolve()
     }
@@ -147,7 +147,7 @@ class Subscriber {
     }, timeoutMs)
 
     return Promise.resolve().then(() => {
-      return this._callback(request, msg.properties)
+      return this._callback(request.data, msg.properties, request)
     }).then(() => {
       if (!timedOut) {
         clearTimeout(timer)

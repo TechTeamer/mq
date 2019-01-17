@@ -27,7 +27,7 @@ class RPCServer {
   }
 
   _callback (msg) {
-    let { action, data } = msg.data || {}
+    let { action, data } = msg || {}
     if (!this.actions.has(action)) {
       return Promise.resolve()
     }
@@ -114,7 +114,7 @@ class RPCServer {
     }, timeoutMs)
 
     return Promise.resolve().then(() => {
-      return this._callback(request)
+      return this._callback(request.data, request)
     }).then((answer) => {
       if (timedOut) {
         return
@@ -141,7 +141,7 @@ class RPCServer {
       }
 
       clearTimeout(timer)
-      let message = 'cannot answer to rpc call'
+      let message = `cannot answer to rpc call: ${err}`
 
       if (!(err instanceof RPCError)) {
         this._logger.error('RPC REPLY FAILED %s', this.name, err)

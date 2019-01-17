@@ -31,7 +31,7 @@ describe('QueueClient && QueueServer', () => {
   it('QueueClient.send() sends a STRING and QueueServer.consume() receives it', (done) => {
     let stringMessage = 'foobar'
     queueServer.consume((msg) => {
-      if (msg.data !== stringMessage) {
+      if (msg !== stringMessage) {
         done(new Error('String received is not the same as the String sent'))
         return
       }
@@ -46,7 +46,7 @@ describe('QueueClient && QueueServer', () => {
   it('QueueClient.send() sends an OBJECT and QueueServer.consume() receives it', (done) => {
     let objectMessage = { foo: 'bar', bar: 'foo' }
     queueServer.consume((msg) => {
-      if (JSON.stringify(msg.data) !== JSON.stringify(objectMessage)) {
+      if (JSON.stringify(msg) !== JSON.stringify(objectMessage)) {
         done(new Error('The send OBJECT is not equal to the received one'))
         return
       }
@@ -83,8 +83,8 @@ describe('QueueClient && QueueServer', () => {
 
     attachments.set('test', buf)
 
-    queueServer.consume((msg) => {
-      if (msg.getAttachments().get('test').toString() !== buf.toString()) {
+    queueServer.consume((msg, msgProp, queueMessage) => {
+      if (queueMessage.getAttachments().get('test').toString() !== buf.toString()) {
         done(new Error('String received is not the same as the String sent'))
         return
       }
