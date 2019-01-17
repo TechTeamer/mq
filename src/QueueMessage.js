@@ -43,9 +43,9 @@ class QueueMessage {
   }
 
   static unserialize (buffer) {
-    if (buffer.slice(0, 1).toString('utf8') === '+') {
+    if (buffer.toString('utf8', 0, 1) === '+') {
       let jsonLength = buffer.slice(1, 5).readUInt32BE()
-      let { status, data, timeOut, attachArray } = JSON.parse(buffer.slice(5, 5 + jsonLength).toString('utf8'))
+      let { status, data, timeOut, attachArray } = JSON.parse(buffer.toString('utf8', 5, 5 + jsonLength))
       let prevAttachmentLength = 5 + jsonLength
       let queueMessage = new QueueMessage(status, data, timeOut)
       for (const [key, length] of attachArray) {
@@ -56,7 +56,7 @@ class QueueMessage {
 
       })
       return queueMessage
-    } else if (buffer.slice(0, 1).toString('utf8') === '{') {
+    } else if (buffer.toString('utf8', 0, 1) === '{') {
       return this.fromJSON(buffer.toString('utf8'))
     } else {
       throw new Error('Impossible to deserialize the message')
