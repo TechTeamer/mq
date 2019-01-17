@@ -57,7 +57,7 @@ class Publisher {
       let param
       try {
         param = new QueueMessage('ok', message, timeOut)
-        if (attachments !== null) {
+        if (attachments instanceof Map) {
           for (const [key, value] of attachments) {
             param.addAttachment(key, value)
           }
