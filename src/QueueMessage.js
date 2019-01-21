@@ -37,8 +37,8 @@ class QueueMessage {
     let stringJson = JSON.stringify(obj)
     let formatBuf = Buffer.alloc(1, '+')
     let lengthBuf = Buffer.alloc(4)
-    lengthBuf.writeUInt32BE(stringJson.length)
     let jsonBuf = Buffer.from(stringJson)
+    lengthBuf.writeUInt32BE(jsonBuf.length)
     return Buffer.concat([formatBuf, lengthBuf, jsonBuf, ...attachmentBuffers])
   }
 
