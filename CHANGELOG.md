@@ -1,3 +1,6 @@
+2.2.1
+- Fix multi-byte character (de)serialization
+
 2.2.0
 - Binary sending is available
 
