@@ -10,7 +10,7 @@ describe('QueueMessage', () => {
   let data = 'This is a valid QueueMessage'
 
   const number = 1
-  const string = 'hello ŰÁÉÚŐÓÜÖÍűáéúőóüöí$\\`#^+-[]<>*;~!%/()'
+  const string = 'hello ŰÁÉÚŐÓÜÖÍűáéúőóüöí$\\`#^+-[]<>*;~!%/()孫詒讓\u1FFF\u{10FFFF}'
   const array = [1, 2, 3]
   const buffer = Buffer.from('test buffer')
   const object = { number, string, array, buffer }
