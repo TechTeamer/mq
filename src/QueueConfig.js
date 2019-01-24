@@ -20,9 +20,6 @@ class QueueConfig {
     if (!obj || !obj.url) {
       return false
     }
-    if (obj.options && (!obj.options.cert || !obj.options.key || !obj.options.ca)) {
-      return false
-    }
 
     return true
   }

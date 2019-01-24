@@ -13,47 +13,4 @@ describe('QueueConfig', () => {
       nothing: ''
     }), 'Missing url should be invalid')
   })
-
-  it('Cert options', () => {
-    assert.isFalse(QueueConfig.isValidConfig({
-      url: 'amqps://localhost:5671',
-      options: {}
-    }), 'Empty options should fail')
-
-    assert.isFalse(QueueConfig.isValidConfig({
-      url: 'amqps://localhost:5671',
-      options: {
-        // cert: '',
-        key: 'something',
-        ca: 'something'
-      }
-    }), 'Cert should be required')
-
-    assert.isFalse(QueueConfig.isValidConfig({
-      url: 'amqps://localhost:5671',
-      options: {
-        cert: 'something',
-        // key: '',
-        ca: 'something'
-      }
-    }), 'Key should be required')
-
-    assert.isFalse(QueueConfig.isValidConfig({
-      url: 'amqps://localhost:5671',
-      options: {
-        cert: 'something',
-        key: 'something'
-        // ca: ''
-      }
-    }), 'ca should be required')
-
-    assert.isTrue(QueueConfig.isValidConfig({
-      url: 'amqps://localhost:5671',
-      options: {
-        cert: 'something',
-        key: 'something',
-        ca: 'something'
-      }
-    }), 'rejectUnauthorized is optional')
-  })
 })
