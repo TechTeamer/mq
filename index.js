@@ -1,6 +1,7 @@
 const QueueClient = require('./src/QueueClient')
 const QueueConfig = require('./src/QueueConfig')
 const QueueConnection = require('./src/QueueConnection')
+const ConnectionPool = require('./src/ConnectionPool')
 const QueueMessage = require('./src/QueueMessage')
 const QueueServer = require('./src/QueueServer')
 const QueueManager = require('./src/QueueManager')
@@ -13,6 +14,7 @@ const Subscriber = require('./src/Subscriber')
 module.exports.QueueClient = QueueClient
 module.exports.QueueConfig = QueueConfig
 module.exports.QueueConnection = QueueConnection
+module.exports.ConnectionPool = ConnectionPool
 module.exports.QueueMessage = QueueMessage
 module.exports.QueueServer = QueueServer
 module.exports.QueueManager = QueueManager
