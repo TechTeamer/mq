@@ -18,11 +18,9 @@ class RabbitMqOptions {
 class QueueConfig {
   static isValidConfig (obj) {
     if (!obj || !obj.url) {
-      // throw new Error('Missing url ' + JSON.stringify(obj))
       return false
     }
     if (obj.options && (!obj.options.cert || !obj.options.key || !obj.options.ca)) {
-      // throw new Error('Invalid options')
       return false
     }
 
