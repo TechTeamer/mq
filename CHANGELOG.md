@@ -1,3 +1,6 @@
+2.3.0
+- Collection Pool
+
 2.2.1
 - Fix multi-byte character (de)serialization
 
