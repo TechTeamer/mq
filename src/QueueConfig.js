@@ -16,6 +16,14 @@ class RabbitMqOptions {
 }
 
 class QueueConfig {
+  static isValidConfig (obj) {
+    if (!obj || !obj.url) {
+      return false
+    }
+
+    return true
+  }
+
   constructor (config = {}) {
     let {
       url = 'amqps://localhost:5672',
