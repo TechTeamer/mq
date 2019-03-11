@@ -7,7 +7,7 @@ class Subscriber {
    * @param {String} name
    * @param {Object} options
    */
-  constructor (queueConnection, logger, name, options) {
+  constructor (queueConnection, logger, name, options = {}) {
     this._connection = queueConnection
     this._logger = logger
     this.name = name

@@ -11,7 +11,7 @@ class RPCServer {
    * @param {String} rpcName
    * @param {Object} options
    */
-  constructor (queueConnection, logger, rpcName, options) {
+  constructor (queueConnection, logger, rpcName, options = {}) {
     this._connection = queueConnection
     this._logger = logger
     this.name = rpcName

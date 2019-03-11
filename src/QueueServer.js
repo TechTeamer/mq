@@ -7,7 +7,7 @@ class QueueServer extends Subscriber {
    * @param {String} name
    * @param {Object} options
    */
-  constructor (queueConnection, logger, name, options) {
+  constructor (queueConnection, logger, name, options = {}) {
     super(queueConnection, logger, name, options)
     this._prefetchCount = options.prefetchCount
   }
