@@ -32,7 +32,7 @@ class RPCClient {
    * @return {Number} correlation id
    * @private
    */
-  _registerMessage (resolve, reject, timeoutMs) {
+  _registerMessage (resolve, reject, timeoutMs, resolveWithFullResponse) {
     let correlationId
     let timeoutId
     let timedOut = false
@@ -42,6 +42,7 @@ class RPCClient {
     } while (this._correlationIdMap.has(correlationId))
 
     this._correlationIdMap.set(correlationId, {
+      resolveWithFullResponse: resolveWithFullResponse,
       resolve: (result) => {
         if (!timedOut) {
           clearTimeout(timeoutId)
@@ -76,7 +77,7 @@ class RPCClient {
    * @param {Map} attachments
    * @return {Promise}
    * */
-  call (message, timeoutMs = null, attachments = null) {
+  call (message, timeoutMs = null, attachments = null, resolveWithFullResponse = false) {
     let channel
 
     return Promise.resolve().then(() => {
@@ -105,7 +106,7 @@ class RPCClient {
           return
         }
 
-        let correlationId = this._registerMessage(resolve, reject, timeoutMs)
+        let correlationId = this._registerMessage(resolve, reject, timeoutMs, resolveWithFullResponse)
 
         channel.sendToQueue(this.name, param.serialize(), {
           correlationId: correlationId,
@@ -182,14 +183,18 @@ class RPCClient {
       return
     }
 
-    const { resolve, reject } = this._correlationIdMap.get(reply.properties.correlationId)
+    const { resolve, reject, resolveWithFullResponse } = this._correlationIdMap.get(reply.properties.correlationId)
 
     this._correlationIdMap.delete(reply.properties.correlationId)
 
     const replyContent = QueueMessage.unserialize(reply.content)
 
     if (replyContent.status === 'ok') {
-      resolve(replyContent.data)
+      if (resolveWithFullResponse) {
+        resolve(replyContent)
+      } else {
+        resolve(replyContent.data)
+      }
     } else {
       this._logger.error('RPC CLIENT GOT ERROR', this.name, reply.properties.correlationId, replyContent)
       reject(replyContent.data)

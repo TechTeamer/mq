@@ -69,11 +69,36 @@ describe('RPCClient && RPCServer', () => {
     })
   })
 
+  it('RPCClient.call() sends an OBJECT, RPCServer.consume() sends back a response' +
+    'with a 100MB random generated buffer and RPCClient receives it', (done) => {
+    let objectMessage = { foo: 'bar', bar: 'foo' }
+
+    let rand = SeedRandom()
+    let buf = Buffer.alloc(102400)
+    for (let i = 0; i < 102400; ++i) {
+      buf[i] = (rand() * 255) << 0
+    }
+
+    rpcServer.consume((msg, request, response) => {
+      response.addAttachment('test', buf)
+      return msg
+    })
+    rpcClient.call(objectMessage, 10000, null, true).then((res) => {
+      if (res.getAttachments().get('test').toString() !== buf.toString()) {
+        done(new Error('String received is not the same as the String sent'))
+      } else {
+        done()
+      }
+    }).catch((err) => {
+      done(err)
+    })
+  })
+
   it('rpcClient.call() sends a message with a 100MB random generated buffer and rpcServer.consume() receives it', function (done) {
     let stringMessage = 'foobar'
     let attachments = new Map()
 
-    var rand = SeedRandom()
+    let rand = SeedRandom()
     let buf = Buffer.alloc(102400)
 
     for (let i = 0; i < 102400; ++i) {

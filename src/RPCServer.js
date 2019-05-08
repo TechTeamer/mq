@@ -127,7 +127,7 @@ class RPCServer {
       let reply
       let replyAttachments = response.getAttachments()
       try {
-        reply = new QueueMessage('ok', answer,)
+        reply = new QueueMessage('ok', answer)
         if (replyAttachments instanceof Map) {
           for (const [key, value] of replyAttachments) {
             reply.addAttachment(key, value)
