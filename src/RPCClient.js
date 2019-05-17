@@ -75,7 +75,8 @@ class RPCClient {
    * @param {*} message
    * @param {Number} timeoutMs
    * @param {Map} attachments
-   * @return {Promise}
+   * @param {Boolean} [resolveWithFullResponse=false]
+   * @return {Promise<QueueMessage|*>}
    * */
   call (message, timeoutMs = null, attachments = null, resolveWithFullResponse = false) {
     let channel

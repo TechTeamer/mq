@@ -84,7 +84,11 @@ describe('RPCClient && RPCServer', () => {
       return msg
     })
     rpcClient.call(objectMessage, 10000, null, true).then((res) => {
-      if (res.getAttachments().get('test').toString() !== buf.toString()) {
+      if (!res.hasAttachment('test')) {
+        done(new Error('Missing attachment from reply'))
+      } else if (!(res.getAttachment('test') instanceof Buffer)) {
+        done(new Error('Attachment is not a buffer'))
+      } else if (res.getAttachment('test').toString() !== buf.toString()) {
         done(new Error('String received is not the same as the String sent'))
       } else {
         done()

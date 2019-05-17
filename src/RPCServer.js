@@ -27,7 +27,14 @@ class RPCServer {
     this.actions = new Map()
   }
 
-  _callback (msg) {
+  /**
+   * @param {*} msg
+   * @param {QueueMessage} request
+   * @param {QueueResponse} response
+   * @protected
+   * @returns {Promise}
+   */
+  _callback (msg, request, response) {
     let { action, data } = msg || {}
     if (!this.actions.has(action)) {
       return Promise.resolve()
