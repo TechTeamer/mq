@@ -1,4 +1,5 @@
 const QueueMessage = require('./QueueMessage')
+const QueueResponse = require('./QueueResponse')
 const RPCError = require('./RPCError')
 
 /**
@@ -26,7 +27,14 @@ class RPCServer {
     this.actions = new Map()
   }
 
-  _callback (msg) {
+  /**
+   * @param {*} msg
+   * @param {QueueMessage} request
+   * @param {QueueResponse} response
+   * @protected
+   * @returns {Promise}
+   */
+  _callback (msg, request, response) {
     let { action, data } = msg || {}
     if (!this.actions.has(action)) {
       return Promise.resolve()
@@ -96,6 +104,8 @@ class RPCServer {
   _processMessage (ch, msg) {
     let request = QueueMessage.unserialize(msg.content)
 
+    let response = new QueueResponse()
+
     if (request.status !== 'ok') {
       this._logger.error('CANNOT GET RPC CALL PARAMS', this.name, request)
 
@@ -114,7 +124,7 @@ class RPCServer {
     }, timeoutMs)
 
     return Promise.resolve().then(() => {
-      return this._callback(request.data, request)
+      return this._callback(request.data, request, response)
     }).then((answer) => {
       if (timedOut) {
         return
@@ -122,8 +132,14 @@ class RPCServer {
 
       clearTimeout(timer)
       let reply
+      let replyAttachments = response.getAttachments()
       try {
-        reply = new QueueMessage('ok', answer).serialize()
+        reply = new QueueMessage('ok', answer)
+        if (replyAttachments instanceof Map) {
+          for (const [key, value] of replyAttachments) {
+            reply.addAttachment(key, value)
+          }
+        }
       } catch (err) {
         this._logger.error('CANNOT SEND RPC REPLY', this.name, err)
 
@@ -133,7 +149,7 @@ class RPCServer {
         return
       }
 
-      ch.sendToQueue(msg.properties.replyTo, reply, { correlationId: msg.properties.correlationId })
+      ch.sendToQueue(msg.properties.replyTo, reply.serialize(), { correlationId: msg.properties.correlationId })
       this._ack(ch, msg)
     }).catch((err) => {
       if (timedOut) {
