@@ -1,3 +1,6 @@
+2.4.0
+- RPC reply attachment
+
 2.3.0
 - Collection Pool
 
