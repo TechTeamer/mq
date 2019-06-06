@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "amqplib": "^0.5.3",
+    "js-yaml": "^3.13.1",
     "uuid": "^3.3.2"
   },
   "devDependencies": {
