@@ -1,3 +1,6 @@
+2.4.1
+- dependency update to fix security vulnerability
+
 2.4.0
 - RPC reply attachment
 
