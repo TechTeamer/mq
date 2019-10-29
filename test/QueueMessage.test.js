@@ -100,4 +100,11 @@ describe('QueueMessage', () => {
       assert.strictEqual(value.toString(), queueMessage.getAttachments().get(key).toString(), 'attachement not match')
     })
   })
+
+  it('#unserialize() is backward compatible with older JSON message format', () => {
+    const queueMessage = new QueueMessage(okStatus, object, 100)
+    const queueMessageBuffer = Buffer.from(JSON.stringify(queueMessage), 'utf8')
+    const newQueueMessage = QueueMessage.unserialize(queueMessageBuffer)
+    assert.strictEqual(newQueueMessage.status, okStatus, 'status not match')
+  })
 })
