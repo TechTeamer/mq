@@ -32,7 +32,7 @@ class QueueConnection {
       return this._connectionPromise
     }
 
-    let options = Object.assign({}, this._config.options)
+    const options = Object.assign({}, this._config.options)
     if (options.cert) {
       options.cert = fs.readFileSync(options.cert)
     }

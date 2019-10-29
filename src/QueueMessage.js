@@ -8,7 +8,7 @@ class QueueMessage {
 
   static fromJSON (jsonString) {
     try {
-      let param = JSON.parse(jsonString)
+      const param = JSON.parse(jsonString)
       if (!param || !param.status) {
         return new QueueMessage('error', 'cannot decode JSON string')
       }
@@ -20,34 +20,34 @@ class QueueMessage {
   }
 
   serialize () {
-    let obj = {
-      'status': this.status,
-      'data': this.data,
-      'timeOut': this.timeOut
+    const obj = {
+      status: this.status,
+      data: this.data,
+      timeOut: this.timeOut
     }
 
-    let attachmentBuffers = []
-    let attachMap = new Map()
+    const attachmentBuffers = []
+    const attachMap = new Map()
     this.attachments.forEach((value, key) => {
       attachmentBuffers.push(value)
       attachMap.set(key, value.length)
     })
     obj.attachArray = [...attachMap]
 
-    let stringJson = JSON.stringify(obj)
-    let formatBuf = Buffer.alloc(1, '+')
-    let lengthBuf = Buffer.alloc(4)
-    let jsonBuf = Buffer.from(stringJson)
+    const stringJson = JSON.stringify(obj)
+    const formatBuf = Buffer.alloc(1, '+')
+    const lengthBuf = Buffer.alloc(4)
+    const jsonBuf = Buffer.from(stringJson)
     lengthBuf.writeUInt32BE(jsonBuf.length)
     return Buffer.concat([formatBuf, lengthBuf, jsonBuf, ...attachmentBuffers])
   }
 
   static unserialize (buffer) {
     if (buffer.toString('utf8', 0, 1) === '+') {
-      let jsonLength = buffer.slice(1, 5).readUInt32BE()
-      let { status, data, timeOut, attachArray } = JSON.parse(buffer.toString('utf8', 5, 5 + jsonLength))
+      const jsonLength = buffer.slice(1, 5).readUInt32BE()
+      const { status, data, timeOut, attachArray } = JSON.parse(buffer.toString('utf8', 5, 5 + jsonLength))
       let prevAttachmentLength = 5 + jsonLength
-      let queueMessage = new QueueMessage(status, data, timeOut)
+      const queueMessage = new QueueMessage(status, data, timeOut)
       for (const [key, length] of attachArray) {
         queueMessage.addAttachment(key, buffer.slice(prevAttachmentLength, prevAttachmentLength + length))
         prevAttachmentLength = prevAttachmentLength + length

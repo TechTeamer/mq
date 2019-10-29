@@ -80,7 +80,7 @@ class QueueManager {
       throw new Error('Override must be a subclass of RPCClient')
     }
 
-    let settings = Object.assign({
+    const settings = Object.assign({
       queueMaxSize: this._config.rpcQueueMaxSize,
       timeoutMs: this._config.rpcTimeoutMs
     }, options)
@@ -112,7 +112,7 @@ class QueueManager {
       throw new Error('Override must be a subclass of RPCServer')
     }
 
-    let settings = Object.assign({
+    const settings = Object.assign({
       prefetchCount: 1,
       timeoutMs: this._config.rpcTimeoutMs
     }, options)
@@ -165,7 +165,7 @@ class QueueManager {
       throw new Error('Override must be a subclass of Subscriber')
     }
 
-    let settings = Object.assign({
+    const settings = Object.assign({
       prefetchCount: 1,
       maxRetry: 5,
       timeoutMs: this._config.rpcTimeoutMs
@@ -219,7 +219,7 @@ class QueueManager {
       throw new Error('Override must be a subclass of QueueServer')
     }
 
-    let settings = Object.assign({
+    const settings = Object.assign({
       prefetchCount: 1,
       maxRetry: 5,
       timeoutMs: this._config.rpcTimeoutMs

@@ -12,7 +12,7 @@ class Subscriber {
     this._logger = logger
     this.name = name
 
-    let { maxRetry, timeoutMs } = options
+    const { maxRetry, timeoutMs } = options
     this._maxRetry = maxRetry
     this._timeoutMs = timeoutMs
 
@@ -24,12 +24,12 @@ class Subscriber {
   }
 
   _callback (msg) {
-    let { action, data } = msg || {}
+    const { action, data } = msg || {}
     if (!this.actions.has(action)) {
       return Promise.resolve()
     }
 
-    let handler = this.actions.get(action)
+    const handler = this.actions.get(action)
     return Promise.resolve().then(() => handler.call(this, data))
   }
 
@@ -112,7 +112,7 @@ class Subscriber {
    * @private
    */
   _processMessage (channel, msg) {
-    let request = QueueMessage.unserialize(msg.content)
+    const request = QueueMessage.unserialize(msg.content)
     if (request.status !== 'ok') {
       this._logger.error('CANNOT GET QUEUE MESSAGE PARAMS', this.name, request)
       this._ack(channel, msg)
@@ -139,7 +139,7 @@ class Subscriber {
     }
 
     let timedOut = false
-    let timeoutMs = typeof request.timeOut === 'number' ? request.timeOut : this._timeoutMs
+    const timeoutMs = typeof request.timeOut === 'number' ? request.timeOut : this._timeoutMs
     const timer = setTimeout(() => {
       timedOut = true
       this._logger.error('Timeout in Subscriber', this.name, request.data)

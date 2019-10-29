@@ -1,7 +1,7 @@
 const chai = require('chai')
 const assert = chai.assert
 const QueueConfig = require('../src/QueueConfig')
-let config = require('./config/LoadConfig')
+const config = require('./config/LoadConfig')
 
 describe('QueueConfig', () => {
   it('Should validate test config', () => {

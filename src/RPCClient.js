@@ -20,7 +20,7 @@ class RPCClient {
     this._replyQueuePromise = null
     this._correlationIdMap = new Map()
 
-    let { queueMaxSize, timeoutMs } = options
+    const { queueMaxSize, timeoutMs } = options
     this._rpcQueueMaxSize = queueMaxSize
     this._rpcTimeoutMs = timeoutMs
   }
@@ -107,7 +107,7 @@ class RPCClient {
           return
         }
 
-        let correlationId = this._registerMessage(resolve, reject, timeoutMs, resolveWithFullResponse)
+        const correlationId = this._registerMessage(resolve, reject, timeoutMs, resolveWithFullResponse)
 
         channel.sendToQueue(this.name, param.serialize(), {
           correlationId: correlationId,

@@ -1,21 +1,21 @@
 const QueueManager = require('../src/QueueManager')
 const ConsoleInspector = require('./consoleInspector')
 const SeedRandom = require('seed-random')
-let config = require('./config/LoadConfig')
+const config = require('./config/LoadConfig')
 
 describe('RPCClient && RPCServer', () => {
-  let rpcName = 'test-rpc'
-  let shortRpcName = 'short-test-rpc'
+  const rpcName = 'test-rpc'
+  const shortRpcName = 'short-test-rpc'
   const logger = new ConsoleInspector(console)
-  let timeoutMs = 1000
+  const timeoutMs = 1000
 
   const queueManager = new QueueManager(config)
   queueManager.setLogger(logger)
 
-  let rpcClient = queueManager.getRPCClient(rpcName, { queueMaxSize: 100, timeoutMs })
-  let rpcServer = queueManager.getRPCServer(rpcName, { prefetchCount: 1, timeoutMs })
-  let shortRpcClient = queueManager.getRPCClient(shortRpcName, { queueMaxSize: 1, timeoutMs })
-  let shortRpcServer = queueManager.getRPCServer(shortRpcName, { prefetchCount: 1, timeoutMs })
+  const rpcClient = queueManager.getRPCClient(rpcName, { queueMaxSize: 100, timeoutMs })
+  const rpcServer = queueManager.getRPCServer(rpcName, { prefetchCount: 1, timeoutMs })
+  const shortRpcClient = queueManager.getRPCClient(shortRpcName, { queueMaxSize: 1, timeoutMs })
+  const shortRpcServer = queueManager.getRPCServer(shortRpcName, { prefetchCount: 1, timeoutMs })
 
   before(() => {
     return queueManager.connect()
@@ -26,7 +26,7 @@ describe('RPCClient && RPCServer', () => {
   })
 
   it('RPCClient.call() sends a STRING and RPCServer.consume() receives it', (done) => {
-    let stringMessage = 'foobar'
+    const stringMessage = 'foobar'
     rpcServer.consume((msg) => {
       if (msg === stringMessage) {
         done()
@@ -40,7 +40,7 @@ describe('RPCClient && RPCServer', () => {
   })
 
   it('RPCClient.call() sends an OBJECT and RPCServer.consume() receives it', (done) => {
-    let objectMessage = { foo: 'bar', bar: 'foo' }
+    const objectMessage = { foo: 'bar', bar: 'foo' }
     rpcServer.consume((msg) => {
       if (JSON.stringify(msg) === JSON.stringify(objectMessage)) {
         done()
@@ -54,7 +54,7 @@ describe('RPCClient && RPCServer', () => {
   })
 
   it('RPCClient.call() sends an OBJECT, RPCServer.consume() sends it back and RPCClient receives it intact', (done) => {
-    let objectMessage = { foo: 'bar', bar: 'foo' }
+    const objectMessage = { foo: 'bar', bar: 'foo' }
     rpcServer.consume((msg) => {
       return msg
     })
@@ -71,10 +71,10 @@ describe('RPCClient && RPCServer', () => {
 
   it('RPCClient.call() sends an OBJECT, RPCServer.consume() sends back a response' +
     'with a 100MB random generated buffer and RPCClient receives it', (done) => {
-    let objectMessage = { foo: 'bar', bar: 'foo' }
+    const objectMessage = { foo: 'bar', bar: 'foo' }
 
-    let rand = SeedRandom()
-    let buf = Buffer.alloc(102400)
+    const rand = SeedRandom()
+    const buf = Buffer.alloc(102400)
     for (let i = 0; i < 102400; ++i) {
       buf[i] = (rand() * 255) << 0
     }
@@ -99,11 +99,11 @@ describe('RPCClient && RPCServer', () => {
   })
 
   it('rpcClient.call() sends a message with a 100MB random generated buffer and rpcServer.consume() receives it', function (done) {
-    let stringMessage = 'foobar'
-    let attachments = new Map()
+    const stringMessage = 'foobar'
+    const attachments = new Map()
 
-    let rand = SeedRandom()
-    let buf = Buffer.alloc(102400)
+    const rand = SeedRandom()
+    const buf = Buffer.alloc(102400)
 
     for (let i = 0; i < 102400; ++i) {
       buf[i] = (rand() * 255) << 0
@@ -125,7 +125,7 @@ describe('RPCClient && RPCServer', () => {
   })
 
   it('RPCClient.call() throws an error when the parameter cant be JSON-serialized', (done) => {
-    let nonJSONSerializableMessage = {}
+    const nonJSONSerializableMessage = {}
     nonJSONSerializableMessage.a = { b: nonJSONSerializableMessage }
 
     rpcServer.consume((msg) => {
@@ -138,10 +138,10 @@ describe('RPCClient && RPCServer', () => {
   })
 
   it(`RPCClient.call() throws an error if it doesn't receive a response sooner than ${timeoutMs}ms`, (done) => {
-    let objectMessage = { foo: 'bar', bar: 'foo' }
+    const objectMessage = { foo: 'bar', bar: 'foo' }
 
     rpcServer.consume((msg) => {
-      let now = Date.now()
+      const now = Date.now()
       while (new Date().getTime() < now + timeoutMs + 100) { }
       return msg
     })
@@ -151,8 +151,8 @@ describe('RPCClient && RPCServer', () => {
       .catch(() => done())
   })
 
-  it(`RPCClient frees up memory after timeout`, (done) => {
-    let objectMessage = { foo: 'bar', bar: 'foo' }
+  it('RPCClient frees up memory after timeout', (done) => {
+    const objectMessage = { foo: 'bar', bar: 'foo' }
 
     let waitForTimeout = true
     shortRpcServer.consume(() => {

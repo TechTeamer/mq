@@ -1,7 +1,7 @@
 
 class RabbitMqOptions {
   constructor (options = {}) {
-    let {
+    const {
       rejectUnauthorized = false,
       cert = '',
       key = '',
@@ -25,7 +25,7 @@ class QueueConfig {
   }
 
   constructor (config = {}) {
-    let {
+    const {
       url = 'amqps://localhost:5672',
       options = {},
       rpcTimeoutMs = 10000,
@@ -33,7 +33,7 @@ class QueueConfig {
       logger = console
     } = config
 
-    let rabbitMqOptions = new RabbitMqOptions(options)
+    const rabbitMqOptions = new RabbitMqOptions(options)
     this.url = url
     this.options = rabbitMqOptions
     this.rpcTimeoutMs = rpcTimeoutMs

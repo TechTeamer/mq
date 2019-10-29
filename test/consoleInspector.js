@@ -6,7 +6,7 @@ const loggerMethods = [
 
 class ConsoleInspector {
   constructor (logger, options) {
-    let { storeLines = true, silent = true } = options || {}
+    const { storeLines = true, silent = true } = options || {}
     this.logger = logger
     this.lines = []
     this.storeLines = storeLines
@@ -14,7 +14,7 @@ class ConsoleInspector {
   }
 
   printLogs (methods) {
-    let { whitelist, blacklist } = methods || {}
+    const { whitelist, blacklist } = methods || {}
 
     this.lines.forEach(({ method, args }) => {
       if (Array.isArray(blacklist) && blacklist.includes(method)) {

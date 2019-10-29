@@ -1,8 +1,8 @@
 const QueueConnection = require('../src/QueueConnection')
-let config = require('./config/LoadConfig')
+const config = require('./config/LoadConfig')
 
 describe('QueueConnection', () => {
-  let connection = new QueueConnection(config)
+  const connection = new QueueConnection(config)
   it('#connect() creates a connection to RabbitMQ', (done) => {
     connection.connect()
       .then((c) => {

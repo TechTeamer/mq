@@ -2,21 +2,21 @@ const assert = require('assert')
 const QueueManager = require('../src/QueueManager')
 const ConsoleInspector = require('./consoleInspector')
 const SeedRandom = require('seed-random')
-let config = require('./config/LoadConfig')
+const config = require('./config/LoadConfig')
 
 describe('QueueClient && QueueServer', () => {
-  let queueName = 'test-queue'
+  const queueName = 'test-queue'
   const logger = new ConsoleInspector(console)
-  let maxRetry = 5
+  const maxRetry = 5
 
-  let clientManager = new QueueManager(config)
+  const clientManager = new QueueManager(config)
   clientManager.setLogger(logger)
-  let queueClient = clientManager.getQueueClient(queueName)
+  const queueClient = clientManager.getQueueClient(queueName)
 
-  let serverManager = new QueueManager(config)
+  const serverManager = new QueueManager(config)
   serverManager.setLogger(logger)
-  let options = { prefetchCount: 1, maxRetry, timeoutMs: 10000 }
-  let queueServer = serverManager.getQueueServer(queueName, options)
+  const options = { prefetchCount: 1, maxRetry, timeoutMs: 10000 }
+  const queueServer = serverManager.getQueueServer(queueName, options)
 
   before(() => {
     return clientManager.connect().then(() => {
@@ -29,7 +29,7 @@ describe('QueueClient && QueueServer', () => {
   })
 
   it('QueueClient.send() sends a STRING and QueueServer.consume() receives it', (done) => {
-    let stringMessage = 'foobar'
+    const stringMessage = 'foobar'
     queueServer.consume((msg) => {
       if (msg !== stringMessage) {
         done(new Error('String received is not the same as the String sent'))
@@ -44,7 +44,7 @@ describe('QueueClient && QueueServer', () => {
   })
 
   it('QueueClient.send() sends an OBJECT and QueueServer.consume() receives it', (done) => {
-    let objectMessage = { foo: 'bar', bar: 'foo' }
+    const objectMessage = { foo: 'bar', bar: 'foo' }
     queueServer.consume((msg) => {
       if (JSON.stringify(msg) !== JSON.stringify(objectMessage)) {
         done(new Error('The send OBJECT is not equal to the received one'))
@@ -58,7 +58,7 @@ describe('QueueClient && QueueServer', () => {
   })
 
   it('QueueClient.send() throws an error when the parameter is not json-serializeable', (done) => {
-    let nonJSONSerializableMessage = {}
+    const nonJSONSerializableMessage = {}
     nonJSONSerializableMessage.a = { b: nonJSONSerializableMessage }
 
     queueServer.consume((msg) => {
@@ -71,11 +71,11 @@ describe('QueueClient && QueueServer', () => {
   })
 
   it('QueueClient.send() sends a message with a 100MB random generated buffer and QueueServer.consume() receives it', function (done) {
-    let stringMessage = 'foobar'
-    let attachments = new Map()
+    const stringMessage = 'foobar'
+    const attachments = new Map()
 
     var rand = SeedRandom()
-    let buf = Buffer.alloc(102400)
+    const buf = Buffer.alloc(102400)
 
     for (let i = 0; i < 102400; ++i) {
       buf[i] = (rand() * 255) << 0
@@ -98,7 +98,7 @@ describe('QueueClient && QueueServer', () => {
 
   it(`QueueServer.consume() tries to receive message for ${maxRetry + 1} times`, (done) => {
     let consumeCalled = 0
-    let objectMessage = { foo: 'bar', bar: 'foo' }
+    const objectMessage = { foo: 'bar', bar: 'foo' }
 
     queueServer.consume((msg) => {
       consumeCalled++

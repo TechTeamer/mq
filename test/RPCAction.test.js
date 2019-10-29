@@ -1,17 +1,17 @@
 const QueueManager = require('../src/QueueManager')
 const ConsoleInspector = require('./consoleInspector')
-let config = require('./config/LoadConfig')
+const config = require('./config/LoadConfig')
 
 describe('RPCClient && RPCServer actions', function () {
-  let rpcName = 'test-rpc-action'
+  const rpcName = 'test-rpc-action'
   const logger = new ConsoleInspector(console)
-  let timeoutMs = 1000
+  const timeoutMs = 1000
 
   const queueManager = new QueueManager(config)
   queueManager.setLogger(logger)
 
-  let rpcClient = queueManager.getRPCClient(rpcName, { queueMaxSize: 100, timeoutMs })
-  let rpcServer = queueManager.getRPCServer(rpcName, { prefetchCount: 1, timeoutMs })
+  const rpcClient = queueManager.getRPCClient(rpcName, { queueMaxSize: 100, timeoutMs })
+  const rpcServer = queueManager.getRPCServer(rpcName, { prefetchCount: 1, timeoutMs })
 
   before(() => {
     return queueManager.connect()
@@ -22,7 +22,7 @@ describe('RPCClient && RPCServer actions', function () {
   })
 
   it('RPCServer.registerAction() registers the action, RPCClient.callAction() sends a STRING and the registered callback for the action receives it', (done) => {
-    let stringMessage = 'foobar'
+    const stringMessage = 'foobar'
 
     rpcServer.registerAction('compareString', (msg) => {
       if (msg === stringMessage) {

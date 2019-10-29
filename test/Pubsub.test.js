@@ -2,20 +2,20 @@ const assert = require('assert')
 const QueueManager = require('../src/QueueManager')
 const ConsoleInspector = require('./consoleInspector')
 const SeedRandom = require('seed-random')
-let config = require('./config/LoadConfig')
+const config = require('./config/LoadConfig')
 
 describe('Publisher && Subscriber', () => {
-  let publisherName = 'test-publisher'
+  const publisherName = 'test-publisher'
   const logger = new ConsoleInspector(console)
-  let maxRetry = 5
+  const maxRetry = 5
 
-  let publisherManager = new QueueManager(config)
+  const publisherManager = new QueueManager(config)
   publisherManager.setLogger(logger)
-  let publisher = publisherManager.getPublisher(publisherName)
+  const publisher = publisherManager.getPublisher(publisherName)
 
-  let subscriberManager = new QueueManager(config)
+  const subscriberManager = new QueueManager(config)
   subscriberManager.setLogger(logger)
-  let subscriber = subscriberManager.getSubscriber(publisherName, { maxRetry, timeoutMs: 10000 })
+  const subscriber = subscriberManager.getSubscriber(publisherName, { maxRetry, timeoutMs: 10000 })
 
   before(() => {
     return publisherManager.connect().then(() => {
@@ -28,7 +28,7 @@ describe('Publisher && Subscriber', () => {
   })
 
   it('Publisher.send() sends a STRING and Subscriber.consume() receives it', (done) => {
-    let stringMessage = 'foobar'
+    const stringMessage = 'foobar'
 
     subscriber.consume((msg) => {
       if (msg !== stringMessage) {
@@ -44,7 +44,7 @@ describe('Publisher && Subscriber', () => {
   })
 
   it('Publisher.send() sends an OBJECT and Subscriber.consume() receives it', (done) => {
-    let objectMessage = { foo: 'bar', bar: 'foo' }
+    const objectMessage = { foo: 'bar', bar: 'foo' }
 
     subscriber.consume((msg) => {
       if (JSON.stringify(msg) !== JSON.stringify(objectMessage)) {
@@ -60,11 +60,11 @@ describe('Publisher && Subscriber', () => {
   })
 
   it('Publisher.send() sends a message with a 100MB random generated buffer and Subscriber.consume() receives it', function (done) {
-    let stringMessage = 'foobar'
-    let attachments = new Map()
+    const stringMessage = 'foobar'
+    const attachments = new Map()
 
     var rand = SeedRandom()
-    let buf = Buffer.alloc(102400)
+    const buf = Buffer.alloc(102400)
 
     for (let i = 0; i < 102400; ++i) {
       buf[i] = (rand() * 255) << 0
@@ -86,7 +86,7 @@ describe('Publisher && Subscriber', () => {
   })
 
   it('Publisher.send() throws an error when the parameter is not json-serializeable', (done) => {
-    let nonJSONSerializableMessage = {}
+    const nonJSONSerializableMessage = {}
     nonJSONSerializableMessage.a = { b: nonJSONSerializableMessage }
 
     subscriber.consume((msg) => {
@@ -101,7 +101,7 @@ describe('Publisher && Subscriber', () => {
   // The "+ 1" in the line below is the first try (which is not a "re"-try)
   it(`QueueServer.consume() tries to receive message for ${maxRetry + 1} times`, (done) => {
     let consumeCalled = 0
-    let objectMessage = { foo: 'bar', bar: 'foo' }
+    const objectMessage = { foo: 'bar', bar: 'foo' }
 
     subscriber.consume((msg) => {
       consumeCalled++
@@ -123,12 +123,12 @@ describe('Publisher && Subscriber', () => {
   })
 
   it('Publisher.send() sends a message and each subscriber receives it', (done) => {
-    let otherManager = new QueueManager(config)
+    const otherManager = new QueueManager(config)
     otherManager.setLogger(logger)
-    let otherSubscriber = otherManager.getSubscriber(publisherName, { maxRetry, timeoutMs: 10000 })
+    const otherSubscriber = otherManager.getSubscriber(publisherName, { maxRetry, timeoutMs: 10000 })
 
     otherManager.connect().then(() => {
-      let stringMessage = 'foobar'
+      const stringMessage = 'foobar'
 
       let ack1 = false
       let ack2 = false

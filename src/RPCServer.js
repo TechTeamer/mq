@@ -18,7 +18,7 @@ class RPCServer {
     this.name = rpcName
     this._replyQueue = ''
 
-    let { prefetchCount, timeoutMs } = options
+    const { prefetchCount, timeoutMs } = options
     this._prefetchCount = prefetchCount
     this._timeoutMs = timeoutMs
 
@@ -35,12 +35,12 @@ class RPCServer {
    * @returns {Promise}
    */
   _callback (msg, request, response) {
-    let { action, data } = msg || {}
+    const { action, data } = msg || {}
     if (!this.actions.has(action)) {
       return Promise.resolve()
     }
 
-    let handler = this.actions.get(action)
+    const handler = this.actions.get(action)
     return Promise.resolve().then(() => handler.call(this, data))
   }
 
@@ -102,9 +102,9 @@ class RPCServer {
    * @private
    */
   _processMessage (ch, msg) {
-    let request = QueueMessage.unserialize(msg.content)
+    const request = QueueMessage.unserialize(msg.content)
 
-    let response = new QueueResponse()
+    const response = new QueueResponse()
 
     if (request.status !== 'ok') {
       this._logger.error('CANNOT GET RPC CALL PARAMS', this.name, request)
@@ -115,7 +115,7 @@ class RPCServer {
     }
 
     let timedOut = false
-    let timeoutMs = typeof request.timeOut === 'number' ? request.timeOut : this._timeoutMs
+    const timeoutMs = typeof request.timeOut === 'number' ? request.timeOut : this._timeoutMs
     const timer = setTimeout(() => {
       timedOut = true
       this._logger.error('timeout in RPCServer', this.name, request.data)
@@ -132,7 +132,7 @@ class RPCServer {
 
       clearTimeout(timer)
       let reply
-      let replyAttachments = response.getAttachments()
+      const replyAttachments = response.getAttachments()
       try {
         reply = new QueueMessage('ok', answer)
         if (replyAttachments instanceof Map) {

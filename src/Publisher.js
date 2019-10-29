@@ -43,7 +43,7 @@ class Publisher {
    * @return {Promise}
    */
   send (message, correlationId, timeOut = null, attachments = null) {
-    let options = {}
+    const options = {}
     let channel
 
     if (correlationId) {
@@ -68,7 +68,7 @@ class Publisher {
       }
 
       return new Promise((resolve, reject) => {
-        let isWriteBufferEmpty = channel.publish(this.exchange, this.routingKey, param.serialize(), options, (err) => {
+        const isWriteBufferEmpty = channel.publish(this.exchange, this.routingKey, param.serialize(), options, (err) => {
           if (err) {
             reject(err)
           } else {

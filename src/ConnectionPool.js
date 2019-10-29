@@ -11,7 +11,7 @@ class ConnectionPool {
    * @param {String} [poolConfig.defaultConnectionName]
    */
   constructor (poolConfig) {
-    let { defaultConnectionName } = poolConfig || {}
+    const { defaultConnectionName } = poolConfig || {}
 
     this._logger = null
     this.connections = new Map()
@@ -20,7 +20,7 @@ class ConnectionPool {
   }
 
   setupQueueManagers (connectionConfigs) {
-    let defaultConnectionName = this.defaultConnectionName
+    const defaultConnectionName = this.defaultConnectionName
     let defaultConnectionConfig = null
     let restConnections = null
 
@@ -43,15 +43,15 @@ class ConnectionPool {
     }
 
     if (defaultConnectionConfig) {
-      let connection = this.createConnection(defaultConnectionConfig)
+      const connection = this.createConnection(defaultConnectionConfig)
       this.registerConnection(defaultConnectionName, connection)
       this.setDefaultConnection(connection)
     }
 
     if (restConnections) {
       Object.keys(restConnections).forEach((connectionName) => {
-        let connectionConfig = restConnections[connectionName]
-        let connection = this.createConnection(connectionConfig)
+        const connectionConfig = restConnections[connectionName]
+        const connection = this.createConnection(connectionConfig)
         this.registerConnection(connectionName, connection)
       })
     }
@@ -66,7 +66,7 @@ class ConnectionPool {
   }
 
   createConnection (connectionConfig) {
-    let connection = new QueueManager(connectionConfig)
+    const connection = new QueueManager(connectionConfig)
 
     if (this._logger) {
       connection.setLogger(this._logger)
@@ -95,7 +95,7 @@ class ConnectionPool {
    * @return {Promise}
    */
   connect () {
-    let connections = [...this.connections.values()]
+    const connections = [...this.connections.values()]
 
     return connections.reduce((promise, connection) => {
       return promise.then(() => connection.connect())

@@ -3,7 +3,7 @@ const assert = chai.assert
 const QueueManager = require('../src/QueueManager')
 const ConnectionPool = require('../src/ConnectionPool')
 const ConsoleInspector = require('./consoleInspector')
-let config = require('./config/LoadConfig')
+const config = require('./config/LoadConfig')
 
 describe('ConnectionPool', () => {
   const logger = new ConsoleInspector(console)
@@ -22,7 +22,7 @@ describe('ConnectionPool', () => {
     pool.setLogger(logger)
     pool.setupQueueManagers(config)
 
-    let defaultConnection = pool.getDefaultConnection()
+    const defaultConnection = pool.getDefaultConnection()
 
     assert.isTrue(pool.hasConnection('default'), 'default connection is not defined')
     assert.instanceOf(defaultConnection, QueueManager, 'default connection is not an instance of QueueManager')
@@ -36,12 +36,12 @@ describe('ConnectionPool', () => {
       other: config
     })
 
-    let defaultConnection = pool.getDefaultConnection()
+    const defaultConnection = pool.getDefaultConnection()
 
     assert.isTrue(pool.hasConnection('default'), 'default connection is not defined')
     assert.instanceOf(defaultConnection, QueueManager, 'default connection is not an instance of QueueManager')
 
-    let otherConnection = pool.getConnection('other')
+    const otherConnection = pool.getConnection('other')
 
     assert.isTrue(pool.hasConnection('other'), 'other connection is not defined')
     assert.instanceOf(otherConnection, QueueManager, 'other connection is not an instance of QueueManager')
