@@ -1,4 +1,4 @@
-3.3.0 - UNRELEASED
+3.0.0
 - drop support for node v6
 - add option to RabbitMQ connection timeout
 
