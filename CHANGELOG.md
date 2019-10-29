@@ -1,3 +1,7 @@
+3.3.0 - UNRELEASED
+- drop support for node v6
+- add option to RabbitMQ connection timeout
+
 2.4.1
 - dependency update to fix security vulnerability
 

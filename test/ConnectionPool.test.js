@@ -3,15 +3,11 @@ const assert = chai.assert
 const QueueManager = require('../src/QueueManager')
 const ConnectionPool = require('../src/ConnectionPool')
 const ConsoleInspector = require('./consoleInspector')
+const QueueConfig = require('../src/QueueConfig')
 const config = require('./config/LoadConfig')
 
 describe('ConnectionPool', () => {
   const logger = new ConsoleInspector(console)
-  const pool = new ConnectionPool()
-  pool.setLogger(logger)
-  pool.setupQueueManagers({
-    default: config
-  })
 
   after(() => {
     logger.empty()
@@ -48,6 +44,11 @@ describe('ConnectionPool', () => {
   })
 
   it('Should connect', (done) => {
+    const pool = new ConnectionPool()
+    pool.setLogger(logger)
+    pool.setupQueueManagers({
+      default: config
+    })
     Promise.resolve().then(() => {
       return pool.connect()
     }).then(() => {
@@ -55,5 +56,28 @@ describe('ConnectionPool', () => {
     }).catch((err) => {
       done(err)
     })
+  })
+
+  it('Should not connect to wrong config', (done) => {
+    const pool = new ConnectionPool()
+    pool.setLogger(logger)
+    pool.setupQueueManagers({
+      default: new QueueConfig({
+        url: 'amqps://localhost:22',
+        rpcTimeoutMs: 10000,
+        rpcQueueMaxSize: 100,
+        logger: logger,
+        options: {
+          timeout: 50
+        }
+      })
+    })
+    Promise.resolve().then(() => {
+      return pool.connect()
+    }).then(() => {
+      done('Connection with wrong config should not connect')
+    }).catch((err) => {
+      assert.instanceOf(err, Error, 'Connection with wrong config should throw an error ')
+    }).finally(done)
   })
 })

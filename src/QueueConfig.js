@@ -12,6 +12,9 @@ class RabbitMqOptions {
     this.cert = cert
     this.key = key
     this.ca = ca
+    if (options.timeout) {
+      this.timeout = options.timeout
+    }
   }
 }
 
