@@ -78,6 +78,7 @@ describe('ConnectionPool', () => {
       done('Connection with wrong config should not connect')
     }).catch((err) => {
       assert.instanceOf(err, Error, 'Connection with wrong config should throw an error ')
-    }).finally(done)
+      done()
+    })
   })
 })
