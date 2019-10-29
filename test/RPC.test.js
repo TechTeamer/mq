@@ -81,6 +81,15 @@ describe('RPCClient && RPCServer', () => {
 
     rpcServer.consume((msg, request, response) => {
       response.addAttachment('test', buf)
+      if (!response.hasAnyAttachments()) {
+        done(new Error('Missing attachment from response'))
+      }
+      if (!response.hasAttachment('test')) {
+        done(new Error('Missing attachment name "test" from response'))
+      }
+      if (!response.getAttachment('test') === buf) {
+        done(new Error('Attachment name "test" is not the same'))
+      }
       return msg
     })
     rpcClient.call(objectMessage, 10000, null, true).then((res) => {
