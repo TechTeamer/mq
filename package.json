@@ -19,7 +19,7 @@
   "scripts": {
     "lint": "eslint .",
     "unit": "mocha --exit",
-    "test": "eslint . && nyc mocha --exit"
+    "test": "eslint . && nyc mocha --exit && nyc report --reporter=text-lcov | coveralls"
   },
   "dependencies": {
     "amqplib": "^0.5.3",
@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "chai": "^4.2.0",
+    "coveralls": "^3.0.7",
     "eslint": "^6.6.0",
     "eslint-config-standard": "^14.1.0",
     "eslint-plugin-import": "^2.14.0",
