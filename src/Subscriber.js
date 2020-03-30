@@ -23,14 +23,14 @@ class Subscriber {
     this.actions = new Map()
   }
 
-  _callback (msg) {
+  _callback (msg, properties, request) {
     const { action, data } = msg || {}
     if (!this.actions.has(action)) {
       return Promise.resolve()
     }
 
     const handler = this.actions.get(action)
-    return Promise.resolve().then(() => handler.call(this, data))
+    return Promise.resolve().then(() => handler.call(this, data, properties, request))
   }
 
   /**
