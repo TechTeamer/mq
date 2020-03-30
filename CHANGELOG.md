@@ -1,3 +1,8 @@
+3.0.1
+- dependency updates to fix security vulnerabilities
+- pass request to Subscriber and QueueServer action handler methods
+- pass request and response to RPCServer action handler methods
+
 3.0.0
 - drop support for node v6
 - add option to RabbitMQ connection timeout
