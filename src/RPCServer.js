@@ -41,7 +41,7 @@ class RPCServer {
     }
 
     const handler = this.actions.get(action)
-    return Promise.resolve().then(() => handler.call(this, data))
+    return Promise.resolve().then(() => handler.call(this, data, request, response))
   }
 
   /**
