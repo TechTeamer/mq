@@ -1,3 +1,7 @@
+4.0.0
+- drop support for node v8
+- dependency upgrade
+
 3.0.0
 - drop support for node v6
 - add option to RabbitMQ connection timeout
