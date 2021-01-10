@@ -94,12 +94,12 @@ class ConnectionPool {
   /**
    * @return {Promise}
    */
-  connect () {
+  async connect () {
     const connections = [...this.connections.values()]
 
-    return connections.reduce((promise, connection) => {
-      return promise.then(() => connection.connect())
-    }, Promise.resolve())
+    for (const connection of connections) {
+      await connection.connect()
+    }
   }
 }
 

@@ -22,8 +22,6 @@ class RPCServer {
     this._prefetchCount = prefetchCount
     this._timeoutMs = timeoutMs
 
-    this._initializePromise = undefined
-
     this.actions = new Map()
   }
 
@@ -61,24 +59,20 @@ class RPCServer {
   /**
    * @return {Promise}
    */
-  initialize () {
-    if (this._initializePromise) {
-      return this._initializePromise
-    }
+  async initialize () {
+    try {
+      const channel = await this._connection.getChannel()
+      await channel.assertQueue(this.name, { durable: true })
 
-    this._initializePromise = this._connection.getChannel().then((channel) => {
-      return channel.assertQueue(this.name, { durable: true }).then(() => {
-        channel.prefetch(this._prefetchCount)
-      }).then(() => {
-        channel.consume(this.name, (msg) => {
-          this._processMessage(channel, msg)
-        })
+      await channel.prefetch(this._prefetchCount)
+
+      await channel.consume(this.name, (msg) => {
+        this._processMessage(channel, msg)
       })
-    }).catch((err) => {
+    } catch (err) {
       this._logger.error('CANNOT CREATE RPC SERVER CHANNEL', err)
-    })
-
-    return this._initializePromise
+      throw err
+    }
   }
 
   /**
@@ -101,7 +95,7 @@ class RPCServer {
    * @return {Promise}
    * @private
    */
-  _processMessage (ch, msg) {
+  async _processMessage (ch, msg) {
     const request = QueueMessage.unserialize(msg.content)
 
     const response = new QueueResponse()
@@ -123,9 +117,8 @@ class RPCServer {
       this._ack(ch, msg)
     }, timeoutMs)
 
-    return Promise.resolve().then(() => {
-      return this._callback(request.data, request, response)
-    }).then((answer) => {
+    try {
+      const answer = await this._callback(request.data, request, response)
       if (timedOut) {
         return
       }
@@ -151,7 +144,7 @@ class RPCServer {
 
       ch.sendToQueue(msg.properties.replyTo, reply.serialize(), { correlationId: msg.properties.correlationId })
       this._ack(ch, msg)
-    }).catch((err) => {
+    } catch (err) {
       if (timedOut) {
         return
       }
@@ -167,7 +160,7 @@ class RPCServer {
 
       ch.sendToQueue(msg.properties.replyTo, new QueueMessage('error', message).serialize(), { correlationId: msg.properties.correlationId })
       this._ack(ch, msg)
-    })
+    }
   }
 
   /**

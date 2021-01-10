@@ -23,6 +23,11 @@ class Publisher {
     return channel.assertExchange(this.exchange, 'fanout', { durable: true })
   }
 
+  async initialize () {
+    const channel = await this._connection.getChannel()
+    await this.assertExchangeOrQueue(channel)
+  }
+
   /**
    * @param {String} action
    * @param {*} data
@@ -42,18 +47,15 @@ class Publisher {
    * @param {Map} attachments
    * @return {Promise}
    */
-  send (message, correlationId, timeOut = null, attachments = null) {
+  async send (message, correlationId, timeOut = null, attachments = null) {
     const options = {}
-    let channel
 
     if (correlationId) {
       options.correlationId = correlationId
     }
 
-    return this._connection.getChannel().then((ch) => {
-      channel = ch
-      return this.assertExchangeOrQueue(channel)
-    }).then(() => {
+    try {
+      const channel = await this._connection.getChannel()
       let param
       try {
         param = new QueueMessage('ok', message, timeOut)
@@ -80,10 +82,10 @@ class Publisher {
           channel.on('drain', resolve)
         }
       })
-    }).catch((err) => {
+    } catch (err) {
       this._logger.error('PUBLISHER: cannot get channel', err)
       throw err
-    })
+    }
   }
 }
 

@@ -1,6 +1,6 @@
 {
   "name": "@techteamer/mq",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "description": "A RabbitMQ wrapper for node",
   "main": "index.js",
   "author": "TechTeamer",
@@ -23,18 +23,17 @@
   },
   "dependencies": {
     "amqplib": "^0.6.0",
-    "js-yaml": "^3.13.1",
     "uuid": "^8.2.0"
   },
   "devDependencies": {
     "chai": "^4.2.0",
     "coveralls": "^3.0.7",
-    "eslint": "^7.5.0",
-    "eslint-config-standard": "^14.1.0",
+    "eslint": "^7.17.0",
+    "eslint-config-standard": "^16.0.2",
     "eslint-plugin-import": "^2.14.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.0.1",
-    "eslint-plugin-standard": "^4.0.0",
+    "eslint-plugin-standard": "^5.0.0",
     "mocha": "^8.0.1",
     "nyc": "^15.1.0",
     "seed-random": "^2.2.0"

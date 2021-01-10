@@ -15,24 +15,18 @@ class QueueServer extends Subscriber {
   /**
    * @return {Promise}
    */
-  initialize () {
-    if (this._initializePromise) {
-      return this._initializePromise
-    }
-
-    this._initializePromise = this._connection.getChannel().then((channel) => {
-      return channel.assertQueue(this.name, { durable: true }).then(() => {
-        return channel.prefetch(this._prefetchCount)
-      }).then(() => {
-        return channel.consume(this.name, (msg) => {
-          this._processMessage(channel, msg)
-        })
+  async initialize () {
+    try {
+      const channel = await this._connection.getChannel()
+      await channel.assertQueue(this.name, { durable: true })
+      await channel.prefetch(this._prefetchCount)
+      await channel.consume(this.name, (msg) => {
+        this._processMessage(channel, msg)
       })
-    }).catch((err) => {
+    } catch (err) {
       this._logger.error('CANNOT INITIALIZE QUEUE SERVER', err)
-    })
-
-    return this._initializePromise
+      throw err
+    }
   }
 }
 

@@ -6,6 +6,7 @@ const Publisher = require('./Publisher')
 const Subscriber = require('./Subscriber')
 const QueueClient = require('./QueueClient')
 const QueueServer = require('./QueueServer')
+
 /**
  * @class QueueManager
  * @param {QueueConnection} connection
@@ -19,40 +20,53 @@ class QueueManager {
     this._config = new QueueConfig(config)
     this._logger = this._config.logger
 
+    /** @var Map<string, RPCClient>} */
     this.rpcClients = new Map()
+    /** @var Map<string, RPCServer>} */
     this.rpcServers = new Map()
+    /** @var Map<string, Publisher>} */
     this.publishers = new Map()
+    /** @var Map<string, Subscriber>} */
     this.subscribers = new Map()
+    /** @var Map<string, QueueClient>} */
     this.queueClients = new Map()
+    /** @var Map<string, QueueServer>} */
     this.queueServers = new Map()
   }
 
-  connect () {
-    return Promise.resolve().then(() => {
-      return this.connection.connect()
-    }).catch((err) => {
+  async connect () {
+    try {
+      await this.connection.connect()
+    } catch (err) {
       this._logger.error('Filed to connect to queue server', err)
       throw err
-    }).then(() => {
-      return Promise.all([...this.rpcServers.values()].map((rpcServer) => {
-        return rpcServer.initialize()
-      }))
-    }).then(() => {
-      return Promise.all([...this.subscribers.values()].map((subscriber) => {
-        return subscriber.initialize()
-      }))
-    }).then(() => {
-      return Promise.all([...this.queueServers.values()].map((queueServer) => {
-        return queueServer.initialize()
-      }))
-    }).catch((err) => {
+    }
+
+    try {
+      for (const [, rpcServer] of this.rpcServers) {
+        await rpcServer.initialize()
+      }
+      for (const [, rpcClient] of this.rpcClients) {
+        await rpcClient.initialize()
+      }
+
+      for (const [, publisher] of this.publishers) {
+        await publisher.initialize()
+      }
+      for (const [, subscriber] of this.subscribers) {
+        await subscriber.initialize()
+      }
+
+      for (const [, queueServer] of this.queueServers) {
+        await queueServer.initialize()
+      }
+      for (const [, queueClient] of this.queueClients) {
+        await queueClient.initialize()
+      }
+    } catch (err) {
       this._logger.error('Failed to initialize servers', err)
       throw err
-    })
-  }
-
-  getChannel () {
-    return this.connection.getChannel()
+    }
   }
 
   setLogger (logger) {

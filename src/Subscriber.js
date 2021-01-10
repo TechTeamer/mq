@@ -18,8 +18,6 @@ class Subscriber {
 
     this._retryMap = new Map()
 
-    this._initializePromise = undefined
-
     this.actions = new Map()
   }
 
@@ -50,31 +48,20 @@ class Subscriber {
   /**
    * @return {Promise}
    */
-  initialize () {
-    if (this._initializePromise) {
-      return this._initializePromise
-    }
+  async initialize () {
+    try {
+      const channel = await this._connection.getChannel()
+      await channel.assertExchange(this.name, 'fanout', { durable: true })
+      const queue = await channel.assertQueue('', { exclusive: true })
 
-    let channel
-    let queue
+      await channel.bindQueue(queue.queue, this.name, '')
 
-    this._initializePromise = this._connection.getChannel().then(c => {
-      channel = c
-      return channel.assertExchange(this.name, 'fanout', { durable: true })
-    }).then(() => {
-      return channel.assertQueue('', { exclusive: true })
-    }).then(q => {
-      queue = q
-      return channel.bindQueue(queue.queue, this.name, '')
-    }).then(() => {
-      return channel.consume(queue.queue, (msg) => {
+      await channel.consume(queue.queue, (msg) => {
         this._processMessage(channel, msg)
       })
-    }).catch(err => {
+    } catch (err) {
       this._logger.error('CANNOT INITIALIZE SUBSCRIBER', err)
-    })
-
-    return this._initializePromise
+    }
   }
 
   /**

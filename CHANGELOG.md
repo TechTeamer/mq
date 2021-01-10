@@ -1,3 +1,8 @@
+4.1.0
+- promises rewrite to async-await in most cases
+- connections and channels are built up one-after-one, previously promise.all was used to register channels/create connections
+- removed unnecessary depencency introduced in 2.4.1
+
 4.0.0
 - drop support for node v8
 - dependency upgrade

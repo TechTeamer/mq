@@ -23,7 +23,7 @@ class QueueConnection {
   }
 
   /**
-   * @return Promise
+   * @return Promise<amqplib.Connection>
    * */
   connect () {
     if (this._connection) {
@@ -74,7 +74,7 @@ class QueueConnection {
   }
 
   /**
-   * @return Promise
+   * @return Promise<amqplib.ConfirmChannel>
    * */
   getChannel () {
     if (this._channel) {

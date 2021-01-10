@@ -151,6 +151,7 @@ describe('RPCClient && RPCServer', () => {
 
     rpcServer.consume((msg) => {
       const now = Date.now()
+      // eslint-disable-next-line no-empty
       while (new Date().getTime() < now + timeoutMs + 100) { }
       return msg
     })

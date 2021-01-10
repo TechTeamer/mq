@@ -63,7 +63,7 @@ describe('Publisher && Subscriber', () => {
     const stringMessage = 'foobar'
     const attachments = new Map()
 
-    var rand = SeedRandom()
+    const rand = SeedRandom()
     const buf = Buffer.alloc(102400)
 
     for (let i = 0; i < 102400; ++i) {

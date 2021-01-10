@@ -17,7 +17,6 @@ class RPCClient {
     this._logger = logger
     this.name = rpcName
     this._replyQueue = ''
-    this._replyQueuePromise = null
     this._correlationIdMap = new Map()
 
     const { queueMaxSize, timeoutMs } = options
@@ -25,10 +24,16 @@ class RPCClient {
     this._rpcTimeoutMs = timeoutMs
   }
 
+  async initialize () {
+    const channel = await this._connection.getChannel()
+    await this._getReplyQueue(channel)
+  }
+
   /**
    * @param {Function} resolve
    * @param {Function} reject
    * @param {Number} timeoutMs
+   * @param {boolean} resolveWithFullResponse
    * @return {Number} correlation id
    * @private
    */
@@ -78,46 +83,38 @@ class RPCClient {
    * @param {Boolean} [resolveWithFullResponse=false]
    * @return {Promise<QueueMessage|*>}
    * */
-  call (message, timeoutMs = null, attachments = null, resolveWithFullResponse = false) {
-    let channel
-
-    return Promise.resolve().then(() => {
+  async call (message, timeoutMs = null, attachments = null, resolveWithFullResponse = false) {
+    try {
       if (this._correlationIdMap.size > this._rpcQueueMaxSize) {
         throw new Error('RPCCLIENT QUEUE FULL ' + this.name)
       }
-    }).then(() => {
-      return this._connection.getChannel().then((ch) => {
-        channel = ch
-      })
-    }).then(() => {
-      return this._getReplyQueue(channel)
-    }).then((replyQueue) => {
-      return new Promise((resolve, reject) => {
-        let param
-        try {
-          param = new QueueMessage('ok', message, timeoutMs)
-          if (attachments instanceof Map) {
-            for (const [key, value] of attachments) {
-              param.addAttachment(key, value)
-            }
-          }
-        } catch (err) {
-          this._logger.error('CANNOT SEND RPC CALL', this.name, err)
-          reject(err)
-          return
-        }
+      const channel = await this._connection.getChannel()
 
+      let param
+      try {
+        param = new QueueMessage('ok', message, timeoutMs)
+        if (attachments instanceof Map) {
+          for (const [key, value] of attachments) {
+            param.addAttachment(key, value)
+          }
+        }
+      } catch (err) {
+        this._logger.error('CANNOT SEND RPC CALL', this.name, err)
+        throw err
+      }
+
+      return await new Promise((resolve, reject) => {
         const correlationId = this._registerMessage(resolve, reject, timeoutMs, resolveWithFullResponse)
 
         channel.sendToQueue(this.name, param.serialize(), {
           correlationId: correlationId,
-          replyTo: replyQueue
+          replyTo: this._replyQueue
         })
       })
-    }).catch((err) => {
+    } catch (err) {
       this._logger.error('RPCCLIENT: cannot make rpc call', err)
       throw new Error(`RPCCLIENT: cannot make rpc call ${err}`)
-    })
+    }
   }
 
   /**
@@ -136,18 +133,10 @@ class RPCClient {
    * @return Promise<String>
    * @private
    * */
-  _getReplyQueue (ch) {
-    if (this._replyQueue) {
-      return Promise.resolve(this._replyQueue)
-    }
-
-    if (this._replyQueuePromise) {
-      return this._replyQueuePromise
-    }
-
-    this._replyQueuePromise = ch.assertQueue('', { exclusive: true }).then((replyQueue) => {
+  async _getReplyQueue (ch) {
+    try {
+      const replyQueue = await ch.assertQueue('', { exclusive: true })
       this._replyQueue = replyQueue.queue
-      this._replyQueuePromise = null
 
       ch.consume(this._replyQueue, (msg) => {
         return Promise.resolve().then(() => {
@@ -158,14 +147,10 @@ class RPCClient {
       }, { noAck: true }).catch((err) => {
         this._logger.error('CANNOT SET RPC CLIENT QUEUE CONSUMER', err)
       })
-
-      return this._replyQueue
-    }).catch(err => {
+    } catch (err) {
       this._logger.error('CANNOT ASSERT RPC REPLY QUEUE', err)
       throw err
-    })
-
-    return this._replyQueuePromise
+    }
   }
 
   /**
