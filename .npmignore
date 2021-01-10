@@ -3,3 +3,7 @@ test
 .eslintrc.json
 .travis.yml
 yarn.lock
+.nyc_output
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
