@@ -16,7 +16,6 @@ class RPCServer {
     this._connection = queueConnection
     this._logger = logger
     this.name = rpcName
-    this._replyQueue = ''
 
     const { prefetchCount, timeoutMs } = options
     this._prefetchCount = prefetchCount
