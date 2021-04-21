@@ -1,12 +1,12 @@
 const BrokerChannel = require('./BrokerChannel')
 const BrokerPublisher = require('./BrokerPublisher')
+const BrokerSubscriber = require('./BrokerSubscriber')
 const BrokerQueueClient = require('./BrokerQueueClient')
 const BrokerQueueServer = require('./BrokerQueueServer')
 const BrokerRpcClient = require('./BrokerRpcClient')
 const BrokerRpcServer = require('./BrokerRpcServer')
-const BrokerSubscriber = require('./BrokerSubscriber')
-const BrokerGatheringServer = require('./BrokerGatheringServer')
 const BrokerGatheringClient = require('./BrokerGatheringClient')
+const BrokerGatheringServer = require('./BrokerGatheringServer')
 
 /**
  * @class BrokerDetails
@@ -91,14 +91,16 @@ class BrokerManager {
    * @property {String} queueServer
    * @property {String} rpcClient
    * @property {String} rpcServer
+   * @property {String} gatheringClient
+   * @property {String} gatheringServer
    * @property {function():BrokerPublisher} BrokerPublisher
    * @property {function():BrokerSubscriber} BrokerSubscriber
    * @property {function():BrokerQueueClient} BrokerQueueClient
    * @property {function():BrokerQueueServer} BrokerQueueServer
    * @property {function():BrokerRpcClient} BrokerRpcClient
    * @property {function():BrokerRpcServer} BrokerRpcServer
-   * @property {function():BrokerGatheringServer} BrokerGatheringServer
    * @property {function():BrokerGatheringClient} BrokerGatheringClient
+   * @property {function():BrokerGatheringServer} BrokerGatheringServer
    * */
 
   /**
@@ -113,8 +115,8 @@ class BrokerManager {
     const queueServer = this.queueManager.getQueueServer(channelOptions.queueServer || `queue-${this.name}-${channelName}`, channelOptions.BrokerQueueServer || BrokerQueueServer)
     const rpcClient = this.queueManager.getRPCClient(channelOptions.rpcClient || `rpc-${this.name}-${channelName}`, channelOptions.BrokerRpcClient || BrokerRpcClient)
     const rpcServer = this.queueManager.getRPCServer(channelOptions.rpcServer || `rpc-${this.name}-${channelName}`, channelOptions.BrokerRpcServer || BrokerRpcServer)
-    const gatheringClient = this.queueManager.getGatheringClient(channelOptions.gatheringClient || `gathering-${this.name}-${channelName}`, channelOptions.BrokerGatheringServer || BrokerGatheringServer)
-    const gatheringServer = this.queueManager.getGatheringServer(channelOptions.gatheringServer || `gathering-${this.name}-${channelName}`, channelOptions.BrokerGatheringClient || BrokerGatheringClient)
+    const gatheringClient = this.queueManager.getGatheringClient(channelOptions.gatheringClient || `gathering-${this.name}-${channelName}`, channelOptions.BrokerGatheringClient || BrokerGatheringClient)
+    const gatheringServer = this.queueManager.getGatheringServer(channelOptions.gatheringServer || `gathering-${this.name}-${channelName}`, channelOptions.BrokerGatheringServer || BrokerGatheringServer)
 
     subscriber.registerBroker(this)
     queueServer.registerBroker(this)
