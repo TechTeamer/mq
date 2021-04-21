@@ -42,7 +42,7 @@ class BrokerGatheringClient extends GatheringClient {
       brokerDetails
     }
 
-    return this.send(message, correlationId, timeOut, attachments)
+    return this.request(message, correlationId, timeOut, attachments)
   }
 }
 
