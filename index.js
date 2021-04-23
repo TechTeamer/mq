@@ -10,6 +10,8 @@ const RPCError = require('./src/RPCError')
 const RPCServer = require('./src/RPCServer')
 const Publisher = require('./src/Publisher')
 const Subscriber = require('./src/Subscriber')
+const GatheringClient = require('./src/GatheringClient')
+const GatheringServer = require('./src/GatheringServer')
 
 module.exports.QueueClient = QueueClient
 module.exports.QueueConfig = QueueConfig
@@ -23,3 +25,5 @@ module.exports.RPCError = RPCError
 module.exports.RPCServer = RPCServer
 module.exports.Publisher = Publisher
 module.exports.Subscriber = Subscriber
+module.exports.GatheringClient = GatheringClient
+module.exports.GatheringServer = GatheringServer
