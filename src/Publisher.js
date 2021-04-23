@@ -31,23 +31,23 @@ class Publisher {
   /**
    * @param {String} action
    * @param {*} data
-   * @param {String} correlationId
-   * @param {Number} timeOut
-   * @param {Map} attachments
+   * @param {String} [correlationId]
+   * @param {Number} [timeOut]
+   * @param {Map} [attachments]
    * @return {Promise}
    * */
-  sendAction (action, data, correlationId, timeOut = null, attachments) {
+  sendAction (action, data, correlationId = null, timeOut = null, attachments = null) {
     return this.send({ action, data }, correlationId, timeOut, attachments)
   }
 
   /**
-   * @param {String} message
-   * @param {String} correlationId
-   * @param {Number} timeOut
-   * @param {Map} attachments
+   * @param {*} message
+   * @param {String} [correlationId]
+   * @param {Number} [timeOut]
+   * @param {Map} [attachments]
    * @return {Promise}
    */
-  async send (message, correlationId, timeOut = null, attachments = null) {
+  async send (message, correlationId = null, timeOut = null, attachments = null) {
     const options = {}
 
     if (correlationId) {
