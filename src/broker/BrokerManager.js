@@ -1,4 +1,10 @@
 const BrokerChannel = require('./BrokerChannel')
+const BrokerPublisher = require('./BrokerPublisher')
+const BrokerQueueClient = require('./BrokerQueueClient')
+const BrokerQueueServer = require('./BrokerQueueServer')
+const BrokerRpcClient = require('./BrokerRpcClient')
+const BrokerRpcServer = require('./BrokerRpcServer')
+const BrokerSubscriber = require('./BrokerSubscriber')
 
 /**
  * @class BrokerDetails
@@ -8,6 +14,7 @@ class BrokerManager {
    * @param {String} name
    * @param {Object} [options]
    * @param {Console} [options.logger]
+   * @param {QueueManager} [options.queueManager]
    * @param {String} [options.type]
    * @param {String|Number} [options.id]
    */
@@ -16,10 +23,14 @@ class BrokerManager {
     this.name = name
 
     const {
+      queueManager,
       logger,
       type,
       id
     } = options || {}
+
+    /** @type {QueueManager} queueManager */
+    this.queueManager = queueManager
 
     /** @type {String} type */
     this.type = type || ''
@@ -71,13 +82,43 @@ class BrokerManager {
   }
 
   /**
+   * @typedef BrokerCreateChannelOptions
+   * @property {String} publisher
+   * @property {String} subscriber
+   * @property {String} queueClient
+   * @property {String} queueServer
+   * @property {String} rpcClient
+   * @property {String} rpcServer
+   * @property {function():BrokerPublisher} BrokerPublisher
+   * @property {function():BrokerSubscriber} BrokerSubscriber
+   * @property {function():BrokerQueueClient} BrokerQueueClient
+   * @property {function():BrokerQueueServer} BrokerQueueServer
+   * @property {function():BrokerRpcClient} BrokerRpcClient
+   * @property {function():BrokerRpcServer} BrokerRpcServer
+   * */
+
+  /**
    * @param {String} channelName
-   * @param {BrokerChannelOptions} channelOptions
+   * @param {BrokerCreateChannelOptions} channelOptions
    * @return {BrokerChannel}
    */
   createChannel (channelName, channelOptions = {}) {
+    const publisher = this.queueManager.getPublisher(channelOptions.publisher || `pubsub-${this.name}-${channelName}`, channelOptions.BrokerPublisher || BrokerPublisher)
+    const subscriber = this.queueManager.getSubscriber(channelOptions.subscriber || `pubsub-${this.name}-${channelName}`, channelOptions.BrokerSubscriber || BrokerSubscriber)
+    const queueClient = this.queueManager.getQueueClient(channelOptions.queueClient || `queue-${this.name}-${channelName}`, channelOptions.BrokerQueueClient || BrokerQueueClient)
+    const queueServer = this.queueManager.getQueueServer(channelOptions.queueServer || `queue-${this.name}-${channelName}`, channelOptions.BrokerQueueServer || BrokerQueueServer)
+    const rpcClient = this.queueManager.getRPCClient(channelOptions.rpcClient || `rpc-${this.name}-${channelName}`, channelOptions.BrokerRpcClient || BrokerRpcClient)
+    const rpcServer = this.queueManager.getRPCServer(channelOptions.rpcServer || `rpc-${this.name}-${channelName}`, channelOptions.BrokerRpcServer || BrokerRpcServer)
+
+    subscriber.registerBroker(this)
+    queueServer.registerBroker(this)
+    rpcServer.registerBroker(this)
+
     const brokerChannel = new BrokerChannel(channelName, {
-      ...channelOptions,
+      publisher,
+      queueClient,
+      rpcClient,
+      logger: this._logger,
       brokerDetails: this.brokerDetails
     })
 

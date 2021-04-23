@@ -4,14 +4,11 @@
 class BrokerChannel {
   /**
    * @typedef BrokerChannelOptions
-   * @property {Console} options.logger
-   * @property {BrokerDetails} options.broker
-   * @property {BrokerPublisher} options.publisher
-   * @property {BrokerSubscriber} options.subscriber
-   * @property {BrokerQueueClient} options.queueClient
-   * @property {BrokerQueueServer} options.queueServer
-   * @property {BrokerRpcClient} options.rpcClient
-   * @property {BrokerRpcServer} options.rpcServer
+   * @property {Console} logger
+   * @property {BrokerDetails} broker
+   * @property {BrokerPublisher} publisher
+   * @property {BrokerQueueClient} queueClient
+   * @property {BrokerRpcClient} rpcClient
    * */
 
   /**
@@ -26,7 +23,7 @@ class BrokerChannel {
     const {
       logger,
       brokerDetails,
-      publisher, subscriber, queueClient, queueServer, rpcClient, rpcServer
+      publisher, queueClient, rpcClient
     } = options || {}
 
     this._logger = logger || global.console
@@ -41,10 +38,6 @@ class BrokerChannel {
     this.queueClient = queueClient
     /** @type {BrokerRpcClient} rpcClient */
     this.rpcClient = rpcClient
-
-    subscriber.registerBroker(this)
-    queueServer.registerBroker(this)
-    rpcServer.registerBroker(this)
   }
 
   // PUBSUB EVENTS
