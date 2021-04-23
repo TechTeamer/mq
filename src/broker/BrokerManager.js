@@ -244,27 +244,6 @@ class BrokerManager {
       throw new Error('Channel failed to process broker message')
     }
   }
-
-  /**
-   * @param {String} channelName
-   * @param {BrokerGathering} resourceResponse
-   * @param {BrokerDetails} brokerDetails
-   * @param {QueueMessage} queueMessage
-   * @returns {Promise<void>}
-   */
-  async handleResourceResponse (channelName, resourceResponse, brokerDetails, queueMessage) {
-    const brokerChannel = this.getChannel(channelName)
-    if (!brokerChannel) {
-      throw new Error(`Broker failed for message: Channel not found '${channelName}' on broker ${this.brokerTag}`)
-    }
-
-    try {
-      return await brokerChannel.handleResourceResponse(resourceResponse, brokerDetails, queueMessage)
-    } catch (err) {
-      this._logger.error(`Channel failed to process broker message on broker '${this.brokerTag}'`, err)
-      throw new Error('Channel failed to process broker message')
-    }
-  }
 }
 
 module.exports = BrokerManager
