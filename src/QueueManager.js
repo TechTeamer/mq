@@ -216,7 +216,7 @@ class QueueManager {
   /**
    * @param {String} exchangeName
    * @param {GatheringClient|function() : GatheringClient} OverrideClass
-   * @return Publisher
+   * @return GatheringClient
    */
   getGatheringClient (exchangeName, OverrideClass = GatheringClient) {
     if (this.gatheringClients.has(exchangeName)) {
@@ -238,7 +238,7 @@ class QueueManager {
    * @param {String} exchangeName
    * @param {GatheringServer|function() : GatheringServer} OverrideClass
    * @param {Object} [options]
-   * @return Subscriber
+   * @return GatheringServer
    */
   getGatheringServer (exchangeName, OverrideClass = GatheringServer, options = {}) {
     if (this.gatheringServers.has(exchangeName)) {
@@ -255,8 +255,6 @@ class QueueManager {
     }
 
     const settings = Object.assign({
-      prefetchCount: 1,
-      maxRetry: 5,
       timeoutMs: this._config.rpcTimeoutMs
     }, options)
 
