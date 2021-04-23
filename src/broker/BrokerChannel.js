@@ -1,3 +1,5 @@
+const { v4: uuid } = require('uuid')
+
 /**
  * @class BrokerChannel
  * */
@@ -9,6 +11,7 @@ class BrokerChannel {
    * @property {BrokerPublisher} publisher
    * @property {BrokerQueueClient} queueClient
    * @property {BrokerRpcClient} rpcClient
+   * @property {BrokerGatheringClient} gatheringClient
    * */
 
   /**
@@ -19,11 +22,12 @@ class BrokerChannel {
     this._events = new Map()
     this._messages = new Map()
     this._endpoints = new Map()
+    this._resourceProviders = new Map()
 
     const {
       logger,
       brokerDetails,
-      publisher, queueClient, rpcClient
+      publisher, queueClient, rpcClient, gatheringClient
     } = options || {}
 
     this._logger = logger || global.console
@@ -38,6 +42,8 @@ class BrokerChannel {
     this.queueClient = queueClient
     /** @type {BrokerRpcClient} rpcClient */
     this.rpcClient = rpcClient
+    /** @type {BrokerGatheringClient} gatheringClient */
+    this.gatheringClient = gatheringClient
   }
 
   // PUBSUB EVENTS
@@ -128,7 +134,7 @@ class BrokerChannel {
    * @param {string} commandName
    * @param {function(data:*, brokerDetails:BrokerDetails, queueMessage:QueueMessage, queueResponse:QueueResponse)} handlerCallback
    */
-  respond (commandName, handlerCallback) {
+  endpoint (commandName, handlerCallback) {
     this._endpoints.set(commandName, handlerCallback)
   }
 
@@ -205,14 +211,85 @@ class BrokerChannel {
 
       if (!handlerCallback) {
         this._logger.debug(`Requeue message from broker ${brokerDetails.brokerTag}: no handler registered for subject ${subject} on channel ${this.name} by broker ${this.brokerDetails.brokerTag}`)
-        return queueMessage.requeue()
+        queueMessage.requeue()
+        return
       }
 
       this._logger.debug(`Handling message ${subject} from broker ${brokerDetails.brokerTag} on channel ${this.name} by broker ${this.brokerDetails.brokerTag}`)
 
-      return await handlerCallback(data, brokerDetails, queueMessage)
+      await handlerCallback(data, brokerDetails, queueMessage)
     } catch (err) {
       this._logger.error(`Handler failed to process message '${subject}' from broker ${brokerDetails.brokerTag} on channel '${this.name}' by broker ${this.brokerDetails.brokerTag}`, err)
+      throw new Error('Handler failed to process broker message')
+    }
+  }
+
+  // GATHERING
+
+  /**
+   * @typedef BrokerGathering
+   * @property {String} resource
+   * @property {*} data
+   * @property {String} gatheringId
+   * */
+
+  /**
+   * @param {String} resource
+   * @param {*} data
+   * @return {BrokerGathering}
+   */
+  createGatheringInfo (resource, data) {
+    return { resource, data }
+  }
+
+  /**
+   * @param {String} resource
+   * @param {*} data
+   * @param {String} [correlationId]
+   * @param {number|null} [timeOut]
+   * @param {Map} [attachments]
+   * @returns {Promise<*>}
+   */
+  async gather (resource, data, correlationId = null, timeOut = null, attachments = null) {
+    const gatheringInfo = this.createGatheringInfo(resource, data)
+
+    return this.gatheringClient.gatherResource(this.brokerDetails, this.name, gatheringInfo, {
+      correlationId, timeOut, attachments
+    })
+  }
+
+  /**
+   * @param {string} resource
+   * @param {function(data:*, brokerDetails:BrokerDetails, queueMessage:QueueMessage, queueResponse:QueueResponse)} resourceProviderCallback
+   */
+  resource (resource, resourceProviderCallback) {
+    this._resourceProviders.set(resource, resourceProviderCallback)
+  }
+
+  /**
+   * @param {BrokerGathering} gatheringInfo
+   * @param {BrokerDetails} brokerDetails
+   * @param {QueueMessage} request
+   * @param {QueueResponse} response
+   * @returns {Promise<void>}
+   */
+  async handleGatheringAnnouncement (gatheringInfo, brokerDetails, request, response) {
+    const { resource, data } = gatheringInfo || {}
+
+    try {
+      const resourceProviderCallback = this._resourceProviders.get(resource)
+
+      if (!resourceProviderCallback) {
+        this._logger.debug(`Skip message from broker ${brokerDetails.brokerTag}: no resource provider registered for resource ${resource} on channel ${this.name} by broker ${this.brokerDetails.brokerTag}`)
+        response.notFound(`No handler registered for resource '${resource}'`)
+        return
+      }
+
+      this._logger.debug(`Handling message ${resource} from broker ${brokerDetails.brokerTag} on channel ${this.name} by broker ${this.brokerDetails.brokerTag}`)
+
+      return await resourceProviderCallback(data, brokerDetails, request, response)
+    } catch (err) {
+      this._logger.error(`Handler failed to process message '${resource}' from broker ${brokerDetails.brokerTag} on channel '${this.name}' by broker ${this.brokerDetails.brokerTag}`, err)
       throw new Error('Handler failed to process broker message')
     }
   }

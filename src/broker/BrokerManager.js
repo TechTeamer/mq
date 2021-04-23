@@ -5,6 +5,8 @@ const BrokerQueueServer = require('./BrokerQueueServer')
 const BrokerRpcClient = require('./BrokerRpcClient')
 const BrokerRpcServer = require('./BrokerRpcServer')
 const BrokerSubscriber = require('./BrokerSubscriber')
+const BrokerGatheringServer = require('./BrokerGatheringServer')
+const BrokerGatheringClient = require('./BrokerGatheringClient')
 
 /**
  * @class BrokerDetails
@@ -95,6 +97,8 @@ class BrokerManager {
    * @property {function():BrokerQueueServer} BrokerQueueServer
    * @property {function():BrokerRpcClient} BrokerRpcClient
    * @property {function():BrokerRpcServer} BrokerRpcServer
+   * @property {function():BrokerGatheringServer} BrokerGatheringServer
+   * @property {function():BrokerGatheringClient} BrokerGatheringClient
    * */
 
   /**
@@ -109,15 +113,19 @@ class BrokerManager {
     const queueServer = this.queueManager.getQueueServer(channelOptions.queueServer || `queue-${this.name}-${channelName}`, channelOptions.BrokerQueueServer || BrokerQueueServer)
     const rpcClient = this.queueManager.getRPCClient(channelOptions.rpcClient || `rpc-${this.name}-${channelName}`, channelOptions.BrokerRpcClient || BrokerRpcClient)
     const rpcServer = this.queueManager.getRPCServer(channelOptions.rpcServer || `rpc-${this.name}-${channelName}`, channelOptions.BrokerRpcServer || BrokerRpcServer)
+    const gatheringClient = this.queueManager.getGatheringClient(channelOptions.gatheringClient || `gathering-${this.name}-${channelName}`, channelOptions.BrokerGatheringServer || BrokerGatheringServer)
+    const gatheringServer = this.queueManager.getGatheringServer(channelOptions.gatheringServer || `gathering-${this.name}-${channelName}`, channelOptions.BrokerGatheringClient || BrokerGatheringClient)
 
     subscriber.registerBroker(this)
     queueServer.registerBroker(this)
     rpcServer.registerBroker(this)
+    gatheringServer.registerBroker(this)
 
     const brokerChannel = new BrokerChannel(channelName, {
       publisher,
       queueClient,
       rpcClient,
+      gatheringClient,
       logger: this._logger,
       brokerDetails: this.brokerDetails
     })
@@ -172,6 +180,28 @@ class BrokerManager {
 
   /**
    * @param {String} channelName
+   * @param {BrokerGathering} gatheringInfo
+   * @param {BrokerDetails} brokerDetails
+   * @param {QueueMessage} request
+   * @param {QueueResponse} response
+   * @returns {Promise<void>}
+   */
+  async handleGatheringAnnouncement (channelName, gatheringInfo, brokerDetails, request, response) {
+    const brokerChannel = this.getChannel(channelName)
+    if (!brokerChannel) {
+      throw new Error(`Broker failed for event: Channel not found '${channelName}' on broker ${this.brokerTag}`)
+    }
+
+    try {
+      return await brokerChannel.handleGatheringAnnouncement(gatheringInfo, brokerDetails, request, response)
+    } catch (err) {
+      this._logger.error(`Channel failed to process broker event on broker '${this.brokerTag}'`, err)
+      throw new Error('Channel failed to process broker event')
+    }
+  }
+
+  /**
+   * @param {String} channelName
    * @param {BrokerRequest} brokerRequest
    * @param {BrokerDetails} brokerDetails
    * @param {QueueMessage} queueMessage
@@ -207,6 +237,27 @@ class BrokerManager {
 
     try {
       return await brokerChannel.handleMessage(brokerMessage, brokerDetails, queueMessage)
+    } catch (err) {
+      this._logger.error(`Channel failed to process broker message on broker '${this.brokerTag}'`, err)
+      throw new Error('Channel failed to process broker message')
+    }
+  }
+
+  /**
+   * @param {String} channelName
+   * @param {BrokerGathering} resourceResponse
+   * @param {BrokerDetails} brokerDetails
+   * @param {QueueMessage} queueMessage
+   * @returns {Promise<void>}
+   */
+  async handleResourceResponse (channelName, resourceResponse, brokerDetails, queueMessage) {
+    const brokerChannel = this.getChannel(channelName)
+    if (!brokerChannel) {
+      throw new Error(`Broker failed for message: Channel not found '${channelName}' on broker ${this.brokerTag}`)
+    }
+
+    try {
+      return await brokerChannel.handleResourceResponse(resourceResponse, brokerDetails, queueMessage)
     } catch (err) {
       this._logger.error(`Channel failed to process broker message on broker '${this.brokerTag}'`, err)
       throw new Error('Channel failed to process broker message')

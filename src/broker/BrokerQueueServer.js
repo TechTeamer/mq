@@ -38,12 +38,12 @@ class BrokerQueueServer extends QueueServer {
       brokerDetails
     } = message || {}
 
-    this._logger.debug(`Handling broker message in subscriber ${this.name}`)
+    this._logger.debug(`Handling broker message in queue server ${this.name}`)
 
     try {
       await this.broker.handleMessage(channelName, brokerMessage, brokerDetails, request)
     } catch (err) {
-      this._logger.error(`Error processing message in broker subscriber ${this.name}`, err)
+      this._logger.error(`Error processing message in broker queue server ${this.name}`, err)
     }
   }
 }
