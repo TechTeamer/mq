@@ -4,6 +4,8 @@ class QueueMessage {
     this.data = data
     this.timeOut = timeOut
     this.attachments = new Map()
+    this.nacked = false
+    this.requeued = false
   }
 
   static fromJSON (jsonString) {
@@ -61,6 +63,16 @@ class QueueMessage {
     } else {
       throw new Error('Impossible to deserialize the message')
     }
+  }
+
+  requeue () {
+    this.requeued = true
+    this.nacked = true
+  }
+
+  reject () {
+    this.requeued = false
+    this.nacked = true
   }
 
   /**
