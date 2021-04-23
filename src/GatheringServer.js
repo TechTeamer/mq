@@ -11,7 +11,7 @@ class GatheringServer {
   constructor (queueConnection, logger, exchange, options) {
     this._connection = queueConnection
     this._logger = logger
-    this.exchange = exchange
+    this.name = exchange
 
     const { timeoutMs } = options || {}
     this._responseTimeoutMs = timeoutMs
