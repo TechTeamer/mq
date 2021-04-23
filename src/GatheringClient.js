@@ -6,14 +6,19 @@ class GatheringClient {
    * @param {QueueConnection} queueConnection
    * @param {Console} logger
    * @param {String} name
+   * @param {Object} [options]
    */
-  constructor (queueConnection, logger, name) {
+  constructor (queueConnection, logger, name, options = {}) {
     this._connection = queueConnection
     this._logger = logger
     this.name = name
 
     this._correlationIdMap = new Map()
     this._replyQueue = ''
+
+    const { queueMaxSize, timeoutMs } = options
+    this._rpcQueueMaxSize = queueMaxSize
+    this._rpcTimeoutMs = timeoutMs
   }
 
   async initialize () {
@@ -25,9 +30,7 @@ class GatheringClient {
       this._replyQueue = replyQueue.queue
 
       channel.consume(this._replyQueue, (reply) => {
-        this._handleGatheringResponse(reply).catch(() => {
-          // this should not throw
-        })
+        this._handleGatheringResponse(reply)
       }, { noAck: true }).catch((err) => {
         this._logger.error('', err)
       })
@@ -91,11 +94,31 @@ class GatheringClient {
 
       return await new Promise((resolve, reject) => {
         const correlationId = this._registerMessage(resolve, reject, timeoutMs, resolveWithFullResponse)
-
-        channel.sendToQueue(this.name, param.serialize(), {
+        const options = {
           correlationId: correlationId,
           replyTo: this._replyQueue
-        })
+        }
+
+        try {
+          const isWriteBufferEmpty = channel.publish(this.name, '', param.serialize(), options, (err) => {
+            if (err) {
+              if (this._correlationIdMap.has(correlationId)) {
+                this._correlationIdMap.delete(correlationId)
+              }
+              this._logger.error('QUEUE GATHERING CLIENT: failed to publish message', err)
+              reject(new Error('channel.publish failed'))
+            }
+          })
+
+          if (!isWriteBufferEmpty) { // http://www.squaremobius.net/amqp.node/channel_api.html#channel_publish
+            channel.on('drain', resolve)
+          }
+        } catch (err) {
+          if (this._correlationIdMap.has(correlationId)) {
+            this._correlationIdMap.delete(correlationId)
+          }
+          reject(err)
+        }
       })
     } catch (err) {
       this._logger.error('QUEUE GATHERING CLIENT: failed to send message', err)

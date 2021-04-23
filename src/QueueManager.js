@@ -216,18 +216,24 @@ class QueueManager {
   /**
    * @param {String} exchangeName
    * @param {GatheringClient|function() : GatheringClient} OverrideClass
+   * @param {Object} [options]
    * @return GatheringClient
    */
-  getGatheringClient (exchangeName, OverrideClass = GatheringClient) {
+  getGatheringClient (exchangeName, OverrideClass = GatheringClient, options = {}) {
     if (this.gatheringClients.has(exchangeName)) {
       return this.gatheringClients.get(exchangeName)
+    }
+
+    if (arguments.length === 2 && typeof OverrideClass !== 'function') {
+      options = OverrideClass
+      OverrideClass = GatheringClient
     }
 
     if (OverrideClass !== GatheringClient && !(OverrideClass.prototype instanceof GatheringClient)) {
       throw new Error('Override must be a subclass of GatheringClient')
     }
 
-    const gatheringClient = new OverrideClass(this.connection, this._logger, exchangeName)
+    const gatheringClient = new OverrideClass(this.connection, this._logger, exchangeName, options)
 
     this.gatheringClients.set(exchangeName, gatheringClient)
 
