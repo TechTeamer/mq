@@ -132,7 +132,7 @@ class RPCServer {
     }, timeoutMs)
 
     try {
-      const answer = await this._callback(request.data, request, response)
+      const answer = await this._callback(request.data, request, response, msg)
 
       clearTimeout(timer)
 

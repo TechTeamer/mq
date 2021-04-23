@@ -134,7 +134,7 @@ class Subscriber {
     }, timeoutMs)
 
     return Promise.resolve().then(() => {
-      return this._callback(request.data, msg.properties, request)
+      return this._callback(request.data, msg.properties, request, msg)
     }).then(() => {
       clearTimeout(timer)
 
