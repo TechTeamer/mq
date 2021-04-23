@@ -13,6 +13,15 @@ const Subscriber = require('./src/Subscriber')
 const GatheringClient = require('./src/GatheringClient')
 const GatheringServer = require('./src/GatheringServer')
 
+const BrokerChannel = require('./src/broker/BrokerChannel')
+const BrokerManager = require('./src/broker/BrokerManager')
+const BrokerPublisher = require('./src/broker/BrokerPublisher')
+const BrokerQueueClient = require('./src/broker/BrokerQueueClient')
+const BrokerQueueServer = require('./src/broker/BrokerQueueServer')
+const BrokerRpcClient = require('./src/broker/BrokerRpcClient')
+const BrokerRpcServer = require('./src/broker/BrokerRpcServer')
+const BrokerSubscriber = require('./src/broker/BrokerSubscriber')
+
 module.exports.QueueClient = QueueClient
 module.exports.QueueConfig = QueueConfig
 module.exports.QueueConnection = QueueConnection
@@ -27,3 +36,12 @@ module.exports.Publisher = Publisher
 module.exports.Subscriber = Subscriber
 module.exports.GatheringClient = GatheringClient
 module.exports.GatheringServer = GatheringServer
+
+module.exports.BrokerChannel = BrokerChannel
+module.exports.BrokerManager = BrokerManager
+module.exports.BrokerPublisher = BrokerPublisher
+module.exports.BrokerQueueClient = BrokerQueueClient
+module.exports.BrokerQueueServer = BrokerQueueServer
+module.exports.BrokerRpcClient = BrokerRpcClient
+module.exports.BrokerRpcServer = BrokerRpcServer
+module.exports.BrokerSubscriber = BrokerSubscriber
