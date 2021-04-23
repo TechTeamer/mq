@@ -181,4 +181,56 @@ describe('RPCClient && RPCServer', () => {
       .then(() => done())
       .catch(err => done(err))
   })
+
+  it('RPCServer handles requeued messages', (done) => {
+    const objectMessage = { foo: 'bar', bar: 'foo' }
+
+    let consumeCount = 0
+    shortRpcServer.consume((data, request, response, message) => {
+      consumeCount++
+      if (consumeCount === 1) {
+        request.requeue()
+      } else {
+        if (!message) {
+          done(new Error('RPC consumer should receive a message argument'))
+        }
+        if (!message.fields) {
+          done(new Error('RPC consumer should receive a message argument with a fields object'))
+        }
+        if (!message.fields.redelivered) {
+          done(new Error('Re-queueing a message should cause a redelivered flag to be set'))
+        }
+      }
+    })
+
+    shortRpcClient.call(objectMessage)
+      .then(() => {
+        if (consumeCount < 2) {
+          done(new Error(`Requeue failed for successful call (consumed ${consumeCount} times) request.requeue() should cause a _nack(requeue = true)`))
+        } else {
+          done()
+        }
+      })
+      .catch((err) => {
+        if (consumeCount < 2) {
+          done(new Error(`Requeue failed for call with error (consume ${consumeCount} times) request.requeue() should cause a _nack(requeue = true): ${err.message}`))
+        } else {
+          done(err)
+        }
+      })
+  })
+
+  it('RPCServer handles rejected messages', (done) => {
+    const objectMessage = { foo: 'bar', bar: 'foo' }
+
+    shortRpcServer.consume((data, request) => {
+      request.reject()
+    })
+
+    shortRpcClient.call(objectMessage)
+      .then(() => {
+        done(new Error('request.reject() should cause a _nack(requeue = false)'))
+      })
+      .catch(() => done())
+  })
 })
