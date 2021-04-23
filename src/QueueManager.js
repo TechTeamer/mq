@@ -6,10 +6,20 @@ const Publisher = require('./Publisher')
 const Subscriber = require('./Subscriber')
 const QueueClient = require('./QueueClient')
 const QueueServer = require('./QueueServer')
+const GatheringClient = require('./GatheringClient')
+const GatheringServer = require('./GatheringServer')
 
 /**
  * @class QueueManager
  * @param {QueueConnection} connection
+ * @property {Map<String, RPCClient>} rpcClients
+ * @property {Map<String, RPCServer>} rpcServers
+ * @property {Map<String, Publisher>} publishers
+ * @property {Map<String, Subscriber>} subscribers
+ * @property {Map<String, QueueClient>} queueClients
+ * @property {Map<String, QueueServer>} queueServers
+ * @property {Map<String, GatheringClient>} gatheringClients
+ * @property {Map<String, GatheringServer>} gatheringServers
  * */
 class QueueManager {
   /**
@@ -32,6 +42,10 @@ class QueueManager {
     this.queueClients = new Map()
     /** @var Map<string, QueueServer>} */
     this.queueServers = new Map()
+    /** @var Map<string, GatheringClient>} */
+    this.gatheringClients = new Map()
+    /** @var Map<string, GatheringServer>} */
+    this.gatheringServers = new Map()
   }
 
   async connect () {
@@ -62,6 +76,13 @@ class QueueManager {
       }
       for (const [, queueClient] of this.queueClients) {
         await queueClient.initialize()
+      }
+
+      for (const [, gatheringClient] of this.gatheringClients) {
+        await gatheringClient.initialize()
+      }
+      for (const [, gatheringServer] of this.gatheringServers) {
+        await gatheringServer.initialize()
       }
     } catch (err) {
       this._logger.error('Failed to initialize servers', err)
@@ -190,6 +211,60 @@ class QueueManager {
     this.subscribers.set(exchangeName, subscriber)
 
     return subscriber
+  }
+
+  /**
+   * @param {String} exchangeName
+   * @param {GatheringClient|function() : GatheringClient} OverrideClass
+   * @return Publisher
+   */
+  getGatheringClient (exchangeName, OverrideClass = GatheringClient) {
+    if (this.gatheringClients.has(exchangeName)) {
+      return this.gatheringClients.get(exchangeName)
+    }
+
+    if (OverrideClass !== GatheringClient && !(OverrideClass.prototype instanceof GatheringClient)) {
+      throw new Error('Override must be a subclass of GatheringClient')
+    }
+
+    const gatheringClient = new OverrideClass(this.connection, this._logger, exchangeName)
+
+    this.gatheringClients.set(exchangeName, gatheringClient)
+
+    return gatheringClient
+  }
+
+  /**
+   * @param {String} exchangeName
+   * @param {GatheringServer|function() : GatheringServer} OverrideClass
+   * @param {Object} [options]
+   * @return Subscriber
+   */
+  getGatheringServer (exchangeName, OverrideClass = GatheringServer, options = {}) {
+    if (this.gatheringServers.has(exchangeName)) {
+      return this.gatheringServers.get(exchangeName)
+    }
+
+    if (arguments.length === 2 && typeof OverrideClass !== 'function') {
+      options = OverrideClass
+      OverrideClass = GatheringServer
+    }
+
+    if (OverrideClass !== GatheringServer && !(OverrideClass.prototype instanceof GatheringServer)) {
+      throw new Error('Override must be a subclass of GatheringServer')
+    }
+
+    const settings = Object.assign({
+      prefetchCount: 1,
+      maxRetry: 5,
+      timeoutMs: this._config.rpcTimeoutMs
+    }, options)
+
+    const gatheringServer = new OverrideClass(this.connection, this._logger, exchangeName, settings)
+
+    this.gatheringServers.set(exchangeName, gatheringServer)
+
+    return gatheringServer
   }
 
   /**
