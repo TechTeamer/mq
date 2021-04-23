@@ -150,8 +150,8 @@ class BrokerChannel {
       const handlerCallback = this._endpoints.get(commandName)
 
       if (!handlerCallback) {
-        this._logger.debug(`Requeue request from broker ${brokerDetails.brokerTag}: no handler registered for command ${commandName} on channel ${this.name} by broker ${this.brokerDetails.brokerTag}`)
-        return queueMessage.requeue()
+        this._logger.debug(`Reject request from broker ${brokerDetails.brokerTag}: no handler registered for command ${commandName} on channel ${this.name} by broker ${this.brokerDetails.brokerTag}`)
+        return queueMessage.reject()
       }
 
       this._logger.debug(`Handling request ${commandName} from broker ${brokerDetails.brokerTag} on channel ${this.name} by broker ${this.brokerDetails.brokerTag}`)
@@ -208,8 +208,8 @@ class BrokerChannel {
       const handlerCallback = this._messages.get(subject)
 
       if (!handlerCallback) {
-        this._logger.debug(`Requeue message from broker ${brokerDetails.brokerTag}: no handler registered for subject ${subject} on channel ${this.name} by broker ${this.brokerDetails.brokerTag}`)
-        queueMessage.requeue()
+        this._logger.debug(`Reject message from broker ${brokerDetails.brokerTag}: no handler registered for subject ${subject} on channel ${this.name} by broker ${this.brokerDetails.brokerTag}`)
+        queueMessage.reject()
         return
       }
 
