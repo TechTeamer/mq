@@ -29,14 +29,12 @@ class GatheringClient {
       const replyQueue = await channel.assertQueue('', { exclusive: true })
       this._replyQueue = replyQueue.queue
 
-      channel.consume(this._replyQueue, (reply) => {
+      await channel.consume(this._replyQueue, (reply) => {
         this._handleGatheringResponse(reply)
-      }, { noAck: true }).catch((err) => {
-        this._logger.error('', err)
-      })
+      }, { noAck: true })
     } catch (err) {
-      this._logger.error('', err)
-      throw err
+      this._logger.error(`QUEUE GATHERING CLIENT: Error initializing '${this.name}'`)
+      throw new Error('Error initializing Gathering Client')
     }
   }
 

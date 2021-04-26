@@ -33,7 +33,8 @@ class GatheringServer {
         })
       })
     } catch (err) {
-      this._logger.error('CANNOT INITIALIZE QUEUE GATHERING SERVER', err)
+      this._logger.error('CANNOT INITIALIZE QUEUE GATHERING SERVER', this.name, err)
+      throw new Error('Error initializing Gathering Server')
     }
   }
 
