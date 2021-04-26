@@ -25,11 +25,12 @@ class GatheringServer {
       const channel = await this._connection.getChannel()
       await channel.assertExchange(this.name, 'fanout', { durable: true })
       const serverQueue = await channel.assertQueue('', { exclusive: true })
+      const serverQueueName = serverQueue.queue
 
       await channel.prefetch(this._prefetchCount)
-      await channel.bindQueue(serverQueue.queue, this.name, '')
+      await channel.bindQueue(serverQueueName, this.name, '')
 
-      await channel.consume(serverQueue.queue, (msg) => {
+      await channel.consume(serverQueueName, (msg) => {
         this._handleGatheringAnnouncement(channel, msg).catch(() => {
           // this should not throw
         })

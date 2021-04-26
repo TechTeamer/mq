@@ -39,53 +39,6 @@ class GatheringClient {
   }
 
   /**
-   * @param {Function} resolve
-   * @param {Function} reject
-   * @param {Number} timeoutMs
-   * @param {boolean} resolveWithFullResponse
-   * @return {Number} correlation id
-   * @private
-   */
-  _registerMessage (resolve, reject, timeoutMs, resolveWithFullResponse) {
-    let correlationId
-    let timeoutId
-    let timedOut = false
-
-    do {
-      correlationId = uuid()
-    } while (this._correlationIdMap.has(correlationId))
-
-    this._correlationIdMap.set(correlationId, {
-      resolveWithFullResponse: resolveWithFullResponse,
-      resolve: (result) => {
-        if (!timedOut) {
-          clearTimeout(timeoutId)
-          timeoutId = null
-          resolve(result)
-        }
-      },
-      reject: (err) => {
-        if (!timedOut) {
-          clearTimeout(timeoutId)
-          timeoutId = null
-          reject(err)
-        }
-      }
-    })
-
-    timeoutId = setTimeout(() => {
-      timedOut = true
-      if (this._correlationIdMap.has(correlationId)) {
-        this._correlationIdMap.delete(correlationId)
-
-        reject(new Error(`QUEUE GATHERING RESPONSE TIMED OUT '${this.name}' ${correlationId}`))
-      }
-    }, timeoutMs || this._rpcTimeoutMs)
-
-    return correlationId
-  }
-
-  /**
    * @param {*} data
    * @param {Number} timeoutMs
    * @param {Map} attachments
@@ -139,6 +92,53 @@ class GatheringClient {
       this._logger.error('QUEUE GATHERING CLIENT: failed to send message', err)
       throw new Error(`QUEUE GATHERING CLIENT: failed to send message ${err.message}`)
     }
+  }
+
+  /**
+   * @param {Function} resolve
+   * @param {Function} reject
+   * @param {Number} timeoutMs
+   * @param {boolean} resolveWithFullResponse
+   * @return {Number} correlation id
+   * @private
+   */
+  _registerMessage (resolve, reject, timeoutMs, resolveWithFullResponse) {
+    let correlationId
+    let timeoutId
+    let timedOut = false
+
+    do {
+      correlationId = uuid()
+    } while (this._correlationIdMap.has(correlationId))
+
+    this._correlationIdMap.set(correlationId, {
+      resolveWithFullResponse: resolveWithFullResponse,
+      resolve: (result) => {
+        if (!timedOut) {
+          clearTimeout(timeoutId)
+          timeoutId = null
+          resolve(result)
+        }
+      },
+      reject: (err) => {
+        if (!timedOut) {
+          clearTimeout(timeoutId)
+          timeoutId = null
+          reject(err)
+        }
+      }
+    })
+
+    timeoutId = setTimeout(() => {
+      timedOut = true
+      if (this._correlationIdMap.has(correlationId)) {
+        this._correlationIdMap.delete(correlationId)
+
+        reject(new Error(`QUEUE GATHERING RESPONSE TIMED OUT '${this.name}' ${correlationId}`))
+      }
+    }, timeoutMs || this._rpcTimeoutMs)
+
+    return correlationId
   }
 
   _handleGatheringResponse (reply) {
