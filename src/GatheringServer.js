@@ -31,7 +31,7 @@ class GatheringServer {
         this._handleGatheringAnnouncement(channel, msg).catch(() => {
           // this should not throw
         })
-      }, { noAck: true })
+      })
     } catch (err) {
       this._logger.error('CANNOT INITIALIZE QUEUE GATHERING SERVER', err)
     }
