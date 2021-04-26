@@ -12,7 +12,7 @@ describe('GatheringClient && GatheringServer', () => {
   queueManager.setLogger(logger)
 
   const gatheringClient = queueManager.getGatheringClient(gatheringName, { queueMaxSize: 100, timeoutMs })
-  const gatheringServer1 = queueManager.getGatheringServer(gatheringName, { timeoutMs })
+  const gatheringServer1 = queueManager.getGatheringServer(gatheringName, { prefetchCount: 1, timeoutMs })
 
   before(() => {
     return queueManager.connect()

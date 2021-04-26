@@ -13,7 +13,8 @@ class GatheringServer {
     this._logger = logger
     this.name = exchange
 
-    const { timeoutMs } = options || {}
+    const { prefetchCount, timeoutMs } = options || {}
+    this._prefetchCount = prefetchCount
     this._responseTimeoutMs = timeoutMs
 
     this.actions = new Map()
@@ -25,6 +26,7 @@ class GatheringServer {
       await channel.assertExchange(this.name, 'fanout', { durable: true })
       const serverQueue = await channel.assertQueue('', { exclusive: true })
 
+      await channel.prefetch(this._prefetchCount)
       await channel.bindQueue(serverQueue.queue, this.name, '')
 
       await channel.consume(serverQueue.queue, (msg) => {
