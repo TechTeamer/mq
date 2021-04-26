@@ -38,34 +38,51 @@ class GatheringClient {
     }
   }
 
-  _handleGatheringResponse (reply) {
-    if (!reply || !reply.properties || !reply.properties.correlationId) {
-      this._logger.error(`QUEUE GATHERING CLIENT: INVALID REPLY ON '${this.name}': NO REPLY/PROPERTIES/CORRELATION ID`, reply)
-      return
-    }
+  /**
+   * @param {Function} resolve
+   * @param {Function} reject
+   * @param {Number} timeoutMs
+   * @param {boolean} resolveWithFullResponse
+   * @return {Number} correlation id
+   * @private
+   */
+  _registerMessage (resolve, reject, timeoutMs, resolveWithFullResponse) {
+    let correlationId
+    let timeoutId
+    let timedOut = false
 
-    const correlationId = reply.properties.correlationId
+    do {
+      correlationId = uuid()
+    } while (this._correlationIdMap.has(correlationId))
 
-    if (!this._correlationIdMap.has(correlationId)) {
-      this._logger.warn(`QUEUE GATHERING CLIENT: RECEIVED UNKNOWN REPLY (possibly timed out or duplicate) '${this.name}'`, correlationId)
-      return
-    }
-
-    const { resolve, reject, resolveWithFullResponse } = this._correlationIdMap.get(correlationId)
-    this._correlationIdMap.delete(correlationId)
-
-    const replyContent = QueueMessage.unserialize(reply.content)
-
-    if (replyContent.status === 'ok') {
-      if (resolveWithFullResponse) {
-        resolve(replyContent)
-      } else {
-        resolve(replyContent.data)
+    this._correlationIdMap.set(correlationId, {
+      resolveWithFullResponse: resolveWithFullResponse,
+      resolve: (result) => {
+        if (!timedOut) {
+          clearTimeout(timeoutId)
+          timeoutId = null
+          resolve(result)
+        }
+      },
+      reject: (err) => {
+        if (!timedOut) {
+          clearTimeout(timeoutId)
+          timeoutId = null
+          reject(err)
+        }
       }
-    } else {
-      this._logger.error('QUEUE GATHERING CLIENT: RECEIVED ERROR REPLY', this.name, correlationId, replyContent)
-      reject(replyContent.data)
-    }
+    })
+
+    timeoutId = setTimeout(() => {
+      timedOut = true
+      if (this._correlationIdMap.has(correlationId)) {
+        this._correlationIdMap.delete(correlationId)
+
+        reject(new Error(`QUEUE GATHERING RESPONSE TIMED OUT '${this.name}' ${correlationId}`))
+      }
+    }, timeoutMs || this._rpcTimeoutMs)
+
+    return correlationId
   }
 
   /**
@@ -124,50 +141,34 @@ class GatheringClient {
     }
   }
 
-  /**
-   * @param {Function} resolve
-   * @param {Function} reject
-   * @param {Number} timeoutMs
-   * @param {boolean} resolveWithFullResponse
-   * @return {Number} correlation id
-   * @private
-   */
-  _registerMessage (resolve, reject, timeoutMs, resolveWithFullResponse) {
-    let correlationId
-    let timeoutId
+  _handleGatheringResponse (reply) {
+    if (!reply || !reply.properties || !reply.properties.correlationId) {
+      this._logger.error(`QUEUE GATHERING CLIENT: INVALID REPLY ON '${this.name}': NO REPLY/PROPERTIES/CORRELATION ID`, reply)
+      return
+    }
 
-    do {
-      correlationId = uuid()
-    } while (this._correlationIdMap.has(correlationId))
+    const correlationId = reply.properties.correlationId
 
-    this._correlationIdMap.set(correlationId, {
-      resolveWithFullResponse: resolveWithFullResponse,
-      resolve: (result) => {
-        if (timeoutId) {
-          clearTimeout(timeoutId)
-          timeoutId = null
-          resolve(result)
-        }
-      },
-      reject: (err) => {
-        if (timeoutId) {
-          clearTimeout(timeoutId)
-          timeoutId = null
-          reject(err)
-        }
+    if (!this._correlationIdMap.has(correlationId)) {
+      this._logger.warn(`QUEUE GATHERING CLIENT: RECEIVED UNKNOWN REPLY (possibly timed out or duplicate) '${this.name}'`, correlationId)
+      return
+    }
+
+    const { resolve, reject, resolveWithFullResponse } = this._correlationIdMap.get(correlationId)
+    this._correlationIdMap.delete(correlationId)
+
+    const replyContent = QueueMessage.unserialize(reply.content)
+
+    if (replyContent.status === 'ok') {
+      if (resolveWithFullResponse) {
+        resolve(replyContent)
+      } else {
+        resolve(replyContent.data)
       }
-    })
-
-    timeoutId = setTimeout(() => {
-      timeoutId = null
-      if (this._correlationIdMap.has(correlationId)) {
-        this._correlationIdMap.delete(correlationId)
-
-        reject(new Error(`QUEUE GATHERING RESPONSE TIMED OUT '${this.name}' ${correlationId}`))
-      }
-    }, timeoutMs || this._rpcTimeoutMs)
-
-    return correlationId
+    } else {
+      this._logger.error('QUEUE GATHERING CLIENT: RECEIVED ERROR REPLY', this.name, correlationId, replyContent)
+      reject(replyContent.data)
+    }
   }
 }
 
