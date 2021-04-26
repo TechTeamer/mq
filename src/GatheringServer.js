@@ -160,11 +160,14 @@ class GatheringServer {
         }
       } else if (response.statusCode === response.NOT_FOUND) {
         this._nack(channel, msg)
+        return
       } else if (response.statusCode === response.ERROR) {
         reply = new QueueMessage('error', response.statusMessage)
       }
     } catch (err) {
       this._logger.error('QUEUE GATHERING SERVER: Failed to construct reply', this.name, err)
+      this._nack(channel, msg)
+      return
     }
 
     try {
