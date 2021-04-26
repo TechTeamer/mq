@@ -12,15 +12,14 @@ describe('GatheringClient && GatheringServer', () => {
   queueManager.setLogger(logger)
 
   const gatheringClient = queueManager.getGatheringClient(gatheringName, { queueMaxSize: 100, timeoutMs })
-  const gatheringServer1 = queueManager.getGatheringServer(gatheringName, { /* queueMaxSize: 100, */ timeoutMs })
-  // const gatheringServer2 = queueManager.getGatheringServer(gatheringName, { /* queueMaxSize: 100, */ timeoutMs })
+  const gatheringServer1 = queueManager.getGatheringServer(gatheringName, { timeoutMs })
 
   before(() => {
     return queueManager.connect()
   })
 
   after(() => {
-    // logger.empty()
+    logger.empty()
   })
 
   it('GatheringClient.request() sends a STRING and GatheringServer.consume() receives it', (done) => {
