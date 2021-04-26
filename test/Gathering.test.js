@@ -5,8 +5,7 @@ const config = require('./config/LoadConfig')
 
 describe('GatheringClient && GatheringServer', () => {
   const gatheringName = 'test-gathering'
-  // const shortGatheringName = 'short-test-gathering'
-  const logger = /*new ConsoleInspector*/(console)
+  const logger = new ConsoleInspector(console)
   const timeoutMs = 1000
 
   const queueManager = new QueueManager(config)
