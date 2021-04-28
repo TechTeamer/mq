@@ -52,7 +52,7 @@ describe('GatheringClient && GatheringServer', () => {
     })
   })
 
-  it('GatheringClient.request() sends an OBJECT, RPCServer.consume() sends it back and GatheringClient receives it intact', (done) => {
+  it('GatheringClient.request() sends an OBJECT, GatheringServer.consume() sends it back and GatheringClient receives it intact', (done) => {
     const objectMessage = { foo: 'bar', bar: 'foo' }
     gatheringServer1.consume((msg) => {
       return msg
@@ -68,7 +68,7 @@ describe('GatheringClient && GatheringServer', () => {
     })
   })
 
-  it('GatheringClient.request() sends an OBJECT, RPCServer.consume() sends back a response' +
+  it('GatheringClient.request() sends an OBJECT, GatheringServer.consume() sends back a response' +
     'with a 100MB random generated buffer and GatheringClient receives it', (done) => {
     const objectMessage = { foo: 'bar', bar: 'foo' }
 

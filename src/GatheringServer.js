@@ -12,6 +12,7 @@ class GatheringServer {
     this._connection = queueConnection
     this._logger = logger
     this.name = exchange
+    this.statusQueue = exchange
 
     const { prefetchCount, timeoutMs } = options || {}
     this._prefetchCount = prefetchCount
@@ -35,6 +36,14 @@ class GatheringServer {
           // this should not throw
         })
       })
+
+      await channel.assertQueue(this.statusQueue, {
+        exclusive: false,
+        autoDelete: true
+      })
+      await channel.consume(this.statusQueue, () => {
+        // noop
+      }, { noAck: true })
     } catch (err) {
       this._logger.error('CANNOT INITIALIZE QUEUE GATHERING SERVER', this.name, err)
       throw new Error('Error initializing Gathering Server')
@@ -114,11 +123,13 @@ class GatheringServer {
       request = QueueMessage.unserialize(msg.content)
       if (request.status !== 'ok') {
         this._logger.error(`QUEUE GATHERING SERVER: MESSAGE NOT OK '${this.name}' ${correlationId}`, request)
+        this._sendStatus(channel, replyTo, correlationId, 'error', 'message not OK')
         this._nack(channel, msg)
         return
       }
     } catch (err) {
       this._logger.error(`QUEUE GATHERING SERVER: MALFORMED MESSAGE '${this.name}' ${correlationId}`, err)
+      this._sendStatus(channel, replyTo, correlationId, 'error', 'malformed message')
       this._nack(channel, msg)
       return
     }
@@ -129,6 +140,7 @@ class GatheringServer {
     const timerId = setTimeout(() => {
       responseTimedOut = true
       this._logger.error(`QUEUE GATHERING SERVER: RESPONSE TIMED OUT '${this.name}' ${correlationId}`)
+      this._sendStatus(channel, replyTo, correlationId, 'error', 'response timed out')
       this._nack(channel, msg)
     }, timeoutMs)
 
@@ -137,6 +149,7 @@ class GatheringServer {
       answer = await this._callback(request.data, request, response)
     } catch (err) {
       this._logger.error(`QUEUE GATHERING SERVER: response failed '${this.name}' ${correlationId}`)
+      this._sendStatus(channel, replyTo, correlationId, 'error', 'response failed')
       this._nack(channel, msg)
       return
     }
@@ -147,9 +160,13 @@ class GatheringServer {
 
     clearTimeout(timerId)
 
-    if (!response.statusCode && typeof answer !== 'undefined') {
+    if (!response.statusCode) {
       // implicit status
-      response.setStatus(response.OK)
+      if (typeof answer === 'undefined') {
+        response.setStatus(response.NOT_FOUND)
+      } else {
+        response.setStatus(response.OK)
+      }
     }
 
     let reply
@@ -163,6 +180,7 @@ class GatheringServer {
           }
         }
       } else if (response.statusCode === response.NOT_FOUND) {
+        this._sendStatus(channel, replyTo, correlationId, 'not_found')
         this._nack(channel, msg)
         return
       } else if (response.statusCode === response.ERROR) {
@@ -170,6 +188,7 @@ class GatheringServer {
       }
     } catch (err) {
       this._logger.error('QUEUE GATHERING SERVER: Failed to construct reply', this.name, err)
+      this._sendStatus(channel, replyTo, correlationId, 'error', 'failed to construct reply')
       this._nack(channel, msg)
       return
     }
@@ -180,6 +199,11 @@ class GatheringServer {
     } catch (err) {
       this._logger.error('QUEUE GATHERING SERVER: Failed to send reply', this.name, err)
     }
+  }
+
+  _sendStatus (channel, replyTo, correlationId, status, message = '') {
+    const reply = new QueueMessage(status, message)
+    channel.sendToQueue(replyTo, reply.serialize(), { correlationId, type: 'status' })
   }
 
   /**
@@ -202,7 +226,7 @@ class GatheringServer {
    * @param [requeue=true]
    * @private
    */
-  _nack (channel, msg, requeue = true) {
+  _nack (channel, msg, requeue = false) {
     if (msg.acked) {
       this._logger.error('trying to double nack', msg)
       return
