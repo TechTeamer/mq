@@ -5,7 +5,7 @@ const config = require('./config/LoadConfig')
 
 describe('GatheringClient && multiple GatheringServer', () => {
   const gatheringName = 'test-gathering-multi'
-  const logger = /*new ConsoleInspector*/(console)
+  const logger = new ConsoleInspector(console)
   const timeoutMs = 1000
 
   const queueManager = new QueueManager(config)
@@ -24,7 +24,7 @@ describe('GatheringClient && multiple GatheringServer', () => {
   })
 
   after(() => {
-    // logger.empty()
+    logger.empty()
   })
 
   it('GatheringClient.request() sends something and one of the GatheringServers reply in time with setting ok response status', (done) => {
@@ -109,6 +109,28 @@ describe('GatheringClient && multiple GatheringServer', () => {
       done(new Error('Should reject not found with acceptNotFound=false'))
     }).catch(() => {
       done()
+    })
+  })
+
+  it('gatheringClient.request() rejects when all consumers time out', (done) => {
+    const messageBody = 'hello'
+    gatheringServer1.consume(() => {
+      // undefined is implied not found
+      return new Promise(resolve => setTimeout(resolve, 500))
+    })
+    gatheringServer2.consume(() => {
+      // undefined is implied not found
+      return new Promise(resolve => setTimeout(resolve, 500))
+    })
+
+    gatheringClient.request(messageBody, 100, null, false, false).then((res) => {
+      done(new Error('Should reject'))
+    }).catch((err) => {
+      if (err.message.includes('QUEUE GATHERING RESPONSE TIMED OUT')) {
+        done()
+      } else {
+        done(err)
+      }
     })
   })
 })

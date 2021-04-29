@@ -5,14 +5,14 @@ class GatheringServer {
   /**
    * @param {QueueConnection} queueConnection
    * @param {Console} logger
-   * @param {String} exchange
+   * @param {String} name
    * @param {Object} options
    */
-  constructor (queueConnection, logger, exchange, options) {
+  constructor (queueConnection, logger, name, options) {
     this._connection = queueConnection
     this._logger = logger
-    this.name = exchange
-    this.statusQueue = exchange
+    this.name = name
+    this.statusQueue = name
 
     const { prefetchCount, timeoutMs } = options || {}
     this._prefetchCount = prefetchCount
@@ -63,7 +63,8 @@ class GatheringServer {
       data
     } = msg || {}
     if (!this.actions.has(action)) {
-      return Promise.resolve()
+      response.notFound(`No action handler for ${action}`)
+      return
     }
 
     const handler = this.actions.get(action)
@@ -140,7 +141,7 @@ class GatheringServer {
     const timerId = setTimeout(() => {
       responseTimedOut = true
       this._logger.error(`QUEUE GATHERING SERVER: RESPONSE TIMED OUT '${this.name}' ${correlationId}`)
-      this._sendStatus(channel, replyTo, correlationId, 'error', 'response timed out')
+      this._sendStatus(channel, replyTo, correlationId, 'ok', 'response timed out')
       this._nack(channel, msg)
     }, timeoutMs)
 
@@ -173,18 +174,20 @@ class GatheringServer {
     try {
       if (response.statusCode === response.OK) {
         const replyAttachments = response.getAttachments()
-        reply = new QueueMessage('ok', answer)
+        const queueMessage = new QueueMessage('ok', answer)
         if (replyAttachments instanceof Map) {
           for (const [key, value] of replyAttachments) {
-            reply.addAttachment(key, value)
+            queueMessage.addAttachment(key, value)
           }
         }
+        reply = queueMessage.serialize()
       } else if (response.statusCode === response.NOT_FOUND) {
-        this._sendStatus(channel, replyTo, correlationId, 'not_found')
+        this._sendStatus(channel, replyTo, correlationId, 'ok', 'not found')
         this._nack(channel, msg)
         return
       } else if (response.statusCode === response.ERROR) {
-        reply = new QueueMessage('error', response.statusMessage)
+        const queueMessage = new QueueMessage('error', response.statusMessage)
+        reply = queueMessage.serialize()
       }
     } catch (err) {
       this._logger.error('QUEUE GATHERING SERVER: Failed to construct reply', this.name, err)
@@ -194,7 +197,7 @@ class GatheringServer {
     }
 
     try {
-      channel.sendToQueue(replyTo, reply.serialize(), { correlationId: correlationId })
+      channel.sendToQueue(replyTo, reply, { correlationId: correlationId, type: 'reply' })
       this._ack(channel, msg)
     } catch (err) {
       this._logger.error('QUEUE GATHERING SERVER: Failed to send reply', this.name, err)

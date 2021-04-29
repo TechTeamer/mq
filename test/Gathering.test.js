@@ -161,4 +161,60 @@ describe('GatheringClient && GatheringServer', () => {
       .then(() => done(new Error('Did not throw a timeout error')))
       .catch(() => done())
   })
+
+  it('gatheringClient.request() rejects when a consumer sets an error status', (done) => {
+    const messageBody = 'hello'
+    gatheringServer1.consume((msg, message, response) => {
+      // undefined is implied not found
+      response.setStatus(response.ERROR, 'HELLO_ERROR')
+    })
+
+    gatheringClient.request(messageBody, 10000, null, false, false).then(() => {
+      done(new Error('Should have rejected'))
+    }).catch((err) => {
+      if (err.message === 'HELLO_ERROR') {
+        done()
+      } else {
+        done(new Error(err.message))
+      }
+    })
+  })
+
+  it('gatheringClient.request() rejects when a consumer sends malformed message', (done) => {
+    const messageBody = 'hello'
+    gatheringServer1.consume(() => {
+      // undefined is implied not found
+      const obj = {}
+      obj.a = { b: obj }
+      return obj
+    })
+
+    gatheringClient.request(messageBody, 10000, null, false, false).then(() => {
+      done(new Error('Should have rejected'))
+    }).catch((err) => {
+      if (err.message === 'failed to construct reply') {
+        done()
+      } else {
+        done(new Error(err.message))
+      }
+    })
+  })
+
+  it('gatheringClient.request() rejects when a consumer throws an error', (done) => {
+    const messageBody = 'hello'
+    gatheringServer1.consume(() => {
+      // undefined is implied not found
+      throw new Error('HELLO_ERROR')
+    })
+
+    gatheringClient.request(messageBody, 10000, null, false, false).then(() => {
+      done(new Error('Should reject when one of the consumers reject'))
+    }).catch((err) => {
+      if (err.message === 'response failed') {
+        done()
+      } else {
+        done(new Error(err.message))
+      }
+    })
+  })
 })

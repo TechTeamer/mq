@@ -44,18 +44,25 @@ class GatheringClient {
           this._logger.error(`QUEUE GATHERING CLIENT: INVALID REPLY ON '${this.name}': NO CORRELATION ID ON REPLY`, reply)
           return
         }
+        if (!reply.properties.type) {
+          this._logger.error(`QUEUE GATHERING CLIENT: INVALID REPLY ON '${this.name}': NO MESSAGE TYPE ON REPLY`, reply)
+          return
+        }
 
-        if (reply.properties.type === 'status') {
-          this._handleStatusResponse(reply)
-        } else {
-          this._handleGatheringResponse(reply)
+        const correlationId = reply.properties.correlationId
+
+        try {
+          if (reply.properties.type === 'status') {
+            this._handleStatusResponse(reply)
+          } else if (reply.properties.type === 'reply') {
+            this._handleGatheringResponse(reply)
+          } else {
+            this._logger.error(`QUEUE GATHERING CLIENT: INVALID REPLY ON '${this.name}': UNKNOWN MESSAGE TYPE ON REPLY`, correlationId, reply)
+          }
+        } catch (err) {
+          this._logger.error(`QUEUE GATHERING CLIENT: FAILED TO HANDLE MESSAGE ON '${this.name}'`, correlationId, err)
         }
       }, { noAck: true })
-
-      // await channel.assertQueue(this.statusQueue, { exclusive: false, autoDelete: true })
-      // await channel.consume(this.statusQueue, (reply) => {
-      //   this._handleStatusResponse(reply)
-      // }, { noAck: true })
     } catch (err) {
       this._logger.error(`QUEUE GATHERING CLIENT: Error initializing '${this.name}'`)
       throw new Error('Error initializing Gathering Client')
@@ -82,22 +89,25 @@ class GatheringClient {
     })
     const serverCount = statusQueue.consumerCount
 
-    const param = new QueueMessage('ok', data, timeoutMs)
+    const queueMessage = new QueueMessage('ok', data, timeoutMs)
     if (attachments instanceof Map) {
       for (const [key, value] of attachments) {
-        param.addAttachment(key, value)
+        queueMessage.addAttachment(key, value)
       }
     }
 
     return new Promise((resolve, reject) => {
-      const correlationId = this._registerMessage(resolve, reject, timeoutMs, resolveWithFullResponse, acceptNotFound, serverCount)
-      const options = {
-        correlationId: correlationId,
-        replyTo: this._replyQueue
-      }
+      let correlationId
 
       try {
-        const isWriteBufferEmpty = channel.publish(this.name, '', param.serialize(), options, (err) => {
+        const messageBody = queueMessage.serialize()
+        correlationId = this._registerMessage(resolve, reject, timeoutMs, resolveWithFullResponse, acceptNotFound, serverCount)
+        const messageOptions = {
+          correlationId: correlationId,
+          replyTo: this._replyQueue
+        }
+
+        const isWriteBufferEmpty = channel.publish(this.name, '', messageBody, messageOptions, (err) => {
           if (err) {
             if (this._correlationIdMap.has(correlationId)) {
               this._correlationIdMap.delete(correlationId)
@@ -108,16 +118,22 @@ class GatheringClient {
         })
 
         if (!isWriteBufferEmpty) { // http://www.squaremobius.net/amqp.node/channel_api.html#channel_publish
-          channel.on('drain', resolve)
+          channel.on('drain', () => {
+            resolve()
+          })
         }
       } catch (err) {
-        if (this._correlationIdMap.has(correlationId)) {
+        if (correlationId && this._correlationIdMap.has(correlationId)) {
           this._correlationIdMap.delete(correlationId)
         }
         this._logger.error('QUEUE GATHERING CLIENT: failed to send message', err)
         reject(err)
       }
     })
+  }
+
+  async requestAction (action, data, timeoutMs = null, attachments = null, resolveWithFullResponse = false, acceptNotFound = true) {
+    return this.request({ action, data }, timeoutMs, attachments, resolveWithFullResponse, acceptNotFound)
   }
 
   /**
@@ -139,11 +155,12 @@ class GatheringClient {
       correlationId = uuid()
     } while (this._correlationIdMap.has(correlationId))
 
-    this._correlationIdMap.set(correlationId, {
+    const requestData = {
       resolveWithFullResponse: resolveWithFullResponse,
       acceptNotFound: acceptNotFound,
       serverCount: serverCount || this._gatheringServerCount,
       responseCount: 0,
+      timeoutId: null,
       resolve: (result) => {
         if (!timedOut) {
           clearTimeout(timeoutId)
@@ -158,9 +175,11 @@ class GatheringClient {
           reject(err)
         }
       }
-    })
+    }
 
-    timeoutId = setTimeout(() => {
+    this._correlationIdMap.set(correlationId, requestData)
+
+    resolve.timeoutId = timeoutId = setTimeout(() => {
       timedOut = true
       if (this._correlationIdMap.has(correlationId)) {
         const requestData = this._correlationIdMap.get(correlationId)
@@ -197,7 +216,7 @@ class GatheringClient {
       }
     } else {
       this._logger.error('QUEUE GATHERING CLIENT: RECEIVED ERROR REPLY', this.name, correlationId, replyContent)
-      reject(replyContent.data)
+      reject(new Error(replyContent.data))
     }
   }
 
@@ -211,8 +230,15 @@ class GatheringClient {
     const requestData = this._correlationIdMap.get(correlationId)
     const { resolve, reject, acceptNotFound, serverCount, responseCount } = requestData || {}
 
+    const replyMessage = QueueMessage.unserialize(reply.content)
+    if (replyMessage.status === 'error') {
+      this._logger.error(`QUEUE GATHERING CLIENT: RECEIVED ERROR STATUS ON '${this.name}'`, correlationId, replyMessage.data)
+      this._correlationIdMap.delete(correlationId)
+      reject(new Error(replyMessage.data))
+      return
+    }
+
     requestData.responseCount++
-    this._correlationIdMap.set(correlationId, requestData)
 
     if (requestData.responseCount >= serverCount) {
       this._correlationIdMap.delete(correlationId)
