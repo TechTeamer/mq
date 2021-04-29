@@ -146,14 +146,14 @@ class BrokerChannel {
   async handleRequest (brokerRequest, brokerDetails, queueMessage, queueResponse) {
     const { commandName, data } = brokerRequest || {}
 
+    const handlerCallback = this._endpoints.get(commandName)
+
+    if (!handlerCallback) {
+      this._logger.error(`Reject request from broker ${brokerDetails.brokerTag}: no handler registered for command ${commandName} on channel ${this.name} by broker ${this.brokerDetails.brokerTag}`)
+      throw new Error('No handler for command')
+    }
+
     try {
-      const handlerCallback = this._endpoints.get(commandName)
-
-      if (!handlerCallback) {
-        this._logger.debug(`Reject request from broker ${brokerDetails.brokerTag}: no handler registered for command ${commandName} on channel ${this.name} by broker ${this.brokerDetails.brokerTag}`)
-        return queueMessage.reject()
-      }
-
       this._logger.debug(`Handling request ${commandName} from broker ${brokerDetails.brokerTag} on channel ${this.name} by broker ${this.brokerDetails.brokerTag}`)
 
       return await handlerCallback(data, brokerDetails, queueMessage, queueResponse)
@@ -208,8 +208,7 @@ class BrokerChannel {
       const handlerCallback = this._messages.get(subject)
 
       if (!handlerCallback) {
-        this._logger.debug(`Reject message from broker ${brokerDetails.brokerTag}: no handler registered for subject ${subject} on channel ${this.name} by broker ${this.brokerDetails.brokerTag}`)
-        queueMessage.reject()
+        this._logger.warn(`Swallowing message from broker ${brokerDetails.brokerTag}: no handler registered for subject ${subject} on channel ${this.name} by broker ${this.brokerDetails.brokerTag}`)
         return
       }
 
@@ -228,7 +227,6 @@ class BrokerChannel {
    * @typedef BrokerGathering
    * @property {String} resource
    * @property {*} data
-   * @property {String} gatheringId
    * */
 
   /**

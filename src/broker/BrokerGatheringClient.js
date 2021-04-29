@@ -1,28 +1,6 @@
 const GatheringClient = require('../GatheringClient')
 
 class BrokerGatheringClient extends GatheringClient {
-  // /**
-  //  * @param {BrokerDetails} brokerDetails
-  //  * @param {String} channelName
-  //  * @param {BrokerGathering} resourceResponse
-  //  * @param queue
-  //  * @returns {Promise}
-  //  */
-  // async gatherResource (brokerDetails, channelName, resourceResponse, queue) {
-  //   const {
-  //     correlationId = null,
-  //     timeOut = null,
-  //     attachments = null
-  //   } = queue || {}
-  //   const message = {
-  //     channelName,
-  //     resourceResponse,
-  //     brokerDetails
-  //   }
-  //
-  //   return this.request(message, correlationId, timeOut, attachments)
-  // }
-
   /**
    * @param {BrokerDetails} brokerDetails
    * @param {String} channelName
@@ -32,9 +10,10 @@ class BrokerGatheringClient extends GatheringClient {
    */
   async gatherResource (brokerDetails, channelName, gatheringInfo, queue) {
     const {
-      correlationId = null,
       timeOut = null,
-      attachments = null
+      attachments = null,
+      resolveWithFullResponse = false,
+      acceptNotFound = true
     } = queue || {}
     const message = {
       channelName,
@@ -42,7 +21,7 @@ class BrokerGatheringClient extends GatheringClient {
       brokerDetails
     }
 
-    return this.request(message, correlationId, timeOut, attachments)
+    return this.request(message, timeOut, attachments, resolveWithFullResponse, acceptNotFound)
   }
 }
 
