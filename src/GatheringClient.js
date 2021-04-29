@@ -197,7 +197,7 @@ class GatheringClient {
     const correlationId = reply.properties.correlationId
 
     if (!this._correlationIdMap.has(correlationId)) {
-      this._logger.warn(`QUEUE GATHERING CLIENT: RECEIVED UNKNOWN REPLY (possibly timed out) '${this.name}'`, correlationId)
+      this._logger.warn(`QUEUE GATHERING CLIENT: RECEIVED UNKNOWN REPLY (possibly timed out or already received) '${this.name}'`, correlationId)
       return
     }
 

@@ -5,7 +5,7 @@ const config = require('./config/LoadConfig')
 
 describe('GatheringClient && multiple GatheringServer', () => {
   const gatheringName = 'test-gathering-multi'
-  const logger = new ConsoleInspector(console)
+  const logger = /*new ConsoleInspector*/(console)
   const timeoutMs = 1000
 
   const queueManager = new QueueManager(config)
@@ -24,7 +24,7 @@ describe('GatheringClient && multiple GatheringServer', () => {
   })
 
   after(() => {
-    logger.empty()
+    // logger.empty()
   })
 
   it('GatheringClient.request() sends something and one of the GatheringServers reply in time with setting ok response status', (done) => {
@@ -71,6 +71,27 @@ describe('GatheringClient && multiple GatheringServer', () => {
 
     gatheringClient.request(messageBody, 10000).then((res) => {
       done()
+    }).catch((err) => {
+      done(err)
+    })
+  })
+
+  it('GatheringClient.request() sends something and every GatheringServer replies with ok status', (done) => {
+    const stringMessage = 'hello'
+    gatheringServer1.consume(() => {
+      return stringMessage
+    })
+    gatheringServer2.consume(() => {
+      return stringMessage
+    })
+
+    gatheringClient.request(stringMessage, 10000).then((msg) => {
+      if (msg === stringMessage) {
+        done()
+      } else {
+        done(new Error('String received is not the same as the String sent'))
+      }
+      return true
     }).catch((err) => {
       done(err)
     })
