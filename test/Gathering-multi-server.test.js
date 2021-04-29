@@ -5,7 +5,7 @@ const config = require('./config/LoadConfig')
 
 describe('GatheringClient && multiple GatheringServer', () => {
   const gatheringName = 'test-gathering-multi'
-  const logger = /*new ConsoleInspector*/(console)
+  const logger = new ConsoleInspector(console)
   const timeoutMs = 1000
 
   const queueManager = new QueueManager(config)
@@ -24,7 +24,7 @@ describe('GatheringClient && multiple GatheringServer', () => {
   })
 
   after(() => {
-    // logger.empty()
+    logger.empty()
   })
 
   it('GatheringClient.request() sends something and one of the GatheringServers reply in time with setting ok response status', (done) => {
