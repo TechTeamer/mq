@@ -22,7 +22,7 @@
     "test": "eslint . && nyc mocha --exit && nyc report --reporter=text-lcov | coveralls"
   },
   "dependencies": {
-    "amqplib": "^0.6.0",
+    "amqplib": "^0.7.1",
     "uuid": "^8.2.0"
   },
   "devDependencies": {
@@ -32,7 +32,7 @@
     "eslint-config-standard": "^16.0.2",
     "eslint-plugin-import": "^2.14.0",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^4.0.1",
+    "eslint-plugin-promise": "^5.1.0",
     "eslint-plugin-standard": "^5.0.0",
     "mocha": "^8.0.1",
     "nyc": "^15.1.0",
