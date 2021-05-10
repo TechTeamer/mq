@@ -1,3 +1,6 @@
+4.1.1
+- dependency updates 
+
 4.1.0
 - promises rewrite to async-await in most cases
 - connections and channels are built up one-after-one, previously promise.all was used to register channels/create connections
