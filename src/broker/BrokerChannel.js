@@ -281,7 +281,7 @@ class BrokerChannel {
         return
       }
 
-      this._logger.debug(`Handling message ${resource} from broker ${brokerDetails.brokerTag} on channel ${this.name} by broker ${this.brokerDetails.brokerTag}`)
+      this._logger.debug(`Handling gathering announce ${resource} from broker ${brokerDetails.brokerTag} on channel ${this.name} by broker ${this.brokerDetails.brokerTag}`)
 
       return await resourceProviderCallback(data, brokerDetails, request, response)
     } catch (err) {

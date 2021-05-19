@@ -179,6 +179,7 @@ class GatheringClient {
 
     this._correlationIdMap.set(correlationId, requestData)
 
+    const _timeoutMs = timeoutMs || this._rpcTimeoutMs
     resolve.timeoutId = timeoutId = setTimeout(() => {
       timedOut = true
       if (this._correlationIdMap.has(correlationId)) {
@@ -186,9 +187,9 @@ class GatheringClient {
         const { serverCount, responseCount } = requestData || {}
         this._correlationIdMap.delete(correlationId)
 
-        reject(new Error(`QUEUE GATHERING RESPONSE TIMED OUT '${this.name}' ${correlationId} ${responseCount}/${serverCount}`))
+        reject(new Error(`QUEUE GATHERING RESPONSE TIMED OUT IN ${_timeoutMs}ms'${this.name}' ${correlationId} ${responseCount}/${serverCount}`))
       }
-    }, timeoutMs || this._rpcTimeoutMs)
+    }, _timeoutMs)
 
     return correlationId
   }

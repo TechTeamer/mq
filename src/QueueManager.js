@@ -233,7 +233,12 @@ class QueueManager {
       throw new Error('Override must be a subclass of GatheringClient')
     }
 
-    const gatheringClient = new OverrideClass(this.connection, this._logger, exchangeName, options)
+    const settings = Object.assign({
+      queueMaxSize: this._config.rpcQueueMaxSize,
+      timeoutMs: this._config.rpcTimeoutMs
+    }, options)
+
+    const gatheringClient = new OverrideClass(this.connection, this._logger, exchangeName, settings)
 
     this.gatheringClients.set(exchangeName, gatheringClient)
 
