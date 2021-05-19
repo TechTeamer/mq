@@ -15,12 +15,17 @@ class GatheringClient {
     this.statusQueue = name
 
     this._correlationIdMap = new Map()
+    this._correlationStatusMap = new Map()
     this._replyQueue = ''
 
     const { queueMaxSize, timeoutMs, serverCount = 0 } = options
     this._rpcQueueMaxSize = queueMaxSize
     this._rpcTimeoutMs = timeoutMs
     this._gatheringServerCount = serverCount
+
+    setInterval(() => {
+      this._correlationStatusMap.clear()
+    }, 60000)
   }
 
   async initialize () {
@@ -186,6 +191,7 @@ class GatheringClient {
         const requestData = this._correlationIdMap.get(correlationId)
         const { serverCount, responseCount } = requestData || {}
         this._correlationIdMap.delete(correlationId)
+        this._correlationStatusMap.set(correlationId, 'timeout')
 
         reject(new Error(`QUEUE GATHERING RESPONSE TIMED OUT IN ${_timeoutMs}ms'${this.name}' ${correlationId} ${responseCount}/${serverCount}`))
       }
@@ -198,7 +204,16 @@ class GatheringClient {
     const correlationId = reply.properties.correlationId
 
     if (!this._correlationIdMap.has(correlationId)) {
-      this._logger.warn(`QUEUE GATHERING CLIENT: RECEIVED UNKNOWN REPLY (possibly timed out or already received) '${this.name}'`, correlationId)
+      const correlationStatus = this._correlationStatusMap.get(correlationId)
+      if (correlationStatus === 'received') {
+        this._logger.debug(`QUEUE GATHERING CLIENT: RECEIVED DUPLICATE REPLY AFTER ${this.name}'`, correlationId)
+      } else if (correlationStatus === 'finished') {
+        this._logger.warn(`QUEUE GATHERING CLIENT: RECEIVED EXCESSIVE REPLY AFTER FINISHED ${this.name}'`, correlationId)
+      } else if (correlationStatus === 'timeout') {
+        this._logger.warn(`QUEUE GATHERING CLIENT: RECEIVED REPLY AFTER TIMEOUT ${this.name}'`, correlationId)
+      } else {
+        this._logger.warn(`QUEUE GATHERING CLIENT: RECEIVED UNKNOWN REPLY '${this.name}'`, correlationId)
+      }
       return
     }
 
@@ -206,6 +221,7 @@ class GatheringClient {
     const { resolve, reject, resolveWithFullResponse } = requestData || {}
 
     this._correlationIdMap.delete(correlationId)
+    this._correlationStatusMap.set(correlationId, 'received')
 
     const replyContent = QueueMessage.unserialize(reply.content)
 
@@ -243,6 +259,7 @@ class GatheringClient {
 
     if (requestData.responseCount >= serverCount) {
       this._correlationIdMap.delete(correlationId)
+      this._correlationStatusMap.set(correlationId, 'finished')
       if (acceptNotFound) {
         resolve()
       } else {
