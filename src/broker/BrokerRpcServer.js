@@ -32,8 +32,6 @@ class BrokerRpcServer extends RPCServer {
       brokerDetails
     } = message || {}
 
-    this._logger.debug(`Handling broker request in rpc server ${this.name}`)
-
     try {
       return await this.broker.handleRequest(channelName, brokerRequest, brokerDetails, request, response)
     } catch (err) {

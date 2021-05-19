@@ -37,7 +37,6 @@ class BrokerGatheringServer extends GatheringServer {
       gatheringInfo,
       brokerDetails
     } = message || {}
-    this._logger.debug(`Handling broker gathering announce in server ${this.name}`)
 
     try {
       return await this.broker.handleGatheringAnnouncement(channelName, gatheringInfo, brokerDetails, request, response)
