@@ -1,3 +1,6 @@
+4.1.2
+- dependency updates, drop support for node v10
+
 4.1.1
 - dependency updates 
 

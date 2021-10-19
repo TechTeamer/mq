@@ -1,4 +1,4 @@
-dist: bionic
+dist: focal
 
 addons:
   apt:
@@ -8,9 +8,9 @@ addons:
 language: node_js
 
 node_js:
-  - 10
   - 12
   - 14
+  - 16
 
 env:
   - NODE_ENV=travis
