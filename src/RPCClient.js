@@ -28,8 +28,14 @@ class RPCClient {
     this._logger = logger
     this.name = rpcName
     this._replyQueue = replyQueueName || ''
-    this._replyQueueOptions = Object.assign({ exclusive: true }, replyQueueOptions || {})
+    this._replyQueueOptions = { exclusive: true }
     this._correlationIdMap = new Map()
+
+    if (typeof replyQueueOptions === 'boolean') {
+      this._replyQueueOptions = replyQueueOptions
+    } else if (replyQueueOptions) {
+      Object.assign(this._replyQueueOptions, replyQueueOptions)
+    }
 
     this._rpcQueueMaxSize = queueMaxSize
     this._rpcTimeoutMs = timeoutMs
@@ -150,8 +156,10 @@ class RPCClient {
    * */
   async _getReplyQueue (ch) {
     try {
-      const replyQueue = await ch.assertQueue(this._replyQueue, this._replyQueueOptions)
-      this._replyQueue = replyQueue.queue
+      if (this._replyQueueOptions) {
+        const replyQueue = await ch.assertQueue(this._replyQueue, this._replyQueueOptions)
+        this._replyQueue = replyQueue.queue
+      }
 
       ch.consume(this._replyQueue, (msg) => {
         return Promise.resolve().then(() => {
