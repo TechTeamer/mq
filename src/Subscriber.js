@@ -12,9 +12,11 @@ class Subscriber {
     this._logger = logger
     this.name = name
 
-    const { maxRetry, timeoutMs } = options
+    const { maxRetry, timeoutMs, MessageModel, ContentSchema } = options
     this._maxRetry = maxRetry
     this._timeoutMs = timeoutMs
+    this.MessageModel = MessageModel || QueueMessage
+    this.ContentSchema = ContentSchema || JSON
 
     this._retryMap = new Map()
 
@@ -92,16 +94,31 @@ class Subscriber {
     msg.acked = true
   }
 
+  _parseMessage (msg) {
+    try {
+      const request = this.MessageModel.unserialize(msg.content, this.ContentSchema)
+
+      if (request.status !== 'ok') {
+        this._logger.error('CANNOT GET QUEUE MESSAGE PARAMS', this.name, request)
+        return null
+      }
+
+      return request
+    } catch (err) {
+      this._logger.error('CANNOT PROCESS QUEUE MESSAGE', this.name, msg.properties, err)
+      return null
+    }
+  }
+
   /**
    * @param channel
    * @param msg
    * @return {Promise}
    * @private
    */
-  _processMessage (channel, msg) {
-    const request = QueueMessage.unserialize(msg.content)
-    if (request.status !== 'ok') {
-      this._logger.error('CANNOT GET QUEUE MESSAGE PARAMS', this.name, request)
+  async _processMessage (channel, msg) {
+    const request = this._parseMessage(msg)
+    if (!request) {
       this._ack(channel, msg)
       return
     }

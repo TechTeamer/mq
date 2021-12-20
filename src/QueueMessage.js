@@ -1,9 +1,10 @@
 class QueueMessage {
-  constructor (status, data, timeOut) {
+  constructor (status, data, timeOut, ContentSchema) {
     this.status = status
     this.data = data
     this.timeOut = timeOut
     this.attachments = new Map()
+    this.ContentSchema = ContentSchema
   }
 
   static fromJSON (jsonString) {
@@ -42,21 +43,26 @@ class QueueMessage {
     return Buffer.concat([formatBuf, lengthBuf, jsonBuf, ...attachmentBuffers])
   }
 
-  static unserialize (buffer) {
-    if (buffer.toString('utf8', 0, 1) === '+') {
-      const jsonLength = buffer.slice(1, 5).readUInt32BE()
-      const { status, data, timeOut, attachArray } = JSON.parse(buffer.toString('utf8', 5, 5 + jsonLength))
-      let prevAttachmentLength = 5 + jsonLength
-      const queueMessage = new QueueMessage(status, data, timeOut)
-      for (const [key, length] of attachArray) {
-        queueMessage.addAttachment(key, buffer.slice(prevAttachmentLength, prevAttachmentLength + length))
-        prevAttachmentLength = prevAttachmentLength + length
+  static unserialize (buffer, ContentSchema) {
+    if (!ContentSchema || ContentSchema === JSON) {
+      if (buffer.toString('utf8', 0, 1) === '+') {
+        const jsonLength = buffer.slice(1, 5).readUInt32BE()
+        const { status, data, timeOut, attachArray } = JSON.parse(buffer.toString('utf8', 5, 5 + jsonLength))
+        let prevAttachmentLength = 5 + jsonLength
+        const queueMessage = new this.constructor(status, data, timeOut, ContentSchema)
+        for (const [key, length] of attachArray) {
+          queueMessage.addAttachment(key, buffer.slice(prevAttachmentLength, prevAttachmentLength + length))
+          prevAttachmentLength = prevAttachmentLength + length
+        }
+
+        return queueMessage
+      } else if (buffer.toString('utf8', 0, 1) === '{') {
+        return this.fromJSON(buffer.toString('utf8'))
+      } else {
+        throw new Error('Impossible to deserialize the message: unrecognized format')
       }
-      return queueMessage
-    } else if (buffer.toString('utf8', 0, 1) === '{') {
-      return this.fromJSON(buffer.toString('utf8'))
     } else {
-      throw new Error('Impossible to deserialize the message')
+      throw new Error('Impossible to deserialize the message: unknown content schema')
     }
   }
 

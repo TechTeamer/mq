@@ -13,13 +13,27 @@ class RPCServer {
    * @param {Object} options
    */
   constructor (queueConnection, logger, rpcName, options) {
+    const {
+      prefetchCount,
+      timeoutMs,
+      RequestMessageModel,
+      ResponseMessageModel,
+      RequestContentSchema,
+      ResponseContentSchema,
+      queueOptions
+    } = options
+
     this._connection = queueConnection
     this._logger = logger
     this.name = rpcName
+    this._queueOptions = Object.assign({ durable: true }, queueOptions || {})
 
-    const { prefetchCount, timeoutMs } = options
     this._prefetchCount = prefetchCount
     this._timeoutMs = timeoutMs
+    this.RequestModel = RequestMessageModel || QueueMessage
+    this.ResponseModel = ResponseMessageModel || QueueMessage
+    this.RequestContentSchema = RequestContentSchema || JSON
+    this.ResponseContentSchema = ResponseContentSchema || JSON
 
     this.actions = new Map()
   }
@@ -62,10 +76,8 @@ class RPCServer {
   async initialize () {
     try {
       const channel = await this._connection.getChannel()
-      await channel.assertQueue(this.name, { durable: true })
-
+      await channel.assertQueue(this.name, this._queueOptions)
       await channel.prefetch(this._prefetchCount)
-
       await channel.consume(this.name, (msg) => {
         this._processMessage(channel, msg)
       })
@@ -89,6 +101,21 @@ class RPCServer {
     msg.acked = true
   }
 
+  onResponseTimeout (ch, msg) {
+    ch.sendToQueue(msg.properties.replyTo, new this.ResponseModel('error', 'timeout', null, this.ResponseContentSchema).serialize(), { correlationId: msg.properties.correlationId })
+    this._ack(ch, msg)
+  }
+
+  onRequestError (ch, msg) {
+    ch.sendToQueue(msg.properties.replyTo, new this.ResponseModel('error', 'cannot decode parameters', null, this.ResponseContentSchema).serialize(), { correlationId: msg.properties.correlationId })
+    this._ack(ch, msg)
+  }
+
+  onResponseError (ch, msg) {
+    ch.sendToQueue(msg.properties.replyTo, new this.ResponseModel('error', 'cannot anwser', null, this.ResponseContentSchema).serialize(), { correlationId: msg.properties.correlationId })
+    this._ack(ch, msg)
+  }
+
   /**
    * @param ch
    * @param msg
@@ -96,15 +123,14 @@ class RPCServer {
    * @private
    */
   async _processMessage (ch, msg) {
-    const request = QueueMessage.unserialize(msg.content)
+    const request = this.RequestModel.unserialize(msg.content, this.RequestContentSchema)
 
     const response = new QueueResponse()
 
     if (request.status !== 'ok') {
       this._logger.error('CANNOT GET RPC CALL PARAMS', this.name, request)
 
-      ch.sendToQueue(msg.properties.replyTo, new QueueMessage('error', 'cannot decode parameters').serialize(), { correlationId: msg.properties.correlationId })
-      this._ack(ch, msg)
+      this.onRequestError(ch, msg)
       return
     }
 
@@ -112,9 +138,8 @@ class RPCServer {
     const timeoutMs = typeof request.timeOut === 'number' ? request.timeOut : this._timeoutMs
     const timer = setTimeout(() => {
       timedOut = true
-      this._logger.error('timeout in RPCServer', this.name, request.data)
-      ch.sendToQueue(msg.properties.replyTo, new QueueMessage('error', 'timeout').serialize(), { correlationId: msg.properties.correlationId })
-      this._ack(ch, msg)
+      this._logger.error('RPCServer response timeout', this.name, request.data)
+      this.onResponseTimeout(ch, msg, request)
     }, timeoutMs)
 
     try {
@@ -124,25 +149,23 @@ class RPCServer {
       }
 
       clearTimeout(timer)
-      let reply
+      let replyData
       const replyAttachments = response.getAttachments()
       try {
-        reply = new QueueMessage('ok', answer)
+        const reply = new this.ResponseModel('ok', answer, null, this.ResponseContentSchema)
         if (replyAttachments instanceof Map) {
           for (const [key, value] of replyAttachments) {
             reply.addAttachment(key, value)
           }
         }
+        replyData = reply.serialize()
       } catch (err) {
-        this._logger.error('CANNOT SEND RPC REPLY', this.name, err)
-
-        ch.sendToQueue(msg.properties.replyTo, new QueueMessage('error', 'cannot encode anwser').serialize(), { correlationId: msg.properties.correlationId })
-        this._ack(ch, msg)
-
+        this._logger.error('CANNOT CREATE RPC REPLY', this.name, err)
+        this.onResponseError(ch, msg, 'err')
         return
       }
 
-      ch.sendToQueue(msg.properties.replyTo, reply.serialize(), { correlationId: msg.properties.correlationId })
+      ch.sendToQueue(msg.properties.replyTo, replyData, { correlationId: msg.properties.correlationId })
       this._ack(ch, msg)
     } catch (err) {
       if (timedOut) {
@@ -150,16 +173,9 @@ class RPCServer {
       }
 
       clearTimeout(timer)
-      let message = `cannot answer to rpc call: ${err}`
 
-      if (!(err instanceof RPCError)) {
-        this._logger.error('RPC REPLY FAILED %s', this.name, err)
-      } else {
-        message = err.message
-      }
-
-      ch.sendToQueue(msg.properties.replyTo, new QueueMessage('error', message).serialize(), { correlationId: msg.properties.correlationId })
-      this._ack(ch, msg)
+      this._logger.error('CANNOT SEND RPC REPLY', this.name, err)
+      this.onResponseError(ch, msg, err)
     }
   }
 

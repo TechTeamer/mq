@@ -5,9 +5,10 @@ class QueueClient extends Publisher {
    * @param {QueueConnection} queueConnection
    * @param {Console} logger
    * @param {String} name
+   * @param {Object} options
    */
-  constructor (queueConnection, logger, name) {
-    super(queueConnection, logger, '')
+  constructor (queueConnection, logger, name, options) {
+    super(queueConnection, logger, '', options)
     this.routingKey = name
   }
 

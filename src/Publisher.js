@@ -5,12 +5,17 @@ class Publisher {
    * @param {QueueConnection} queueConnection
    * @param {Console} logger
    * @param {String} exchange
+   * @param {Object} options
    */
-  constructor (queueConnection, logger, exchange) {
+  constructor (queueConnection, logger, exchange, options) {
     this._connection = queueConnection
     this._logger = logger
     this.exchange = exchange
     this.routingKey = ''
+    this.options = options
+    const { MessageModel, ContentSchema } = options
+    this.MessageModel = MessageModel || QueueMessage
+    this.ContentSchema = ContentSchema || JSON
   }
 
   /**
@@ -58,7 +63,7 @@ class Publisher {
       const channel = await this._connection.getChannel()
       let param
       try {
-        param = new QueueMessage('ok', message, timeOut)
+        param = new this.MessageModel('ok', message, timeOut, this.ContentSchema)
         if (attachments instanceof Map) {
           for (const [key, value] of attachments) {
             param.addAttachment(key, value)
