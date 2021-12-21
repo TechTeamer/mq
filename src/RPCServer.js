@@ -1,6 +1,5 @@
 const QueueMessage = require('./QueueMessage')
 const QueueResponse = require('./QueueResponse')
-const RPCError = require('./RPCError')
 
 /**
  * @class RPCServer
@@ -21,7 +20,7 @@ class RPCServer {
       RequestContentSchema,
       ResponseContentSchema,
       queueOptions
-    } = options
+    } = options || {}
 
     this._connection = queueConnection
     this._logger = logger

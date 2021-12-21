@@ -22,7 +22,7 @@ class RPCClient {
       ResponseContentSchema,
       replyQueueName = '',
       replyQueueOptions = {}
-    } = options
+    } = options || {}
 
     this._connection = queueConnection
     this._logger = logger

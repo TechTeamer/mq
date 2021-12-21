@@ -12,7 +12,7 @@ class Subscriber {
     this._logger = logger
     this.name = name
 
-    const { maxRetry, timeoutMs, MessageModel, ContentSchema } = options
+    const { maxRetry, timeoutMs, MessageModel, ContentSchema } = options || {}
     this._maxRetry = maxRetry
     this._timeoutMs = timeoutMs
     this.MessageModel = MessageModel || QueueMessage

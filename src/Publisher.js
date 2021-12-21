@@ -13,7 +13,7 @@ class Publisher {
     this.exchange = exchange
     this.routingKey = ''
     this.options = options
-    const { MessageModel, ContentSchema } = options
+    const { MessageModel, ContentSchema } = options || {}
     this.MessageModel = MessageModel || QueueMessage
     this.ContentSchema = ContentSchema || JSON
   }
