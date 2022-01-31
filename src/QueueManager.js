@@ -274,9 +274,10 @@ class QueueManager {
   /**
    * @param {String} queueName
    * @param {QueueClient|function() : QueueClient} OverrideClass
+   * @param {Object} [options={}]
    * @return QueueClient
    */
-  getQueueClient (queueName, OverrideClass = QueueClient) {
+  getQueueClient (queueName, OverrideClass = QueueClient, options = {}) {
     if (this.queueClients.has(queueName)) {
       return this.queueClients.get(queueName)
     }
@@ -285,7 +286,7 @@ class QueueManager {
       throw new Error('Override must be a subclass of QueueClient')
     }
 
-    const queueClient = new OverrideClass(this.connection, this._logger, queueName)
+    const queueClient = new OverrideClass(this.connection, this._logger, queueName, options)
 
     this.queueClients.set(queueName, queueClient)
 
