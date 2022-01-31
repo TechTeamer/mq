@@ -105,14 +105,41 @@ class RPCServer {
     this._ack(ch, msg)
   }
 
+  handleResponseTimeout (ch, msg) {
+    try {
+      this.onResponseTimeout(ch, msg)
+    } catch (err) {
+      this._logger.error('Error handling RPC response timeout', err)
+      this._ack(ch, msg)
+    }
+  }
+
   onRequestError (ch, msg) {
     ch.sendToQueue(msg.properties.replyTo, new this.ResponseModel('error', 'cannot decode parameters', null, this.ResponseContentSchema).serialize(), { correlationId: msg.properties.correlationId })
     this._ack(ch, msg)
   }
 
+  handleRequestError (ch, msg) {
+    try {
+      this.onRequestError(ch, msg)
+    } catch (err) {
+      this._logger.error('Error handling RPC request error', err)
+      this._ack(ch, msg)
+    }
+  }
+
   onResponseError (ch, msg) {
     ch.sendToQueue(msg.properties.replyTo, new this.ResponseModel('error', 'cannot anwser', null, this.ResponseContentSchema).serialize(), { correlationId: msg.properties.correlationId })
     this._ack(ch, msg)
+  }
+
+  handleResponseError (ch, msg) {
+    try {
+      this.onResponseError(ch, msg)
+    } catch (err) {
+      this._logger.error('Error handling RPC response error', err)
+      this._ack(ch, msg)
+    }
   }
 
   /**
@@ -129,7 +156,7 @@ class RPCServer {
     if (request.status !== 'ok') {
       this._logger.error('CANNOT GET RPC CALL PARAMS', this.name, request)
 
-      this.onRequestError(ch, msg)
+      this.handleRequestError(ch, msg)
       return
     }
 
@@ -138,7 +165,7 @@ class RPCServer {
     const timer = setTimeout(() => {
       timedOut = true
       this._logger.error('RPCServer response timeout', this.name, request.data)
-      this.onResponseTimeout(ch, msg, request)
+      this.handleResponseTimeout(ch, msg, request)
     }, timeoutMs)
 
     try {
@@ -160,7 +187,7 @@ class RPCServer {
         replyData = reply.serialize()
       } catch (err) {
         this._logger.error('CANNOT CREATE RPC REPLY', this.name, err)
-        this.onResponseError(ch, msg, 'err')
+        this.handleResponseError(ch, msg, 'err')
         return
       }
 
@@ -174,7 +201,7 @@ class RPCServer {
       clearTimeout(timer)
 
       this._logger.error('CANNOT SEND RPC REPLY', this.name, err)
-      this.onResponseError(ch, msg, err)
+      this.handleResponseError(ch, msg, err)
     }
   }
 
