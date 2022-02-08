@@ -25,20 +25,21 @@ class RPCServer {
   }
 
   /**
-   * @param {*} msg
+   * @param {*} body
    * @param {QueueMessage} request
    * @param {QueueResponse} response
+   * @param {Object} msg
    * @protected
    * @returns {Promise}
    */
-  _callback (msg, request, response) {
-    const { action, data } = msg || {}
+  _callback (body, request, response, msg) {
+    const { action, data } = body || {}
     if (!this.actions.has(action)) {
       return Promise.resolve()
     }
 
     const handler = this.actions.get(action)
-    return Promise.resolve().then(() => handler.call(this, data, request, response))
+    return Promise.resolve().then(() => handler.call(this, data, request, response, msg))
   }
 
   /**
@@ -117,7 +118,7 @@ class RPCServer {
     }, timeoutMs)
 
     try {
-      const answer = await this._callback(request.data, request, response)
+      const answer = await this._callback(request.data, request, response, msg)
       if (timedOut) {
         return
       }
