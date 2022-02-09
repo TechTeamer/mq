@@ -1,3 +1,7 @@
+4.1.3
+- dependency updates
+- pass raw msg param to handler callbacks (#31)
+
 4.1.2
 - dependency updates, drop support for node v10
 
