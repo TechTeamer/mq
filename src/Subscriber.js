@@ -21,14 +21,14 @@ class Subscriber {
     this.actions = new Map()
   }
 
-  _callback (msg, properties, request) {
-    const { action, data } = msg || {}
+  _callback (body, properties, request, msg) {
+    const { action, data } = body || {}
     if (!this.actions.has(action)) {
       return Promise.resolve()
     }
 
     const handler = this.actions.get(action)
-    return Promise.resolve().then(() => handler.call(this, data, properties, request))
+    return Promise.resolve().then(() => handler.call(this, data, properties, request, msg))
   }
 
   /**
@@ -134,7 +134,7 @@ class Subscriber {
     }, timeoutMs)
 
     return Promise.resolve().then(() => {
-      return this._callback(request.data, msg.properties, request)
+      return this._callback(request.data, msg.properties, request, msg)
     }).then(() => {
       if (!timedOut) {
         clearTimeout(timer)
