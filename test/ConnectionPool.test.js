@@ -66,7 +66,7 @@ describe('ConnectionPool', () => {
         url: 'amqps://localhost:22',
         rpcTimeoutMs: 10000,
         rpcQueueMaxSize: 100,
-        logger: logger,
+        logger,
         options: {
           timeout: 50
         }

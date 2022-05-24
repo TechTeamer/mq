@@ -47,7 +47,7 @@ class RPCClient {
     } while (this._correlationIdMap.has(correlationId))
 
     this._correlationIdMap.set(correlationId, {
-      resolveWithFullResponse: resolveWithFullResponse,
+      resolveWithFullResponse,
       resolve: (result) => {
         if (!timedOut) {
           clearTimeout(timeoutId)
@@ -107,7 +107,7 @@ class RPCClient {
         const correlationId = this._registerMessage(resolve, reject, timeoutMs, resolveWithFullResponse)
 
         channel.sendToQueue(this.name, param.serialize(), {
-          correlationId: correlationId,
+          correlationId,
           replyTo: this._replyQueue
         })
       })

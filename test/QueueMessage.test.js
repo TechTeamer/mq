@@ -7,13 +7,13 @@ const QueueMessage = require('../src/QueueMessage')
 describe('QueueMessage', () => {
   const okStatus = 'ok'
   const errorStatus = 'error'
-  const data = 'This is a valid QueueMessage'
+  const queuMessageData = 'This is a valid QueueMessage'
 
   const number = 1
   const string = 'hello ŰÁÉÚŐÓÜÖÍűáéúőóüöí$\\`#^+-[]<>*;~!%/()孫詒讓\u1FFF\u{10FFFF}'
   const array = [1, 2, 3]
-  const buffer = Buffer.from('test buffer')
-  const object = { number, string, array, buffer }
+  const testBuffer = Buffer.from('test buffer')
+  const object = { number, string, array, buffer: testBuffer }
 
   it('#fromJSON() returns a QueueMessage with status "error" if it receives an invalid QueueMessage', () => {
     const badQueueMessage = 'thisIsNotAQueueMessage'
@@ -21,7 +21,7 @@ describe('QueueMessage', () => {
   })
 
   it('#fromJSON() parses the stringified QueueMessage with the correct status', () => {
-    const goodQueueMessage = JSON.stringify(new QueueMessage(okStatus, data))
+    const goodQueueMessage = JSON.stringify(new QueueMessage(okStatus, queuMessageData))
     assert.strictEqual(QueueMessage.fromJSON(goodQueueMessage).status, okStatus)
   })
 
@@ -45,7 +45,7 @@ describe('QueueMessage', () => {
   })
 
   it('#fromJSON() parses the serialized QueueMessage containing a buffer', () => {
-    const queueMessage = JSON.stringify(new QueueMessage(okStatus, buffer))
+    const queueMessage = JSON.stringify(new QueueMessage(okStatus, testBuffer))
     const data = QueueMessage.fromJSON(queueMessage).data
     const _buffer = Buffer.from(data)
     assert.strictEqual(_buffer.toString('utf8'), 'test buffer', 'buffer content not match')

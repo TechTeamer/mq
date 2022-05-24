@@ -52,9 +52,6 @@ class QueueMessage {
         queueMessage.addAttachment(key, buffer.slice(prevAttachmentLength, prevAttachmentLength + length))
         prevAttachmentLength = prevAttachmentLength + length
       }
-      Object.keys(attachArray).forEach((key) => {
-
-      })
       return queueMessage
     } else if (buffer.toString('utf8', 0, 1) === '{') {
       return this.fromJSON(buffer.toString('utf8'))

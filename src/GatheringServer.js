@@ -197,7 +197,7 @@ class GatheringServer {
     }
 
     try {
-      channel.sendToQueue(replyTo, reply, { correlationId: correlationId, type: 'reply' })
+      channel.sendToQueue(replyTo, reply, { correlationId, type: 'reply' })
       this._ack(channel, msg)
     } catch (err) {
       this._logger.error('QUEUE GATHERING SERVER: Failed to send reply', this.name, err)

@@ -103,7 +103,7 @@ class GatheringClient {
         const messageBody = queueMessage.serialize()
         correlationId = this._registerMessage(resolve, reject, timeoutMs, resolveWithFullResponse, acceptNotFound, serverCount)
         const messageOptions = {
-          correlationId: correlationId,
+          correlationId,
           replyTo: this._replyQueue
         }
 
@@ -156,8 +156,8 @@ class GatheringClient {
     } while (this._correlationIdMap.has(correlationId))
 
     const requestData = {
-      resolveWithFullResponse: resolveWithFullResponse,
-      acceptNotFound: acceptNotFound,
+      resolveWithFullResponse,
+      acceptNotFound,
       serverCount: serverCount || this._gatheringServerCount,
       responseCount: 0,
       timeoutId: null,
@@ -178,12 +178,10 @@ class GatheringClient {
     }
 
     this._correlationIdMap.set(correlationId, requestData)
-
     resolve.timeoutId = timeoutId = setTimeout(() => {
       timedOut = true
       if (this._correlationIdMap.has(correlationId)) {
-        const requestData = this._correlationIdMap.get(correlationId)
-        const { serverCount, responseCount } = requestData || {}
+        const { serverCount, responseCount } = this._correlationIdMap.get(correlationId) || {} // eslint-disable-line no-shadow
         this._correlationIdMap.delete(correlationId)
 
         reject(new Error(`QUEUE GATHERING RESPONSE TIMED OUT '${this.name}' ${correlationId} ${responseCount}/${serverCount}`))
