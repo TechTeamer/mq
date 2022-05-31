@@ -1,3 +1,7 @@
+4.1.4
+- dependency updates
+- minimum requirement is node v14
+
 4.1.3
 - dependency updates
 - pass raw msg param to handler callbacks (#31)
