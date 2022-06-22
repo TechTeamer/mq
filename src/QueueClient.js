@@ -10,6 +10,16 @@ class QueueClient extends Publisher {
   constructor (queueConnection, logger, name, options) {
     super(queueConnection, logger, '', options)
     this.routingKey = name
+    this._assertQueue = null
+    const {
+      assertQueue
+    } = options || {}
+
+    if (assertQueue) {
+      this._assertQueue = assertQueue === true
+        ? { durable: true } // defaults
+        : assertQueue
+    }
   }
 
   /**
@@ -17,7 +27,9 @@ class QueueClient extends Publisher {
    * @returns {Promise}
    */
   assertExchangeOrQueue (channel) {
-    return channel.assertQueue(this.routingKey, { durable: true })
+    if (this._assertQueue) {
+      return channel.assertQueue(this.routingKey, this._assertQueue)
+    }
   }
 }
 

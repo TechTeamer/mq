@@ -12,11 +12,27 @@ class Subscriber {
     this._logger = logger
     this.name = name
 
-    const { maxRetry, timeoutMs, MessageModel, ContentSchema } = options || {}
+    const {
+      maxRetry,
+      timeoutMs,
+      MessageModel,
+      ContentSchema,
+      assertQueueOptions,
+      assertExchange = true
+    } = options || {}
     this._maxRetry = maxRetry
     this._timeoutMs = timeoutMs
     this.MessageModel = MessageModel || QueueMessage
     this.ContentSchema = ContentSchema || JSON
+    this._assertQueueOptions = assertQueueOptions
+      ? Object.assign(assertQueueOptions || {}, { exclusive: true })
+      : { exclusive: true } // defaults
+    this._assertExchange = null
+    if (assertExchange) {
+      this._assertExchange = assertExchange === true
+        ? { durable: true } // defaults
+        : assertExchange
+    }
 
     this._retryMap = new Map()
 
@@ -53,8 +69,10 @@ class Subscriber {
   async initialize () {
     try {
       const channel = await this._connection.getChannel()
-      await channel.assertExchange(this.name, 'fanout', { durable: true })
-      const queue = await channel.assertQueue('', { exclusive: true })
+      if (this._assertExchange) {
+        await channel.assertExchange(this.name, 'fanout', this._assertExchange)
+      }
+      const queue = await channel.assertQueue('', this._assertQueueOptions)
 
       await channel.bindQueue(queue.queue, this.name, '')
 
@@ -113,16 +131,11 @@ class Subscriber {
   /**
    * @param channel
    * @param msg
-   * @return {Promise}
+   * @param request
+   * @returns {boolean} true if too many retries reached
    * @private
    */
-  async _processMessage (channel, msg) {
-    const request = this._parseMessage(msg)
-    if (!request) {
-      this._ack(channel, msg)
-      return
-    }
-
+  _handleMessageRetry (channel, msg, request) {
     if (msg.fields && msg.fields.redelivered && msg.fields.consumerTag) {
       let counter = 1
       if (this._retryMap.has(msg.fields.consumerTag)) {
@@ -138,8 +151,29 @@ class Subscriber {
         if (msg.fields.consumerTag) {
           this._retryMap.delete(msg.fields.consumerTag)
         }
-        return
+        return true
       }
+    }
+
+    return false
+  }
+
+  /**
+   * @param channel
+   * @param msg
+   * @return {Promise}
+   * @private
+   */
+  async _processMessage (channel, msg) {
+    const request = this._parseMessage(msg)
+    if (!request) {
+      this._ack(channel, msg)
+      return
+    }
+
+    const tooManyRetries = this._handleMessageRetry(channel, msg, request)
+    if (tooManyRetries) {
+      return
     }
 
     let timedOut = false
@@ -150,9 +184,9 @@ class Subscriber {
       this._nack(channel, msg)
     }, timeoutMs)
 
-    return Promise.resolve().then(() => {
-      return this._callback(request.data, msg.properties, request, msg)
-    }).then(() => {
+    try {
+      await this._callback(request.data, msg.properties, request, msg)
+
       if (!timedOut) {
         clearTimeout(timer)
         this._ack(channel, msg)
@@ -160,13 +194,13 @@ class Subscriber {
           this._retryMap.delete(msg.fields.consumerTag)
         }
       }
-    }).catch((err) => {
+    } catch (err) {
       if (!timedOut) {
         clearTimeout(timer)
         this._logger.error('Cannot process Subscriber consume', err)
         this._nack(channel, msg)
       }
-    })
+    }
   }
 
   /**

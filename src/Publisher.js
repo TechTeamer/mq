@@ -13,7 +13,13 @@ class Publisher {
     this.exchange = exchange
     this.routingKey = ''
     this.options = options
-    const { MessageModel, ContentSchema } = options || {}
+    const { MessageModel, ContentSchema, assertExchange = true } = options || {}
+    this._assertExchange = null
+    if (assertExchange) {
+      this._assertExchange = assertExchange === true
+        ? { durable: true } // defaults
+        : assertExchange
+    }
     this.MessageModel = MessageModel || QueueMessage
     this.ContentSchema = ContentSchema || JSON
   }
@@ -25,7 +31,9 @@ class Publisher {
    * @returns {Promise}
    */
   assertExchangeOrQueue (channel) {
-    return channel.assertExchange(this.exchange, 'fanout', { durable: true })
+    if (this._assertExchange) {
+      return channel.assertExchange(this.exchange, 'fanout', this._assertExchange)
+    }
   }
 
   async initialize () {
