@@ -1,5 +1,5 @@
 class QueueMessage {
-  constructor (status, data, timeOut, ContentSchema) {
+  constructor (status, data, timeOut, ContentSchema = JSON) {
     this.status = status
     this.data = data
     this.timeOut = timeOut
@@ -43,13 +43,13 @@ class QueueMessage {
     return Buffer.concat([formatBuf, lengthBuf, jsonBuf, ...attachmentBuffers])
   }
 
-  static unserialize (buffer, ContentSchema) {
+  static unserialize (buffer, ContentSchema = JSON) {
     if (!ContentSchema || ContentSchema === JSON) {
       if (buffer.toString('utf8', 0, 1) === '+') {
         const jsonLength = buffer.slice(1, 5).readUInt32BE()
         const { status, data, timeOut, attachArray } = JSON.parse(buffer.toString('utf8', 5, 5 + jsonLength))
         let prevAttachmentLength = 5 + jsonLength
-        const queueMessage = new this.constructor(status, data, timeOut, ContentSchema)
+        const queueMessage = new this(status, data, timeOut, ContentSchema)
         for (const [key, length] of attachArray) {
           queueMessage.addAttachment(key, buffer.slice(prevAttachmentLength, prevAttachmentLength + length))
           prevAttachmentLength = prevAttachmentLength + length
