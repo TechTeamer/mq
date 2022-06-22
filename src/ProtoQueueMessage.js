@@ -1,25 +1,6 @@
 const QueueMessage = require('./QueueMessage')
 
 class ProtoQueueMessage extends QueueMessage {
-  static load (protoPath, definitionLookup) {
-    try {
-      const protobuf = require('protobufjs')
-      const proto = protobuf.load(protoPath)
-
-      if (!proto) {
-        return null
-      }
-      if (!definitionLookup) {
-        return proto
-      }
-      if (definitionLookup) {
-        return proto.lookup(definitionLookup)
-      }
-    } catch (err) {
-      return null
-    }
-  }
-
   serialize () {
     const errorMessage = this.ContentSchema.verify(this.data)
 
