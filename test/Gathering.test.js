@@ -4,7 +4,7 @@ const SeedRandom = require('seed-random')
 const config = require('./config/LoadConfig')
 
 describe('GatheringClient && GatheringServer', () => {
-  const gatheringName = 'test-gathering'
+  const gatheringName = 'techteamer-mq-js-test-gathering'
   const logger = new ConsoleInspector(console)
   const timeoutMs = 1000
   const assertExchangeOptions = { durable: false, autoDelete: true }
