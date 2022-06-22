@@ -9,12 +9,12 @@ class QueueServer extends Subscriber {
    */
   constructor (queueConnection, logger, name, options) {
     super(queueConnection, logger, name, options)
-    this._assertQueue = null
+    this._assertQueueOptions = null
     this._prefetchCount = options.prefetchCount
-    if (typeof options.assertQueue === 'boolean') {
-      this._assertQueue = options.assertQueue
-    } else {
-      this._assertQueue = options.assertQueue || { durable: true }
+    if (options.assertQueueOptions) {
+      this._assertQueueOptions = options.assertQueueOptions === true
+        ? { durable: true }
+        : options.assertQueueOptions
     }
   }
 
@@ -24,8 +24,8 @@ class QueueServer extends Subscriber {
   async initialize () {
     try {
       const channel = await this._connection.getChannel()
-      if (this._assertQueue) {
-        await channel.assertQueue(this.name, this._assertQueue)
+      if (this._assertQueueOptions) {
+        await channel.assertQueue(this.name, this._assertQueueOptions)
       }
       await channel.prefetch(this._prefetchCount)
       await channel.consume(this.name, (msg) => {
