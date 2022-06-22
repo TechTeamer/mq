@@ -36,6 +36,10 @@
     "eslint-plugin-standard": "^5.0.0",
     "mocha": "^10.0.0",
     "nyc": "^15.1.0",
+    "protobufjs": "^6.11.3",
     "seed-random": "^2.2.0"
+  },
+  "peerDependencies": {
+    "protobufjs": "^6.11.3"
   }
 }
