@@ -18,8 +18,9 @@ class QueueServer extends Subscriber {
     this._prefetchCount = prefetchCount
 
     if (assertQueueOptions) {
+      const defaultOptions = { durable: true }
       this._assertQueueOptions = assertQueueOptions === true
-        ? { durable: true }
+        ? defaultOptions
         : assertQueueOptions
     }
   }

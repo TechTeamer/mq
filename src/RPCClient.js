@@ -35,7 +35,7 @@ class RPCClient {
       const defaultOptions = { exclusive: true }
       this._replyQueueOptions = replyQueueOptions === true
         ? defaultOptions
-        : Object.assign(defaultOptions, replyQueueOptions)
+        : replyQueueOptions
     }
 
     this._rpcQueueMaxSize = queueMaxSize
