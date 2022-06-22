@@ -4,16 +4,17 @@ const ConsoleInspector = require('./consoleInspector')
 const config = require('./config/LoadConfig')
 
 describe('GatheringClient && multiple GatheringServer', () => {
-  const gatheringName = 'test-gathering-multi'
+  const gatheringName = 'techteamer-mq-js-test-gathering-multi'
   const logger = new ConsoleInspector(console)
   const timeoutMs = 1000
+  const assertExchangeOptions = { durable: false, autoDelete: true }
 
   const queueManager = new QueueManager(config)
   queueManager.setLogger(logger)
 
-  const gatheringClient = queueManager.getGatheringClient(gatheringName, { queueMaxSize: 100, timeoutMs })
-  const gatheringServer1 = new GatheringServer(queueManager.connection, queueManager._logger, gatheringName, { prefetchCount: 1, timeoutMs })
-  const gatheringServer2 = new GatheringServer(queueManager.connection, queueManager._logger, gatheringName, { prefetchCount: 1, timeoutMs })
+  const gatheringClient = queueManager.getGatheringClient(gatheringName, { queueMaxSize: 100, timeoutMs, assertExchange: assertExchangeOptions })
+  const gatheringServer1 = new GatheringServer(queueManager.connection, queueManager._logger, gatheringName, { prefetchCount: 1, timeoutMs, assertExchange: assertExchangeOptions })
+  const gatheringServer2 = new GatheringServer(queueManager.connection, queueManager._logger, gatheringName, { prefetchCount: 1, timeoutMs, assertExchange: assertExchangeOptions })
 
   before(() => {
     return queueManager.connect().then(() => {

@@ -5,15 +5,16 @@ const chai = require('chai')
 const expect = chai.expect
 
 describe('RPCClient && RPCServer actions', function () {
-  const rpcName = 'test-rpc-action'
+  const rpcName = 'techteamer-mq-js-test-rpc-action'
   const logger = new ConsoleInspector(console)
   const timeoutMs = 1000
+  const assertQueueOptions = { durable: false, exclusive: true }
 
   const queueManager = new QueueManager(config)
   queueManager.setLogger(logger)
 
   const rpcClient = queueManager.getRPCClient(rpcName, { queueMaxSize: 100, timeoutMs })
-  const rpcServer = queueManager.getRPCServer(rpcName, { prefetchCount: 1, timeoutMs })
+  const rpcServer = queueManager.getRPCServer(rpcName, { prefetchCount: 1, timeoutMs, assertQueue: assertQueueOptions })
 
   before(() => {
     return queueManager.connect()

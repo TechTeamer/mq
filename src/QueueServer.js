@@ -38,7 +38,7 @@ class QueueServer extends Subscriber {
         this._processMessage(channel, msg)
       })
     } catch (err) {
-      this._logger.error('CANNOT INITIALIZE QUEUE SERVER', err)
+      this._logger.error('CANNOT INITIALIZE QUEUE SERVER', this.name, this._assertQueue, err)
       throw err
     }
   }

@@ -14,9 +14,25 @@ class GatheringServer {
     this.name = name
     this.statusQueue = name
 
-    const { prefetchCount, timeoutMs } = options || {}
+    const {
+      prefetchCount,
+      timeoutMs,
+      assertQueueOptions,
+      assertExchange = true
+    } = options || {}
     this._prefetchCount = prefetchCount
     this._responseTimeoutMs = timeoutMs
+    this._assertExchange = null
+
+    this._assertQueueOptions = assertQueueOptions
+      ? Object.assign(assertQueueOptions || {}, { exclusive: true })
+      : { exclusive: true } // defaults
+
+    if (assertExchange) {
+      this._assertExchange = assertExchange === true
+        ? { durable: true }
+        : assertExchange
+    }
 
     this.actions = new Map()
   }
@@ -24,8 +40,10 @@ class GatheringServer {
   async initialize () {
     try {
       const channel = await this._connection.getChannel()
-      await channel.assertExchange(this.name, 'fanout', { durable: true })
-      const serverQueue = await channel.assertQueue('', { exclusive: true })
+      if (this._assertExchange) {
+        await channel.assertExchange(this.name, 'fanout', this._assertExchange)
+      }
+      const serverQueue = await channel.assertQueue('', this._assertQueueOptions)
       const serverQueueName = serverQueue.queue
 
       await channel.prefetch(this._prefetchCount)

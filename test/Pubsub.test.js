@@ -5,17 +5,24 @@ const SeedRandom = require('seed-random')
 const config = require('./config/LoadConfig')
 
 describe('Publisher && Subscriber', () => {
-  const publisherName = 'test-publisher'
+  const publisherName = 'techteamer-mq-js-test-publisher'
   const logger = new ConsoleInspector(console)
   const maxRetry = 5
+  const assertExchangeOptions = { durable: false, autoDelete: true }
 
   const publisherManager = new QueueManager(config)
   publisherManager.setLogger(logger)
-  const publisher = publisherManager.getPublisher(publisherName)
+  const publisher = publisherManager.getPublisher(publisherName, {
+    assertExchange: assertExchangeOptions
+  })
 
   const subscriberManager = new QueueManager(config)
   subscriberManager.setLogger(logger)
-  const subscriber = subscriberManager.getSubscriber(publisherName, { maxRetry, timeoutMs: 10000 })
+  const subscriber = subscriberManager.getSubscriber(publisherName, {
+    maxRetry,
+    timeoutMs: 10000,
+    assertExchange: assertExchangeOptions
+  })
 
   before(() => {
     return publisherManager.connect().then(() => {
@@ -125,7 +132,11 @@ describe('Publisher && Subscriber', () => {
   it('Publisher.send() sends a message and each subscriber receives it', (done) => {
     const otherManager = new QueueManager(config)
     otherManager.setLogger(logger)
-    const otherSubscriber = otherManager.getSubscriber(publisherName, { maxRetry, timeoutMs: 10000 })
+    const otherSubscriber = otherManager.getSubscriber(publisherName, {
+      maxRetry,
+      timeoutMs: 10000,
+      assertExchange: assertExchangeOptions
+    })
 
     otherManager.connect().then(() => {
       const stringMessage = 'foobar'
