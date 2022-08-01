@@ -52,6 +52,8 @@ describe('ProtoQueueMessage', () => {
 
     assert.strictEqual(newQueueMessage.timeOut, null, 'timeout does not match')
 
+    assert.strictEqual(newQueueMessage.attachments.size, 0, 'attachment count does not match')
+
     newQueueMessage.getAttachments().forEach((value, key) => {
       assert.strictEqual(value.toString(), queueMessage.getAttachments().get(key).toString(), 'attachment not match')
     })
