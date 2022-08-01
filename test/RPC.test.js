@@ -14,9 +14,9 @@ describe('RPCClient && RPCServer', () => {
   queueManager.setLogger(logger)
 
   const rpcClient = queueManager.getRPCClient(rpcName, { queueMaxSize: 100, timeoutMs })
-  const rpcServer = queueManager.getRPCServer(rpcName, { prefetchCount: 1, timeoutMs, assertQueue: assertQueueOptions })
+  const rpcServer = queueManager.getRPCServer(rpcName, { prefetchCount: 1, timeoutMs, assertQueueOptions })
   const shortRpcClient = queueManager.getRPCClient(shortRpcName, { queueMaxSize: 1, timeoutMs })
-  const shortRpcServer = queueManager.getRPCServer(shortRpcName, { prefetchCount: 1, timeoutMs, assertQueue: assertQueueOptions })
+  const shortRpcServer = queueManager.getRPCServer(shortRpcName, { prefetchCount: 1, timeoutMs, assertQueueOptions })
 
   before(() => {
     return queueManager.connect()

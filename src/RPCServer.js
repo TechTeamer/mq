@@ -19,18 +19,17 @@ class RPCServer {
       ResponseMessageModel,
       RequestContentSchema,
       ResponseContentSchema,
-      assertQueue = true
+      assertQueue = true,
+      assertQueueOptions = null
     } = options || {}
 
     this._connection = queueConnection
     this._logger = logger
     this.name = rpcName
-    this._assertQueue = null
+    this._assertQueue = assertQueue === true
 
-    if (assertQueue) {
-      this._assertQueue = assertQueue === true
-        ? { durable: true } // defaults
-        : assertQueue
+    if (this._assertQueue) {
+      this._assertQueueOptions = Object.assign(assertQueueOptions || {}, { durable: true })
     }
 
     this._prefetchCount = prefetchCount
@@ -82,7 +81,7 @@ class RPCServer {
     try {
       const channel = await this._connection.getChannel()
       if (this._assertQueue) {
-        await channel.assertQueue(this.name, this._assertQueue)
+        await channel.assertQueue(this.name, this._assertQueueOptions)
       }
       await channel.prefetch(this._prefetchCount)
       await channel.consume(this.name, (msg) => {

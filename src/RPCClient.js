@@ -21,20 +21,19 @@ class RPCClient {
       RequestContentSchema,
       ResponseContentSchema,
       replyQueueName = '',
-      assertReplyQueue = true
+      assertReplyQueue = true,
+      assertReplyQueueOptions = null
     } = options || {}
 
     this._connection = queueConnection
     this._logger = logger
     this.name = rpcName
     this._replyQueue = replyQueueName || ''
-    this._assertReplyQueue = null
     this._correlationIdMap = new Map()
 
-    if (assertReplyQueue) {
-      this._assertReplyQueue = assertReplyQueue === true
-        ? { exclusive: true } // defaults
-        : assertReplyQueue
+    this._assertReplyQueue = assertReplyQueue === true
+    if (this._assertReplyQueue) {
+      this._assertReplyQueueOptions = Object.assign(assertReplyQueueOptions || {}, { exclusive: true })
     }
 
     this._rpcQueueMaxSize = queueMaxSize
@@ -157,7 +156,7 @@ class RPCClient {
   async _getReplyQueue (ch) {
     try {
       if (this._assertReplyQueue) {
-        const assertResult = await ch.assertQueue(this._replyQueue, this._assertReplyQueue)
+        const assertResult = await ch.assertQueue(this._replyQueue, this._assertReplyQueueOptions)
         this._replyQueue = assertResult.queue
       }
 
