@@ -135,24 +135,24 @@ class Subscriber {
    * @returns {boolean} true if too many retries reached
    * @private
    */
-  _handleMessageRetry (channel, msg, request) {
-    if (msg.fields && msg.fields.redelivered && msg.fields.consumerTag) {
-      let counter = 1
-      if (this._retryMap.has(msg.fields.consumerTag)) {
-        counter = this._retryMap.get(msg.fields.consumerTag) + 1
-        this._retryMap.set(msg.fields.consumerTag, counter)
-      } else {
-        this._retryMap.set(msg.fields.consumerTag, counter)
-      }
+  _handleMessageRetry (msg, request) {
+    if (!msg.fields || !msg.fields.redelivered || !msg.fields.consumerTag) {
+      return false
+    }
 
-      if (counter > this._maxRetry) {
-        this._logger.error('SUBSCRIBER TRIED TOO MANY TIMES', this.name, request, msg)
-        this._ack(channel, msg)
-        if (msg.fields.consumerTag) {
-          this._retryMap.delete(msg.fields.consumerTag)
-        }
-        return true
-      }
+    const consumerTag = msg.fields.consumerTag
+    let counter = 1
+    if (this._retryMap.has(consumerTag)) {
+      counter = this._retryMap.get(consumerTag) + 1
+      this._retryMap.set(consumerTag, counter)
+    } else {
+      this._retryMap.set(consumerTag, counter)
+    }
+
+    if (counter > this._maxRetry) {
+      this._logger.error('SUBSCRIBER TRIED TOO MANY TIMES', this.name, request, msg)
+      this._retryMap.delete(consumerTag)
+      return true
     }
 
     return false
@@ -171,8 +171,9 @@ class Subscriber {
       return
     }
 
-    const tooManyRetries = this._handleMessageRetry(channel, msg, request)
+    const tooManyRetries = this._handleMessageRetry(msg, request)
     if (tooManyRetries) {
+      this._ack(channel, msg)
       return
     }
 
