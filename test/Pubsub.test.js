@@ -13,7 +13,8 @@ describe('Publisher && Subscriber', () => {
   const publisherManager = new QueueManager(config)
   publisherManager.setLogger(logger)
   const publisher = publisherManager.getPublisher(publisherName, {
-    assertExchange: assertExchangeOptions
+    assertExchange: true,
+    assertExchangeOptions
   })
 
   const subscriberManager = new QueueManager(config)
@@ -21,7 +22,8 @@ describe('Publisher && Subscriber', () => {
   const subscriber = subscriberManager.getSubscriber(publisherName, {
     maxRetry,
     timeoutMs: 10000,
-    assertExchange: assertExchangeOptions
+    assertExchange: true,
+    assertExchangeOptions
   })
 
   before(() => {

@@ -17,21 +17,19 @@ class Subscriber {
       timeoutMs,
       MessageModel,
       ContentSchema,
-      assertQueueOptions,
-      assertExchange = true
+      assertQueueOptions = null,
+      assertExchange = true,
+      assertExchangeOptions = null
     } = options || {}
     this._maxRetry = maxRetry
     this._timeoutMs = timeoutMs
     this.MessageModel = MessageModel || QueueMessage
     this.ContentSchema = ContentSchema || JSON
-    this._assertQueueOptions = assertQueueOptions
-      ? Object.assign(assertQueueOptions || {}, { exclusive: true })
-      : { exclusive: true } // defaults
-    this._assertExchange = null
+    this._assertQueueOptions = Object.assign(assertQueueOptions || {}, { exclusive: true })
+    this._assertExchange = assertExchange === true
     if (assertExchange) {
-      this._assertExchange = assertExchange === true
-        ? { durable: true } // defaults
-        : assertExchange
+      const defaults = { durable: true }
+      this._assertExchangeOptions = assertExchangeOptions || defaults
     }
 
     this._retryMap = new Map()
@@ -70,7 +68,7 @@ class Subscriber {
     try {
       const channel = await this._connection.getChannel()
       if (this._assertExchange) {
-        await channel.assertExchange(this.name, 'fanout', this._assertExchange)
+        await channel.assertExchange(this.name, 'fanout', this._assertExchangeOptions)
       }
       const queue = await channel.assertQueue('', this._assertQueueOptions)
 

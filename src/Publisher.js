@@ -13,12 +13,17 @@ class Publisher {
     this.exchange = exchange
     this.routingKey = ''
     this.options = options
-    const { MessageModel, ContentSchema, assertExchange = true } = options || {}
+    const {
+      MessageModel,
+      ContentSchema,
+      assertExchange = true,
+      assertExchangeOptions = null
+    } = options || {}
     this._assertExchange = null
     if (assertExchange) {
+      const defaults = { durable: true }
       this._assertExchange = assertExchange === true
-        ? { durable: true } // defaults
-        : assertExchange
+      this._assertExchangeOptions = assertExchangeOptions || defaults
     }
     this.MessageModel = MessageModel || QueueMessage
     this.ContentSchema = ContentSchema || JSON
@@ -32,7 +37,7 @@ class Publisher {
    */
   assertExchangeOrQueue (channel) {
     if (this._assertExchange) {
-      return channel.assertExchange(this.exchange, 'fanout', this._assertExchange)
+      return channel.assertExchange(this.exchange, 'fanout', this._assertExchangeOptions)
     }
   }
 
