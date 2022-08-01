@@ -13,7 +13,7 @@ describe('QueueClient && QueueServer', () => {
   const clientManager = new QueueManager(config)
   clientManager.setLogger(logger)
   const queueClient = clientManager.getQueueClient(queueName, {
-    assertQueue: false
+    assertQueue: false // skip queue assertion for client, b/c the server initiates it exclusively
   })
 
   const serverManager = new QueueManager(config)

@@ -43,6 +43,11 @@ class QueueMessage {
     return Buffer.concat([formatBuf, lengthBuf, jsonBuf, ...attachmentBuffers])
   }
 
+  /**
+   * @param {Buffer} buffer
+   * @param ContentSchema
+   * @returns {QueueMessage}
+   */
   static unserialize (buffer, ContentSchema = JSON) {
     if (!ContentSchema || ContentSchema === JSON) {
       if (buffer.toString('utf8', 0, 1) === '+') {
