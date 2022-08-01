@@ -19,9 +19,7 @@ class QueueServer extends Subscriber {
     this._prefetchCount = prefetchCount
 
     this._assertQueue = assertQueue === true
-    if (this._assertQueue) {
-      this._assertQueueOptions = Object.assign(assertQueueOptions || {}, { durable: true })
-    }
+    this._assertQueueOptions = Object.assign({ durable: true }, assertQueueOptions || {})
   }
 
   /**

@@ -25,12 +25,10 @@ class Subscriber {
     this._timeoutMs = timeoutMs
     this.MessageModel = MessageModel || QueueMessage
     this.ContentSchema = ContentSchema || JSON
-    this._assertQueueOptions = Object.assign(assertQueueOptions || {}, { exclusive: true })
+
+    this._assertQueueOptions = Object.assign({ exclusive: true }, assertQueueOptions || {})
     this._assertExchange = assertExchange === true
-    if (assertExchange) {
-      const defaults = { durable: true }
-      this._assertExchangeOptions = assertExchangeOptions || defaults
-    }
+    this._assertExchangeOptions = Object.assign({ durable: true }, assertExchangeOptions || {})
 
     this._retryMap = new Map()
 

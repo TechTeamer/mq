@@ -25,14 +25,8 @@ class GatheringServer {
     this._responseTimeoutMs = timeoutMs
     this._assertExchange = assertExchange === true
     this._assertExchangeOptions = null
-
-    this._assertQueueOptions = assertQueueOptions
-      ? Object.assign(assertQueueOptions || {}, { exclusive: true })
-      : { exclusive: true } // defaults
-
-    if (this._assertExchange) {
-      this._assertExchangeOptions = Object.assign(assertExchangeOptions || {}, { durable: true })
-    }
+    this._assertQueueOptions = Object.assign({ exclusive: true }, assertQueueOptions || {})
+    this._assertExchangeOptions = Object.assign({ durable: true }, assertExchangeOptions || {})
 
     this.actions = new Map()
   }

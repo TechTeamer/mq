@@ -19,12 +19,10 @@ class Publisher {
       assertExchange = true,
       assertExchangeOptions = null
     } = options || {}
-    this._assertExchange = null
-    if (assertExchange) {
-      const defaults = { durable: true }
-      this._assertExchange = assertExchange === true
-      this._assertExchangeOptions = assertExchangeOptions || defaults
-    }
+
+    this._assertExchange = assertExchange === true
+    this._assertExchangeOptions = Object.assign({ durable: true }, assertExchangeOptions || {})
+
     this.MessageModel = MessageModel || QueueMessage
     this.ContentSchema = ContentSchema || JSON
   }

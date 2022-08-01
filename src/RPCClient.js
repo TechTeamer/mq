@@ -32,9 +32,7 @@ class RPCClient {
     this._correlationIdMap = new Map()
 
     this._assertReplyQueue = assertReplyQueue === true
-    if (this._assertReplyQueue) {
-      this._assertReplyQueueOptions = Object.assign(assertReplyQueueOptions || {}, { exclusive: true })
-    }
+    this._assertReplyQueueOptions = Object.assign({ exclusive: true }, assertReplyQueueOptions || {})
 
     this._rpcQueueMaxSize = queueMaxSize
     this._rpcTimeoutMs = timeoutMs

@@ -31,11 +31,8 @@ class GatheringClient {
     this._assertExchange = assertExchange === true
     this._assertExchangeOptions = null
 
-    this._assertQueueOptions = Object.assign(assertQueueOptions || {}, { exclusive: true })
-
-    if (this._assertExchange) {
-      this._assertExchangeOptions = Object.assign(assertExchangeOptions || {}, { durable: true })
-    }
+    this._assertQueueOptions = Object.assign({ exclusive: true }, assertQueueOptions || {})
+    this._assertExchangeOptions = Object.assign({ durable: true }, assertExchangeOptions || {})
   }
 
   async initialize () {
