@@ -13,7 +13,7 @@ describe('ProtoQueueMessage', () => {
   const number = 1
   const string = 'hello ŰÁÉÚŐÓÜÖÍűáéúőóüöí$\\`#^+-[]<>*;~!%/()孫詒讓\u1FFF\u{10FFFF}'
   const array = [1, 2, 3]
-  const testBuffer = Buffer.from('test buffer')
+  const testBuffer = Buffer.from(string)
   const testData = { number, string, array, buffer: testBuffer }
   let TestMessage
 
@@ -42,15 +42,15 @@ describe('ProtoQueueMessage', () => {
 
     const data = newQueueMessage.data
     assert.isObject(data, 'not an object')
-    assert.hasAllKeys(data, ['number', 'string', 'array', 'buffer'], 'object members not match')
-    assert.strictEqual(data.number, number, 'number not match')
-    assert.strictEqual(data.string, string, 'string not match')
+    assert.hasAllKeys(data, ['number', 'string', 'array', 'buffer'], 'object members do not match')
+    assert.strictEqual(data.number, number, 'number does not match')
+    assert.strictEqual(data.string, string, 'string does not match')
     assert.isArray(data.array, array, 'not an array')
-    assert.sameMembers(data.array, array, 'array members not match')
+    assert.sameMembers(data.array, array, 'array members do not match')
     const buffer = Buffer.from(data.buffer)
-    assert.strictEqual(buffer.toString('utf8'), 'test buffer', 'buffer content not match')
+    assert.strictEqual(buffer.toString('utf8'), string, 'buffer content does not match')
 
-    assert.strictEqual(newQueueMessage.timeOut, null, 'timeout not match')
+    assert.strictEqual(newQueueMessage.timeOut, null, 'timeout does not match')
 
     newQueueMessage.getAttachments().forEach((value, key) => {
       assert.strictEqual(value.toString(), queueMessage.getAttachments().get(key).toString(), 'attachment not match')
