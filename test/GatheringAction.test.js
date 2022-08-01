@@ -13,8 +13,8 @@ describe('GatheringClient && GatheringServer actions', () => {
   const queueManager = new QueueManager(config)
   queueManager.setLogger(logger)
 
-  const gatheringClient = queueManager.getGatheringClient(gatheringName, { queueMaxSize: 100, timeoutMs, assertExchange: assertExchangeOptions })
-  const gatheringServer1 = queueManager.getGatheringServer(gatheringName, { prefetchCount: 1, timeoutMs, assertExchange: assertExchangeOptions })
+  const gatheringClient = queueManager.getGatheringClient(gatheringName, { queueMaxSize: 100, timeoutMs, assertExchangeOptions })
+  const gatheringServer1 = queueManager.getGatheringServer(gatheringName, { prefetchCount: 1, timeoutMs, assertExchangeOptions })
 
   before(() => {
     return queueManager.connect()

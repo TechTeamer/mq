@@ -22,21 +22,19 @@ class GatheringClient {
       timeoutMs,
       serverCount = 0,
       assertQueueOptions,
-      assertExchange = true
+      assertExchange = true,
+      assertExchangeOptions = null
     } = options
     this._rpcQueueMaxSize = queueMaxSize
     this._rpcTimeoutMs = timeoutMs
     this._gatheringServerCount = serverCount
-    this._assertExchange = null
+    this._assertExchange = assertExchange === true
+    this._assertExchangeOptions = null
 
-    this._assertQueueOptions = assertQueueOptions
-      ? Object.assign(assertQueueOptions || {}, { exclusive: true })
-      : { exclusive: true } // defaults
+    this._assertQueueOptions = Object.assign(assertQueueOptions || {}, { exclusive: true })
 
-    if (assertExchange) {
-      this._assertExchange = assertExchange === true
-        ? { durable: true }
-        : assertExchange
+    if (this._assertExchange) {
+      this._assertExchangeOptions = Object.assign(assertExchangeOptions || {}, { durable: true })
     }
   }
 
@@ -44,7 +42,7 @@ class GatheringClient {
     try {
       const channel = await this._connection.getChannel()
       if (this._assertExchange) {
-        await channel.assertExchange(this.name, 'fanout', this._assertExchange)
+        await channel.assertExchange(this.name, 'fanout', this._assertExchangeOptions)
       }
 
       const replyQueue = await channel.assertQueue('', this._assertQueueOptions)
