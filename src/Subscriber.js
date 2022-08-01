@@ -21,6 +21,7 @@ class Subscriber {
       assertExchange = true,
       assertExchangeOptions = null
     } = options || {}
+
     this._maxRetry = maxRetry
     this._timeoutMs = timeoutMs
     this.MessageModel = MessageModel || QueueMessage

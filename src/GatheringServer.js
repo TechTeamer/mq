@@ -21,10 +21,11 @@ class GatheringServer {
       assertExchange = true,
       assertExchangeOptions = null
     } = options || {}
+
     this._prefetchCount = prefetchCount
     this._responseTimeoutMs = timeoutMs
+
     this._assertExchange = assertExchange === true
-    this._assertExchangeOptions = null
     this._assertQueueOptions = Object.assign({ exclusive: true }, assertQueueOptions || {})
     this._assertExchangeOptions = Object.assign({ durable: true }, assertExchangeOptions || {})
 

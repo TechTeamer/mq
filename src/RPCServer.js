@@ -26,11 +26,9 @@ class RPCServer {
     this._connection = queueConnection
     this._logger = logger
     this.name = rpcName
-    this._assertQueue = assertQueue === true
 
-    if (this._assertQueue) {
-      this._assertQueueOptions = Object.assign(assertQueueOptions || {}, { durable: true })
-    }
+    this._assertQueue = assertQueue === true
+    this._assertQueueOptions = Object.assign({ durable: true }, assertQueueOptions || {})
 
     this._prefetchCount = prefetchCount
     this._timeoutMs = timeoutMs

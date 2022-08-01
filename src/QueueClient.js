@@ -11,6 +11,7 @@ class QueueClient extends Publisher {
     super(queueConnection, logger, '', options)
     this.routingKey = name
     this._assertQueue = null
+
     const {
       assertQueue = true,
       assertQueueOptions
