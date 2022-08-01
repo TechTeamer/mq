@@ -12,13 +12,13 @@ class QueueClient extends Publisher {
     this.routingKey = name
     this._assertQueue = null
     const {
-      assertQueue
+      assertQueue = true,
+      assertQueueOptions
     } = options || {}
 
-    if (assertQueue) {
-      this._assertQueue = assertQueue === true
-        ? { durable: true } // defaults
-        : assertQueue
+    this._assertQueue = assertQueue === true
+    if (this._assertQueue) {
+      this._assertQueueOptions = Object.assign(assertQueueOptions || {}, { durable: true })
     }
   }
 
@@ -28,7 +28,7 @@ class QueueClient extends Publisher {
    */
   assertExchangeOrQueue (channel) {
     if (this._assertQueue) {
-      return channel.assertQueue(this.routingKey, this._assertQueue)
+      return channel.assertQueue(this.routingKey, this._assertQueueOptions)
     }
   }
 }

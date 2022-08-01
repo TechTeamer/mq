@@ -11,16 +11,16 @@ class QueueServer extends Subscriber {
     super(queueConnection, logger, name, options)
     const {
       assertQueue = true,
+      assertQueueOptions = null,
       prefetchCount
     } = options || {}
 
     this._assertQueue = null
     this._prefetchCount = prefetchCount
 
-    if (assertQueue) {
-      this._assertQueue = assertQueue === true
-        ? { durable: true } // defaults
-        : assertQueue
+    this._assertQueue = assertQueue === true
+    if (this._assertQueue) {
+      this._assertQueueOptions = Object.assign(assertQueueOptions || {}, { durable: true })
     }
   }
 
@@ -31,14 +31,14 @@ class QueueServer extends Subscriber {
     try {
       const channel = await this._connection.getChannel()
       if (this._assertQueue) {
-        await channel.assertQueue(this.name, this._assertQueue)
+        await channel.assertQueue(this.name, this._assertQueueOptions)
       }
       await channel.prefetch(this._prefetchCount)
       await channel.consume(this.name, (msg) => {
         this._processMessage(channel, msg)
       })
     } catch (err) {
-      this._logger.error('CANNOT INITIALIZE QUEUE SERVER', this.name, this._assertQueue, err)
+      this._logger.error('CANNOT INITIALIZE QUEUE SERVER', this.name, this._assertQueueOptions, err)
       throw err
     }
   }

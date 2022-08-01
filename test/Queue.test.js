@@ -22,7 +22,8 @@ describe('QueueClient && QueueServer', () => {
     prefetchCount: 1,
     maxRetry,
     timeoutMs: 10000,
-    assertQueue: assertQueueOptions
+    assertQueue: true,
+    assertQueueOptions
   }
   const queueServer = serverManager.getQueueServer(queueName, options)
 

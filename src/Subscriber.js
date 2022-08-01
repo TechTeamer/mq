@@ -160,7 +160,7 @@ class Subscriber {
    * @param channel
    * @param msg
    * @return {Promise}
-   * @private
+   * @protected
    */
   async _processMessage (channel, msg) {
     const request = this._parseMessage(msg)
