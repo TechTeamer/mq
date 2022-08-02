@@ -1,3 +1,9 @@
+5.0.0
+- added Protobuf support
+- added more options to configure queue and exchange assertions
+- updated and upgraded dependencies
+- added option to exit on connection closing
+
 4.1.4
 - dependency updates
 - minimum requirement is node v14
