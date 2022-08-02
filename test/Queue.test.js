@@ -5,17 +5,26 @@ const SeedRandom = require('seed-random')
 const config = require('./config/LoadConfig')
 
 describe('QueueClient && QueueServer', () => {
-  const queueName = 'test-queue'
+  const queueName = 'techteamer-mq-js-test-queue'
   const logger = new ConsoleInspector(console)
   const maxRetry = 5
+  const assertQueueOptions = { durable: false, exclusive: true }
 
   const clientManager = new QueueManager(config)
   clientManager.setLogger(logger)
-  const queueClient = clientManager.getQueueClient(queueName)
+  const queueClient = clientManager.getQueueClient(queueName, {
+    assertQueue: false // skip queue assertion for client, b/c the server initiates it exclusively
+  })
 
   const serverManager = new QueueManager(config)
   serverManager.setLogger(logger)
-  const options = { prefetchCount: 1, maxRetry, timeoutMs: 10000 }
+  const options = {
+    prefetchCount: 1,
+    maxRetry,
+    timeoutMs: 10000,
+    assertQueue: true,
+    assertQueueOptions
+  }
   const queueServer = serverManager.getQueueServer(queueName, options)
 
   before(() => {

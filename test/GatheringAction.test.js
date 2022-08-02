@@ -5,15 +5,16 @@ const chai = require('chai')
 const expect = chai.expect
 
 describe('GatheringClient && GatheringServer actions', () => {
-  const gatheringName = 'test-gathering-action'
+  const gatheringName = 'techteamer-mq-js-test-test-gathering-action'
   const logger = new ConsoleInspector(console)
   const timeoutMs = 1000
+  const assertExchangeOptions = { durable: false, autoDelete: true }
 
   const queueManager = new QueueManager(config)
   queueManager.setLogger(logger)
 
-  const gatheringClient = queueManager.getGatheringClient(gatheringName, { queueMaxSize: 100, timeoutMs })
-  const gatheringServer1 = queueManager.getGatheringServer(gatheringName, { prefetchCount: 1, timeoutMs })
+  const gatheringClient = queueManager.getGatheringClient(gatheringName, { queueMaxSize: 100, timeoutMs, assertExchangeOptions })
+  const gatheringServer1 = queueManager.getGatheringServer(gatheringName, { prefetchCount: 1, timeoutMs, assertExchangeOptions })
 
   before(() => {
     return queueManager.connect()

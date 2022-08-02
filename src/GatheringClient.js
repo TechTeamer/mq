@@ -17,18 +17,32 @@ class GatheringClient {
     this._correlationIdMap = new Map()
     this._replyQueue = ''
 
-    const { queueMaxSize, timeoutMs, serverCount = 0 } = options
+    const {
+      queueMaxSize,
+      timeoutMs,
+      serverCount = 0,
+      assertQueueOptions,
+      assertExchange = true,
+      assertExchangeOptions = null
+    } = options
+
     this._rpcQueueMaxSize = queueMaxSize
     this._rpcTimeoutMs = timeoutMs
     this._gatheringServerCount = serverCount
+
+    this._assertExchange = assertExchange === true
+    this._assertQueueOptions = Object.assign({ exclusive: true }, assertQueueOptions || {})
+    this._assertExchangeOptions = Object.assign({ durable: true }, assertExchangeOptions || {})
   }
 
   async initialize () {
     try {
       const channel = await this._connection.getChannel()
-      await channel.assertExchange(this.name, 'fanout', { durable: true })
+      if (this._assertExchange) {
+        await channel.assertExchange(this.name, 'fanout', this._assertExchangeOptions)
+      }
 
-      const replyQueue = await channel.assertQueue('', { exclusive: true })
+      const replyQueue = await channel.assertQueue('', this._assertQueueOptions)
       this._replyQueue = replyQueue.queue
 
       await channel.consume(this._replyQueue, (reply) => {

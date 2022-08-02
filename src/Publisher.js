@@ -5,12 +5,27 @@ class Publisher {
    * @param {QueueConnection} queueConnection
    * @param {Console} logger
    * @param {String} exchange
+   * @param {Object} options
    */
-  constructor (queueConnection, logger, exchange) {
+  constructor (queueConnection, logger, exchange, options) {
     this._connection = queueConnection
     this._logger = logger
     this.exchange = exchange
     this.routingKey = ''
+    this.options = options
+
+    const {
+      MessageModel,
+      ContentSchema,
+      assertExchange = true,
+      assertExchangeOptions = null
+    } = options || {}
+
+    this._assertExchange = assertExchange === true
+    this._assertExchangeOptions = Object.assign({ durable: true }, assertExchangeOptions || {})
+
+    this.MessageModel = MessageModel || QueueMessage
+    this.ContentSchema = ContentSchema || JSON
   }
 
   /**
@@ -20,7 +35,9 @@ class Publisher {
    * @returns {Promise}
    */
   assertExchangeOrQueue (channel) {
-    return channel.assertExchange(this.exchange, 'fanout', { durable: true })
+    if (this._assertExchange) {
+      return channel.assertExchange(this.exchange, 'fanout', this._assertExchangeOptions)
+    }
   }
 
   async initialize () {
@@ -58,7 +75,7 @@ class Publisher {
       const channel = await this._connection.getChannel()
       let param
       try {
-        param = new QueueMessage('ok', message, timeOut)
+        param = new this.MessageModel('ok', message, timeOut, this.ContentSchema)
         if (attachments instanceof Map) {
           for (const [key, value] of attachments) {
             param.addAttachment(key, value)

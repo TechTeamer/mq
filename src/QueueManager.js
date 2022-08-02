@@ -162,18 +162,24 @@ class QueueManager {
   /**
    * @param {String} exchangeName
    * @param {Publisher|function() : Publisher} OverrideClass
+   * @param {Object} [options]
    * @return Publisher
    */
-  getPublisher (exchangeName, OverrideClass = Publisher) {
+  getPublisher (exchangeName, OverrideClass = Publisher, options = {}) {
     if (this.publishers.has(exchangeName)) {
       return this.publishers.get(exchangeName)
+    }
+
+    if (arguments.length === 2 && typeof OverrideClass !== 'function') {
+      options = OverrideClass
+      OverrideClass = Publisher
     }
 
     if (OverrideClass !== Publisher && !(OverrideClass.prototype instanceof Publisher)) {
       throw new Error('Override must be a subclass of Publisher')
     }
 
-    const publisher = new OverrideClass(this.connection, this._logger, exchangeName)
+    const publisher = new OverrideClass(this.connection, this._logger, exchangeName, options)
 
     this.publishers.set(exchangeName, publisher)
 
@@ -274,18 +280,24 @@ class QueueManager {
   /**
    * @param {String} queueName
    * @param {QueueClient|function() : QueueClient} OverrideClass
+   * @param {Object} [options={}]
    * @return QueueClient
    */
-  getQueueClient (queueName, OverrideClass = QueueClient) {
+  getQueueClient (queueName, OverrideClass = QueueClient, options = {}) {
     if (this.queueClients.has(queueName)) {
       return this.queueClients.get(queueName)
+    }
+
+    if (arguments.length === 2 && typeof OverrideClass !== 'function') {
+      options = OverrideClass
+      OverrideClass = QueueClient
     }
 
     if (OverrideClass !== QueueClient && !(OverrideClass.prototype instanceof QueueClient)) {
       throw new Error('Override must be a subclass of QueueClient')
     }
 
-    const queueClient = new OverrideClass(this.connection, this._logger, queueName)
+    const queueClient = new OverrideClass(this.connection, this._logger, queueName, options)
 
     this.queueClients.set(queueName, queueClient)
 

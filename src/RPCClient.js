@@ -13,15 +13,33 @@ class RPCClient {
    * @param {Object} options
    */
   constructor (queueConnection, logger, rpcName, options) {
+    const {
+      queueMaxSize,
+      timeoutMs,
+      RequestMessageModel,
+      ResponseMessageModel,
+      RequestContentSchema,
+      ResponseContentSchema,
+      replyQueueName = '',
+      assertReplyQueue = true,
+      assertReplyQueueOptions = null
+    } = options || {}
+
     this._connection = queueConnection
     this._logger = logger
     this.name = rpcName
-    this._replyQueue = ''
+    this._replyQueue = replyQueueName || ''
     this._correlationIdMap = new Map()
 
-    const { queueMaxSize, timeoutMs } = options
+    this._assertReplyQueue = assertReplyQueue === true
+    this._assertReplyQueueOptions = Object.assign({ exclusive: true }, assertReplyQueueOptions || {})
+
     this._rpcQueueMaxSize = queueMaxSize
     this._rpcTimeoutMs = timeoutMs
+    this.RequestMessageModel = RequestMessageModel || QueueMessage
+    this.ResponseMessageModel = ResponseMessageModel || QueueMessage
+    this.RequestContentSchema = RequestContentSchema || JSON
+    this.ResponseContentSchema = ResponseContentSchema || JSON
   }
 
   async initialize () {
@@ -92,7 +110,7 @@ class RPCClient {
 
       let param
       try {
-        param = new QueueMessage('ok', message, timeoutMs)
+        param = new this.RequestMessageModel('ok', message, timeoutMs, this.RequestContentSchema)
         if (attachments instanceof Map) {
           for (const [key, value] of attachments) {
             param.addAttachment(key, value)
@@ -135,8 +153,10 @@ class RPCClient {
    * */
   async _getReplyQueue (ch) {
     try {
-      const replyQueue = await ch.assertQueue('', { exclusive: true })
-      this._replyQueue = replyQueue.queue
+      if (this._assertReplyQueue) {
+        const assertResult = await ch.assertQueue(this._replyQueue, this._assertReplyQueueOptions)
+        this._replyQueue = assertResult.queue
+      }
 
       ch.consume(this._replyQueue, (msg) => {
         return Promise.resolve().then(() => {
@@ -173,7 +193,7 @@ class RPCClient {
 
     this._correlationIdMap.delete(reply.properties.correlationId)
 
-    const replyContent = QueueMessage.unserialize(reply.content)
+    const replyContent = this.ResponseMessageModel.unserialize(reply.content, this.ResponseContentSchema)
 
     if (replyContent.status === 'ok') {
       if (resolveWithFullResponse) {

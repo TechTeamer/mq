@@ -12,9 +12,24 @@ class Subscriber {
     this._logger = logger
     this.name = name
 
-    const { maxRetry, timeoutMs } = options
+    const {
+      maxRetry,
+      timeoutMs,
+      MessageModel,
+      ContentSchema,
+      assertQueueOptions = null,
+      assertExchange = true,
+      assertExchangeOptions = null
+    } = options || {}
+
     this._maxRetry = maxRetry
     this._timeoutMs = timeoutMs
+    this.MessageModel = MessageModel || QueueMessage
+    this.ContentSchema = ContentSchema || JSON
+
+    this._assertQueueOptions = Object.assign({ exclusive: true }, assertQueueOptions || {})
+    this._assertExchange = assertExchange === true
+    this._assertExchangeOptions = Object.assign({ durable: true }, assertExchangeOptions || {})
 
     this._retryMap = new Map()
 
@@ -51,8 +66,10 @@ class Subscriber {
   async initialize () {
     try {
       const channel = await this._connection.getChannel()
-      await channel.assertExchange(this.name, 'fanout', { durable: true })
-      const queue = await channel.assertQueue('', { exclusive: true })
+      if (this._assertExchange) {
+        await channel.assertExchange(this.name, 'fanout', this._assertExchangeOptions)
+      }
+      const queue = await channel.assertQueue('', this._assertQueueOptions)
 
       await channel.bindQueue(queue.queue, this.name, '')
 
@@ -92,37 +109,69 @@ class Subscriber {
     msg.acked = true
   }
 
+  _parseMessage (msg) {
+    try {
+      const request = this.MessageModel.unserialize(msg.content, this.ContentSchema)
+
+      if (request.status !== 'ok') {
+        this._logger.error('CANNOT GET QUEUE MESSAGE PARAMS', this.name, request)
+        return null
+      }
+
+      return request
+    } catch (err) {
+      this._logger.error('CANNOT PROCESS QUEUE MESSAGE', this.name, msg.properties, err)
+      return null
+    }
+  }
+
+  /**
+   * @param channel
+   * @param msg
+   * @param request
+   * @returns {boolean} true if too many retries reached
+   * @private
+   */
+  _handleMessageRetry (msg, request) {
+    if (!msg.fields || !msg.fields.redelivered || !msg.fields.consumerTag) {
+      return false
+    }
+
+    const consumerTag = msg.fields.consumerTag
+    let counter = 1
+    if (this._retryMap.has(consumerTag)) {
+      counter = this._retryMap.get(consumerTag) + 1
+      this._retryMap.set(consumerTag, counter)
+    } else {
+      this._retryMap.set(consumerTag, counter)
+    }
+
+    if (counter > this._maxRetry) {
+      this._logger.error('SUBSCRIBER TRIED TOO MANY TIMES', this.name, request, msg)
+      this._retryMap.delete(consumerTag)
+      return true
+    }
+
+    return false
+  }
+
   /**
    * @param channel
    * @param msg
    * @return {Promise}
-   * @private
+   * @protected
    */
-  _processMessage (channel, msg) {
-    const request = QueueMessage.unserialize(msg.content)
-    if (request.status !== 'ok') {
-      this._logger.error('CANNOT GET QUEUE MESSAGE PARAMS', this.name, request)
+  async _processMessage (channel, msg) {
+    const request = this._parseMessage(msg)
+    if (!request) {
       this._ack(channel, msg)
       return
     }
 
-    if (msg.fields && msg.fields.redelivered && msg.fields.consumerTag) {
-      let counter = 1
-      if (this._retryMap.has(msg.fields.consumerTag)) {
-        counter = this._retryMap.get(msg.fields.consumerTag) + 1
-        this._retryMap.set(msg.fields.consumerTag, counter)
-      } else {
-        this._retryMap.set(msg.fields.consumerTag, counter)
-      }
-
-      if (counter > this._maxRetry) {
-        this._logger.error('SUBSCRIBER TRIED TOO MANY TIMES', this.name, request, msg)
-        this._ack(channel, msg)
-        if (msg.fields.consumerTag) {
-          this._retryMap.delete(msg.fields.consumerTag)
-        }
-        return
-      }
+    const tooManyRetries = this._handleMessageRetry(msg, request)
+    if (tooManyRetries) {
+      this._ack(channel, msg)
+      return
     }
 
     let timedOut = false
@@ -133,9 +182,9 @@ class Subscriber {
       this._nack(channel, msg)
     }, timeoutMs)
 
-    return Promise.resolve().then(() => {
-      return this._callback(request.data, msg.properties, request, msg)
-    }).then(() => {
+    try {
+      await this._callback(request.data, msg.properties, request, msg)
+
       if (!timedOut) {
         clearTimeout(timer)
         this._ack(channel, msg)
@@ -143,13 +192,13 @@ class Subscriber {
           this._retryMap.delete(msg.fields.consumerTag)
         }
       }
-    }).catch((err) => {
+    } catch (err) {
       if (!timedOut) {
         clearTimeout(timer)
         this._logger.error('Cannot process Subscriber consume', err)
         this._nack(channel, msg)
       }
-    })
+    }
   }
 
   /**

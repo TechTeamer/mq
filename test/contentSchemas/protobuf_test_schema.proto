@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+message TestMessage {
+  int32 number = 1;
+  string string = 2;
+  repeated int32 array = 3;
+  bytes buffer = 4;
+}

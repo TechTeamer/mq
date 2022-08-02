@@ -3,17 +3,24 @@ const ConsoleInspector = require('./consoleInspector')
 const config = require('./config/LoadConfig')
 
 describe('Publisher && Subscriber actions', () => {
-  const publisherName = 'test-publisher-action'
+  const publisherName = 'techteamer-mq-js-test-publisher-action'
   const logger = new ConsoleInspector(console)
   const maxRetry = 5
+  const assertExchangeOptions = { durable: false, autoDelete: true }
 
   const publisherManager = new QueueManager(config)
   publisherManager.setLogger(logger)
-  const publisher = publisherManager.getPublisher(publisherName)
+  const publisher = publisherManager.getPublisher(publisherName, {
+    assertExchangeOptions
+  })
 
   const subscriberManager = new QueueManager(config)
   subscriberManager.setLogger(logger)
-  const subscriber = subscriberManager.getSubscriber(publisherName, { maxRetry, timeoutMs: 10000 })
+  const subscriber = subscriberManager.getSubscriber(publisherName, {
+    maxRetry,
+    timeoutMs: 10000,
+    assertExchangeOptions
+  })
 
   before(() => {
     return publisherManager.connect().then(() => {

@@ -4,18 +4,19 @@ const SeedRandom = require('seed-random')
 const config = require('./config/LoadConfig')
 
 describe('RPCClient && RPCServer', () => {
-  const rpcName = 'test-rpc'
-  const shortRpcName = 'short-test-rpc'
+  const rpcName = 'techteamer-mq-js-test-rpc'
+  const shortRpcName = 'techteamer-mq-js-test-rpc-short'
   const logger = new ConsoleInspector(console)
   const timeoutMs = 1000
+  const assertQueueOptions = { durable: false, exclusive: true }
 
   const queueManager = new QueueManager(config)
   queueManager.setLogger(logger)
 
   const rpcClient = queueManager.getRPCClient(rpcName, { queueMaxSize: 100, timeoutMs })
-  const rpcServer = queueManager.getRPCServer(rpcName, { prefetchCount: 1, timeoutMs })
+  const rpcServer = queueManager.getRPCServer(rpcName, { prefetchCount: 1, timeoutMs, assertQueueOptions })
   const shortRpcClient = queueManager.getRPCClient(shortRpcName, { queueMaxSize: 1, timeoutMs })
-  const shortRpcServer = queueManager.getRPCServer(shortRpcName, { prefetchCount: 1, timeoutMs })
+  const shortRpcServer = queueManager.getRPCServer(shortRpcName, { prefetchCount: 1, timeoutMs, assertQueueOptions })
 
   before(() => {
     return queueManager.connect()
