@@ -53,7 +53,9 @@ class QueueConnection {
       })
       conn.on('close', () => {
         this._logger.error('RabbitMQ closed')
-        process.exit(2)
+        if (this._config.exitOnConnectionClose) {
+          process.exit(this._config.exitOnConnectionClose)
+        }
       })
       conn.on('blocked', (reason) => {
         this._logger.error('RabbitMQ blocked', reason)

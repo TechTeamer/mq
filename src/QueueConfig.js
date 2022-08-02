@@ -33,7 +33,8 @@ class QueueConfig {
       options = {},
       rpcTimeoutMs = 10000,
       rpcQueueMaxSize = 100,
-      logger = console
+      logger = console,
+      exitOnConnectionClose = 2
     } = config
 
     const rabbitMqOptions = new RabbitMqOptions(options)
@@ -42,6 +43,7 @@ class QueueConfig {
     this.rpcTimeoutMs = rpcTimeoutMs
     this.rpcQueueMaxSize = rpcQueueMaxSize
     this.logger = logger
+    this.exitOnConnectionClose = exitOnConnectionClose
   }
 }
 
