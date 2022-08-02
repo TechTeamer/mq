@@ -1,3 +1,6 @@
+5.0.1
+- export ProtoQueueMessage class
+
 5.0.0
 - added Protobuf support
 - added more options to configure queue and exchange assertions
