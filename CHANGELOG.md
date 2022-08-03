@@ -1,3 +1,6 @@
+5.0.2
+- add options to configure deserialization of ProtoQueueMessage
+
 5.0.1
 - export ProtoQueueMessage class
 
