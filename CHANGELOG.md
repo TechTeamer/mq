@@ -1,3 +1,6 @@
+5.1.0
+- handle multiple connection urls and hosts
+
 5.0.2
 - add options to configure deserialization of ProtoQueueMessage
 
