@@ -27,7 +27,7 @@ class Subscriber {
     this.MessageModel = MessageModel || QueueMessage
     this.ContentSchema = ContentSchema || JSON
 
-    this._assertQueueOptions = Object.assign({ exclusive: true }, assertQueueOptions || {})
+    this._assertQueueOptions = Object.assign({ exclusive: true, autoDelete: true }, assertQueueOptions || {})
     this._assertExchange = assertExchange === true
     this._assertExchangeOptions = Object.assign({ durable: true }, assertExchangeOptions || {})
 

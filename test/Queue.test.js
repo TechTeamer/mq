@@ -8,7 +8,7 @@ describe('QueueClient && QueueServer', () => {
   const queueName = 'techteamer-mq-js-test-queue'
   const logger = new ConsoleInspector(console)
   const maxRetry = 5
-  const assertQueueOptions = { durable: false, exclusive: true }
+  const assertQueueOptions = { durable: false, exclusive: true, autoDelete: true }
 
   const clientManager = new QueueManager(config)
   clientManager.setLogger(logger)

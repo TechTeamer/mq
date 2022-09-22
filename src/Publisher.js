@@ -62,14 +62,17 @@ class Publisher {
    * @param {String} [correlationId]
    * @param {Number} [timeOut]
    * @param {Map} [attachments]
+   * @param {object} [sendOptions]
    * @return {Promise}
    */
-  async send (message, correlationId = null, timeOut = null, attachments = null) {
-    const options = {}
+  async send (message, correlationId = null, timeOut = null, attachments = null, sendOptions = {}) {
+    const defaultOptions = {}
 
     if (correlationId) {
-      options.correlationId = correlationId
+      defaultOptions.correlationId = correlationId
     }
+
+    const options = Object.assign(defaultOptions, sendOptions || {})
 
     try {
       const channel = await this._connection.getChannel()

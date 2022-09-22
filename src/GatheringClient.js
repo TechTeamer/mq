@@ -31,7 +31,7 @@ class GatheringClient {
     this._gatheringServerCount = serverCount
 
     this._assertExchange = assertExchange === true
-    this._assertQueueOptions = Object.assign({ exclusive: true }, assertQueueOptions || {})
+    this._assertQueueOptions = Object.assign({ exclusive: true, autoDelete: true }, assertQueueOptions || {})
     this._assertExchangeOptions = Object.assign({ durable: true }, assertExchangeOptions || {})
   }
 

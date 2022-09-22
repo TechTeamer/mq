@@ -32,7 +32,7 @@ class RPCClient {
     this._correlationIdMap = new Map()
 
     this._assertReplyQueue = assertReplyQueue === true
-    this._assertReplyQueueOptions = Object.assign({ exclusive: true }, assertReplyQueueOptions || {})
+    this._assertReplyQueueOptions = Object.assign({ exclusive: true, autoDelete: true }, assertReplyQueueOptions || {})
 
     this._rpcQueueMaxSize = queueMaxSize
     this._rpcTimeoutMs = timeoutMs
@@ -99,9 +99,10 @@ class RPCClient {
    * @param {Number} timeoutMs
    * @param {Map} attachments
    * @param {Boolean} [resolveWithFullResponse=false]
+   * @param {Object} sendOptions
    * @return {Promise<QueueMessage|*>}
    * */
-  async call (message, timeoutMs = null, attachments = null, resolveWithFullResponse = false) {
+  async call (message, timeoutMs = null, attachments = null, resolveWithFullResponse = false, sendOptions = {}) {
     try {
       if (this._correlationIdMap.size > this._rpcQueueMaxSize) {
         throw new Error('RPCCLIENT QUEUE FULL ' + this.name)
@@ -124,10 +125,9 @@ class RPCClient {
       return await new Promise((resolve, reject) => {
         const correlationId = this._registerMessage(resolve, reject, timeoutMs, resolveWithFullResponse)
 
-        channel.sendToQueue(this.name, param.serialize(), {
-          correlationId,
-          replyTo: this._replyQueue
-        })
+        const options = Object.assign({ correlationId, replyTo: this._replyQueue }, sendOptions || {})
+
+        channel.sendToQueue(this.name, param.serialize(), options)
       })
     } catch (err) {
       this._logger.error('RPCCLIENT: cannot make rpc call', err)

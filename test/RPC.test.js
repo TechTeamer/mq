@@ -8,7 +8,7 @@ describe('RPCClient && RPCServer', () => {
   const shortRpcName = 'techteamer-mq-js-test-rpc-short'
   const logger = new ConsoleInspector(console)
   const timeoutMs = 1000
-  const assertQueueOptions = { durable: false, exclusive: true }
+  const assertQueueOptions = { durable: false, exclusive: true, autoDelete: true }
 
   const queueManager = new QueueManager(config)
   queueManager.setLogger(logger)
