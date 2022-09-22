@@ -1,6 +1,6 @@
 {
   "name": "@techteamer/mq",
-  "version": "5.1.0",
+  "version": "5.2.0",
   "description": "A RabbitMQ wrapper for node",
   "main": "index.js",
   "author": "TechTeamer",

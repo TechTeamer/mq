@@ -1,3 +1,7 @@
+5.2.0
+- option to use direct exchange for RPC
+- autodelete for random (empty named) queues
+
 5.1.0
 - handle multiple connection urls and hosts
 
