@@ -22,8 +22,8 @@
     "test": "eslint . && nyc mocha --exit && nyc report --reporter=text-lcov | coveralls"
   },
   "dependencies": {
-    "amqplib": "^0.10.1",
-    "uuid": "^8.2.0"
+    "amqplib": "^0.10.3",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "chai": "^4.3.6",
