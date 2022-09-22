@@ -20,7 +20,9 @@ class RPCServer {
       RequestContentSchema,
       ResponseContentSchema,
       assertQueue = true,
-      assertQueueOptions = null
+      assertQueueOptions = null,
+      bindDirectExchangeName = null,
+      exchangeOptions = null
     } = options || {}
 
     this._connection = queueConnection
@@ -29,6 +31,9 @@ class RPCServer {
 
     this._assertQueue = assertQueue === true
     this._assertQueueOptions = Object.assign({ durable: true }, assertQueueOptions || {})
+
+    this._bindDirectExchangeName = bindDirectExchangeName
+    this._exchangeOptions = exchangeOptions || {}
 
     this._prefetchCount = prefetchCount
     this._timeoutMs = timeoutMs
@@ -81,6 +86,11 @@ class RPCServer {
       if (this._assertQueue) {
         await channel.assertQueue(this.name, this._assertQueueOptions)
       }
+
+      if (this._bindDirectExchangeName) {
+        await channel.assertExchange(this._bindDirectExchangeName, 'direct', this._exchangeOptions)
+      }
+
       await channel.prefetch(this._prefetchCount)
       await channel.consume(this.name, (msg) => {
         this._processMessage(channel, msg)
@@ -110,7 +120,7 @@ class RPCServer {
   }
 
   onResponseTimeout (ch, msg, request) {
-    ch.sendToQueue(msg.properties.replyTo, this._createResponseTimeoutReply(msg, request).serialize(), { correlationId: msg.properties.correlationId })
+    this._send(ch, msg.properties.replyTo, this._createResponseTimeoutReply(msg, request).serialize(), { correlationId: msg.properties.correlationId })
     this._ack(ch, msg)
   }
 
@@ -128,7 +138,7 @@ class RPCServer {
   }
 
   onRequestError (ch, msg, request) {
-    ch.sendToQueue(msg.properties.replyTo, this._createRequestErrorReply(msg, request).serialize(), { correlationId: msg.properties.correlationId })
+    this._send(ch, msg.properties.replyTo, this._createRequestErrorReply(msg, request).serialize(), { correlationId: msg.properties.correlationId })
     this._ack(ch, msg)
   }
 
@@ -146,7 +156,7 @@ class RPCServer {
   }
 
   onResponseError (ch, msg, error, request) {
-    ch.sendToQueue(msg.properties.replyTo, this._createResponseErrorReply(msg, error, request).serialize(), { correlationId: msg.properties.correlationId })
+    this._send(ch, msg.properties.replyTo, this._createResponseErrorReply(msg, error, request).serialize(), { correlationId: msg.properties.correlationId })
     this._ack(ch, msg)
   }
 
@@ -212,7 +222,7 @@ class RPCServer {
         return
       }
 
-      ch.sendToQueue(msg.properties.replyTo, replyData, { correlationId: msg.properties.correlationId })
+      this._send(ch, msg.properties.replyTo, replyData, { correlationId: msg.properties.correlationId })
       this._ack(ch, msg)
     } catch (err) {
       if (timedOut) {
@@ -223,6 +233,14 @@ class RPCServer {
 
       this._logger.error('CANNOT SEND RPC REPLY', this.name, err)
       this.handleResponseError(ch, msg, err, request)
+    }
+  }
+
+  _send (channel, replyTo, data, options) {
+    if (this._bindDirectExchangeName) {
+      channel.publish(this._bindDirectExchangeName, replyTo, data, options)
+    } else {
+      channel.sendToQueue(replyTo, data, options)
     }
   }
 

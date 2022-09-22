@@ -22,7 +22,9 @@ class RPCClient {
       ResponseContentSchema,
       replyQueueName = '',
       assertReplyQueue = true,
-      assertReplyQueueOptions = null
+      assertReplyQueueOptions = null,
+      bindDirectExchangeName = null,
+      exchangeOptions = null
     } = options || {}
 
     this._connection = queueConnection
@@ -33,6 +35,9 @@ class RPCClient {
 
     this._assertReplyQueue = assertReplyQueue === true
     this._assertReplyQueueOptions = Object.assign({ exclusive: true, autoDelete: true }, assertReplyQueueOptions || {})
+
+    this._bindDirectExchangeName = bindDirectExchangeName
+    this._exchangeOptions = exchangeOptions || {}
 
     this._rpcQueueMaxSize = queueMaxSize
     this._rpcTimeoutMs = timeoutMs
@@ -156,6 +161,11 @@ class RPCClient {
       if (this._assertReplyQueue) {
         const assertResult = await ch.assertQueue(this._replyQueue, this._assertReplyQueueOptions)
         this._replyQueue = assertResult.queue
+
+        if (this._bindDirectExchangeName) {
+          await ch.assertExchange(this._bindDirectExchangeName, 'direct', this._exchangeOptions)
+          await ch.bindQueue(this._replyQueue, this._bindDirectExchangeName, this._replyQueue)
+        }
       }
 
       ch.consume(this._replyQueue, (msg) => {
@@ -167,6 +177,8 @@ class RPCClient {
       }, { noAck: true }).catch((err) => {
         this._logger.error('CANNOT SET RPC CLIENT QUEUE CONSUMER', err)
       })
+
+      return this._replyQueue
     } catch (err) {
       this._logger.error('CANNOT ASSERT RPC REPLY QUEUE', err)
       throw err

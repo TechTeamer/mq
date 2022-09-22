@@ -5,16 +5,24 @@ const config = require('./config/LoadConfig')
 
 describe('RPCClient && RPCServer', () => {
   const rpcName = 'techteamer-mq-js-test-rpc'
+  const rpcExchangeName = 'techteamer-mq-js-test-rpc-exchange'
   const shortRpcName = 'techteamer-mq-js-test-rpc-short'
   const logger = new ConsoleInspector(console)
   const timeoutMs = 1000
   const assertQueueOptions = { durable: false, exclusive: true, autoDelete: true }
+
+  const exchangeName = 'test-exchange'
+  const exchangeOptions = { durable: false, autoDelete: true }
 
   const queueManager = new QueueManager(config)
   queueManager.setLogger(logger)
 
   const rpcClient = queueManager.getRPCClient(rpcName, { queueMaxSize: 100, timeoutMs })
   const rpcServer = queueManager.getRPCServer(rpcName, { prefetchCount: 1, timeoutMs, assertQueueOptions })
+
+  const rpcExchangeClient = queueManager.getRPCClient(rpcExchangeName, { queueMaxSize: 100, timeoutMs, bindDirectExchangeName: exchangeName, exchangeOptions })
+  const rpcExchangeServer = queueManager.getRPCServer(rpcExchangeName, { prefetchCount: 1, timeoutMs, assertQueueOptions, bindDirectExchangeName: exchangeName, exchangeOptions })
+
   const shortRpcClient = queueManager.getRPCClient(shortRpcName, { queueMaxSize: 1, timeoutMs })
   const shortRpcServer = queueManager.getRPCServer(shortRpcName, { prefetchCount: 1, timeoutMs, assertQueueOptions })
 
@@ -50,6 +58,23 @@ describe('RPCClient && RPCServer', () => {
       }
     })
     rpcClient.call(objectMessage, 10000).catch((err) => {
+      done(err)
+    })
+  })
+
+  it('RPCClient.call() calls through an EXCHANGE and RPCServer answers back', (done) => {
+    const objectMessage = { foo: 'bar', bar: 'foo' }
+    rpcExchangeServer.consume((msg) => {
+      return msg
+    })
+
+    rpcExchangeClient.call(objectMessage, 10000).then((res) => {
+      if (JSON.stringify(res) === JSON.stringify(objectMessage)) {
+        done()
+      } else {
+        done(new Error('Object sent and received are not equal'))
+      }
+    }).catch((err) => {
       done(err)
     })
   })
