@@ -17,10 +17,37 @@ class QueueConnection {
     this._channel = null
     this._channelPromise = null
     this._activeConnectionConfig = null
+    this._onClose = () => {
+      this._logger.error('RabbitMQ closed')
+      if (this._config.exitOnConnectionClose) {
+        process.exit(this._config.exitOnConnectionClose)
+      }
+    }
   }
 
   setLogger (logger) {
     this._logger = logger
+  }
+
+  close () {
+    if (this._connection) {
+      this._connection.close((err) => {
+        this._logger.error('RabbitMQ close connection failed', err)
+        throw err
+      })
+    }
+  }
+
+  reconnect () {
+    if (this._connection) {
+      this._connection.off('close', this._onClose)
+      this.close()
+    }
+
+    this._connection = null
+    this._connectionPromise = null
+
+    return this.connect()
   }
 
   /**
@@ -53,10 +80,7 @@ class QueueConnection {
         }
       })
       conn.on('close', () => {
-        this._logger.error('RabbitMQ closed')
-        if (this._config.exitOnConnectionClose) {
-          process.exit(this._config.exitOnConnectionClose)
-        }
+        this._onClose()
       })
       conn.on('blocked', (reason) => {
         this._logger.error('RabbitMQ blocked', reason)
