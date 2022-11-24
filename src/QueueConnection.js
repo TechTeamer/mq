@@ -58,7 +58,7 @@ class QueueConnection {
           this._logger.error('RabbitMQ error', err)
         }
       })
-      conn.on('close', () => this._onClose())
+      conn.on('close', this._onClose)
       conn.on('blocked', (reason) => {
         this._logger.error('RabbitMQ blocked', reason)
       })
@@ -119,9 +119,9 @@ class QueueConnection {
   /**
    * @return Promise
    * */
-  close (invokeCloseEvent = false) {
+  close (handleCloseEvent = false) {
     if (this._connection) {
-      if (!invokeCloseEvent) {
+      if (!handleCloseEvent) {
         this._connection.off('close', this._onClose)
       }
 

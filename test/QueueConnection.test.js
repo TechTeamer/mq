@@ -93,4 +93,22 @@ describe('QueueConnection', () => {
     await connection.connect()
     assert.strictEqual(connection._activeConnectionConfig.hostname, url.hostname)
   })
+
+  it('#close() closes connection to RabbitMQ', async () => {
+    const connection = new QueueConnection(config)
+    try {
+      await connection.connect()
+    } catch (e) {
+      throw new Error(`connect() failed: ${e}`)
+    }
+
+    try {
+      await connection.close()
+    } catch (e) {
+      throw new Error(`close() failed: ${e}`)
+    }
+
+    assert.strictEqual(connection._connection, null)
+    assert.strictEqual(connection._connectionPromise, null)
+  })
 })
