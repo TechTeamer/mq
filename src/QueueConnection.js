@@ -29,27 +29,6 @@ class QueueConnection {
     this._logger = logger
   }
 
-  close () {
-    if (this._connection) {
-      this._connection.close((err) => {
-        this._logger.error('RabbitMQ close connection failed', err)
-        throw err
-      })
-    }
-  }
-
-  reconnect () {
-    if (this._connection) {
-      this._connection.off('close', this._onClose)
-      this.close()
-    }
-
-    this._connection = null
-    this._connectionPromise = null
-
-    return this.connect()
-  }
-
   /**
    * @return Promise<amqplib.Connection>
    * */
@@ -137,6 +116,25 @@ class QueueConnection {
       // assume simple url string or standard url object
       return amqp.connect(configUrl, options)
     }
+  }
+
+  /**
+   * @return Promise
+   * */
+  close (invokeCloseEvent = false) {
+    if (this._connection) {
+      if (!invokeCloseEvent) {
+        this._connection.off('close', this._onClose)
+      }
+
+      this._connection.close((err) => {
+        this._logger.error('RabbitMQ close connection failed', err)
+        throw err
+      })
+    }
+
+    this._connection = null
+    this._connectionPromise = null
   }
 
   onConnection (event, callback) {

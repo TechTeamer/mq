@@ -101,6 +101,17 @@ class ConnectionPool {
       await connection.connect()
     }
   }
+
+  /**
+   * @return {Promise}
+   */
+  async reconnect () {
+    const connections = [...this.connections.values()]
+
+    for (const connection of connections) {
+      await connection.reconnect()
+    }
+  }
 }
 
 module.exports = ConnectionPool
