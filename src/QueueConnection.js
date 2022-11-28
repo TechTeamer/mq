@@ -119,16 +119,18 @@ class QueueConnection {
   /**
    * @return Promise
    * */
-  close (handleCloseEvent = false) {
+  async close (handleCloseEvent = false) {
     if (this._connection) {
       if (!handleCloseEvent) {
         this._connection.off('close', this._onClose)
       }
 
-      this._connection.close((err) => {
+      try {
+        await this._connection.close()
+      } catch (err) {
         this._logger.error('RabbitMQ close connection failed', err)
         throw err
-      })
+      }
     }
 
     this._connection = null
