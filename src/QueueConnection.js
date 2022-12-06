@@ -45,7 +45,7 @@ class QueueConnection {
     }
 
     this._connectionPromise = this._connect(this._config.url, options).then((conn) => {
-      this._logger.info('RabbitMQ connection established')
+      this._logger.info(`RabbitMQ connection established on '${this._config.url.hostname}' host`)
 
       conn.on('error', (err) => {
         if (err.message !== 'Connection closing') {
