@@ -121,12 +121,8 @@ class QueueConnection extends EventEmitter {
   /**
    * @return Promise
    * */
-  async close (handleCloseEvent = false) {
+  async close () {
     if (this._connection) {
-      if (!handleCloseEvent) {
-        this._connection.off('close', this._onClose)
-      }
-
       try {
         await this._connection.close()
       } catch (err) {
@@ -137,12 +133,6 @@ class QueueConnection extends EventEmitter {
 
     this._connection = null
     this._connectionPromise = null
-  }
-
-  onConnection (event, callback) {
-    if (this._connection) {
-      this._connection.on(event, callback)
-    }
   }
 
   /**
