@@ -81,4 +81,51 @@ describe('ConnectionPool', () => {
       done()
     })
   })
+
+  it('Should reconnect', (done) => {
+    const pool = new ConnectionPool()
+    pool.setLogger(logger)
+    pool.setupQueueManagers({
+      default: config
+    })
+    Promise.resolve().then(() => {
+      return pool.connect()
+    }).then(() => {
+      return pool.reconnect()
+    }).then(() => {
+      done()
+    }).catch((err) => {
+      done(err)
+    })
+  })
+
+  it('Should not reconnect to wrong config', (done) => {
+    const pool = new ConnectionPool()
+    pool.setLogger(logger)
+    pool.setupQueueManagers({
+      default: config
+    })
+    Promise.resolve().then(() => {
+      return pool.connect()
+    }).then(() => {
+      pool.setupQueueManagers({
+        default: new QueueConfig({
+          url: 'amqps://localhost:22',
+          rpcTimeoutMs: 10000,
+          rpcQueueMaxSize: 100,
+          logger,
+          options: {
+            timeout: 50
+          }
+        })
+      })
+
+      return pool.reconnect()
+    }).then(() => {
+      done('Reconnection with wrong config should not connect')
+    }).catch((err) => {
+      assert.instanceOf(err, Error, 'Reconnection with wrong config should throw an error ')
+      done()
+    })
+  })
 })

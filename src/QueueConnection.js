@@ -17,6 +17,12 @@ class QueueConnection {
     this._channel = null
     this._channelPromise = null
     this._activeConnectionConfig = null
+    this._onClose = () => {
+      this._logger.error('RabbitMQ closed')
+      if (this._config.exitOnConnectionClose) {
+        process.exit(this._config.exitOnConnectionClose)
+      }
+    }
   }
 
   setLogger (logger) {
@@ -52,12 +58,7 @@ class QueueConnection {
           this._logger.error('RabbitMQ error', err)
         }
       })
-      conn.on('close', () => {
-        this._logger.error('RabbitMQ closed')
-        if (this._config.exitOnConnectionClose) {
-          process.exit(this._config.exitOnConnectionClose)
-        }
-      })
+      conn.on('close', this._onClose)
       conn.on('blocked', (reason) => {
         this._logger.error('RabbitMQ blocked', reason)
       })
@@ -113,6 +114,27 @@ class QueueConnection {
       // assume simple url string or standard url object
       return amqp.connect(configUrl, options)
     }
+  }
+
+  /**
+   * @return Promise
+   * */
+  async close (handleCloseEvent = false) {
+    if (this._connection) {
+      if (!handleCloseEvent) {
+        this._connection.off('close', this._onClose)
+      }
+
+      try {
+        await this._connection.close()
+      } catch (err) {
+        this._logger.error('RabbitMQ close connection failed', err)
+        throw err
+      }
+    }
+
+    this._connection = null
+    this._connectionPromise = null
   }
 
   onConnection (event, callback) {

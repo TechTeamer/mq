@@ -90,6 +90,16 @@ class QueueManager {
     }
   }
 
+  async reconnect () {
+    try {
+      await this.connection.close()
+      await this.connect()
+    } catch (err) {
+      this._logger.error('Failed to reconnect to queue server', err)
+      throw err
+    }
+  }
+
   setLogger (logger) {
     this._logger = logger
     this.connection.setLogger(logger)
