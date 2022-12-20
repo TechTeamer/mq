@@ -49,7 +49,7 @@ describe('QueueConnection', () => {
 
   it('#connect() handles multiple string urls and tries the next url in the list if one is not working', async () => {
     const multiUrlConfig = copyConfig({
-      url: ['invalid_url', config.url]
+      url: [config.url.replace('localhost', 'localhost2'), config.url]
     })
 
     const connection = new QueueConnection(multiUrlConfig)
