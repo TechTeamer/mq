@@ -1,15 +1,17 @@
 const fs = require('fs')
 const amqp = require('amqplib/channel_api')
 const QueueConfig = require('./QueueConfig')
+const EventEmitter = require('events')
 
 /**
  * @class QueueConnection
  * */
-class QueueConnection {
+class QueueConnection extends EventEmitter {
   /**
    * @param {QueueConfig} config
    */
   constructor (config) {
+    super()
     this._config = new QueueConfig(config)
     this._logger = this._config.logger
     this._connection = null
@@ -17,12 +19,6 @@ class QueueConnection {
     this._channel = null
     this._channelPromise = null
     this._activeConnectionConfig = null
-    this._onClose = () => {
-      this._logger.error('RabbitMQ closed')
-      if (this._config.exitOnConnectionClose) {
-        process.exit(this._config.exitOnConnectionClose)
-      }
-    }
   }
 
   setLogger (logger) {
@@ -56,14 +52,20 @@ class QueueConnection {
       conn.on('error', (err) => {
         if (err.message !== 'Connection closing') {
           this._logger.error('RabbitMQ error', err)
+          this.emit('error', err)
         }
       })
-      conn.on('close', this._onClose)
+      conn.on('close', (err) => {
+        this._logger.error('RabbitMQ closed', err)
+        this.emit('close', err)
+      })
       conn.on('blocked', (reason) => {
         this._logger.error('RabbitMQ blocked', reason)
+        this.emit('blocked', reason)
       })
       conn.on('unblocked', (reason) => {
         this._logger.error('RabbitMQ unblocked', reason)
+        this.emit('unblocked', reason)
       })
 
       this._connection = conn

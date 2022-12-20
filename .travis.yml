@@ -8,8 +8,8 @@ addons:
 language: node_js
 
 node_js:
-  - 14
   - 16
+  - 18
 
 env:
   - NODE_ENV=travis

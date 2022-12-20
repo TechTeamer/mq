@@ -1,6 +1,6 @@
 {
   "name": "@techteamer/mq",
-  "version": "5.2.0",
+  "version": "6.0.0",
   "description": "A RabbitMQ wrapper for node",
   "main": "index.js",
   "author": "TechTeamer",
@@ -14,7 +14,7 @@
     "url": "https://github.com/TechTeamer/mq"
   },
   "engines": {
-    "node": ">=14"
+    "node": ">=16"
   },
   "scripts": {
     "lint": "eslint .",

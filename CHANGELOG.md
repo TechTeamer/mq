@@ -1,3 +1,9 @@
+6.0.0
+- BREAKING: removed process.exit on connection close
+- connection events are emitted (error, close, blocked, unblocked)
+- ability to reconnect
+- supports only node v16+
+
 5.2.0
 - option to use direct exchange for RPC
 - autodelete for random (empty named) queues
