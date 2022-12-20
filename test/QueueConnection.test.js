@@ -116,9 +116,9 @@ describe('QueueConnection', () => {
     const connection = new QueueConnection(config)
 
     let callbackCalled = false
-    connection._onClose = () => {
+    connection.addListener('close', () => {
       callbackCalled = true
-    }
+    })
 
     try {
       await connection.connect()
