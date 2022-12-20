@@ -2,7 +2,6 @@ const QueueConnection = require('../src/QueueConnection')
 const QueueConfig = require('../src/QueueConfig')
 const config = require('./config/LoadConfig')
 const chai = require('chai')
-const URL = require('node:url').URL
 const assert = chai.assert
 
 function copyConfig (obj) {

@@ -2,6 +2,7 @@ const fs = require('fs')
 const amqp = require('amqplib/channel_api')
 const QueueConfig = require('./QueueConfig')
 const EventEmitter = require('events')
+const URL = require('node:url').URL
 
 /**
  * @class QueueConnection
