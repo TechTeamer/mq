@@ -8,6 +8,7 @@ const QueueServer = require('../src/QueueServer')
 const RPCClient = require('../src/RPCClient')
 const RPCServer = require('../src/RPCServer')
 const ConsoleInspector = require('./consoleInspector')
+const EventEmitter = require('events')
 
 const config = require('./config/LoadConfig')
 
@@ -185,5 +186,109 @@ describe('QueueManager', () => {
     assert.throws(() => {
       manager.getSubscriber(rpc, Override)
     })
+  })
+
+  it('#onConnectionClose() throws an error without queue connection', (done) => {
+    try {
+      manager.onConnectionClose(null)
+    } catch (e) {
+      assert.strictEqual(e.message, 'onConnectionClose not connected')
+    }
+    done()
+  })
+
+  it('#onConnectionError() throws an error without queue connection', (done) => {
+    try {
+      manager.onConnectionError(null)
+    } catch (e) {
+      assert.strictEqual(e.message, 'onConnectionError not connected')
+    }
+    done()
+  })
+
+  it('#onConnectionBlocked() throws an error without queue connection', (done) => {
+    try {
+      manager.onConnectionBlocked(null)
+    } catch (e) {
+      assert.strictEqual(e.message, 'onConnectionBlocked not connected')
+    }
+    done()
+  })
+
+  it('#onConnectionUnblocked() throws an error without queue connection', (done) => {
+    try {
+      manager.onConnectionUnblocked(null)
+    } catch (e) {
+      assert.strictEqual(e.message, 'onConnectionUnblocked not connected')
+    }
+    done()
+  })
+
+  it('#onConnectionClose() calls the callback function', async () => {
+    manager.connection._connection = new EventEmitter()
+    const connection = manager.connection
+
+    let callbackCalled = false
+
+    const fn = () => {
+      callbackCalled = true
+    }
+
+    manager.onConnectionClose(fn)
+    connection._connection.emit('close')
+    manager.connection._connection = null
+
+    assert.equal(callbackCalled, true)
+  })
+
+  it('#onConnectionError() calls the callback function', async () => {
+    manager.connection._connection = new EventEmitter()
+    const connection = manager.connection
+
+    let callbackCalled = false
+
+    const fn = () => {
+      callbackCalled = true
+    }
+
+    manager.onConnectionError(fn)
+    connection._connection.emit('error')
+    manager.connection._connection = null
+
+    assert.equal(callbackCalled, true)
+  })
+
+  it('#onConnectionBlocked() calls the callback function', async () => {
+    manager.connection._connection = new EventEmitter()
+    const connection = manager.connection
+
+    let callbackCalled = false
+
+    const fn = () => {
+      callbackCalled = true
+    }
+
+    manager.onConnectionBlocked(fn)
+    connection._connection.emit('blocked')
+    manager.connection._connection = null
+
+    assert.equal(callbackCalled, true)
+  })
+
+  it('#onConnectionUnblocked() calls the callback function', async () => {
+    manager.connection._connection = new EventEmitter()
+    const connection = manager.connection
+
+    let callbackCalled = false
+
+    const fn = () => {
+      callbackCalled = true
+    }
+
+    manager.onConnectionUnblocked(fn)
+    connection._connection.emit('unblocked')
+    manager.connection._connection = null
+
+    assert.equal(callbackCalled, true)
   })
 })

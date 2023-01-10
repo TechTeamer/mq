@@ -346,6 +346,54 @@ class QueueManager {
 
     return queueServer
   }
+
+  /**
+   *
+   * @param {Function} fn
+   */
+  onConnectionClose (fn) {
+    if (!this.connection._connection) {
+      throw new Error('onConnectionClose not connected')
+    }
+
+    this.connection._connection.on('close', fn)
+  }
+
+  /**
+   *
+   * @param {Function} fn
+   */
+  onConnectionError (fn) {
+    if (!this.connection._connection) {
+      throw new Error('onConnectionError not connected')
+    }
+
+    this.connection._connection.on('error', fn)
+  }
+
+  /**
+   *
+   * @param {Function} fn
+   */
+  onConnectionBlocked (fn) {
+    if (!this.connection._connection) {
+      throw new Error('onConnectionBlocked not connected')
+    }
+
+    this.connection._connection.on('blocked', fn)
+  }
+
+  /**
+   *
+   * @param {Function} fn
+   */
+  onConnectionUnblocked (fn) {
+    if (!this.connection._connection) {
+      throw new Error('onConnectionUnblocked not connected')
+    }
+
+    this.connection._connection.on('unblocked', fn)
+  }
 }
 
 module.exports = QueueManager
