@@ -49,7 +49,7 @@ class QueueConnection extends EventEmitter {
 
     this._connectionPromise = this._connect(this._config.url, options).then((conn) => {
       const urlObject = new URL(this._activeConnectionUrl)
-      this._logger.info(`RabbitMQ connection established on '${urlObject.host}' host`)
+      this._logger.info(`RabbitMQ connection established on '${urlObject.host}' host. vhost: ${urlObject.pathname}`)
 
       conn.on('error', (err) => {
         if (err.message !== 'Connection closing') {
