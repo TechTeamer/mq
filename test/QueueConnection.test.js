@@ -44,53 +44,71 @@ describe('QueueConnection', () => {
 
     const connection = new QueueConnection(multiUrlConfig)
     await connection.connect()
-    assert.strictEqual(connection._activeConnectionConfig, config.url)
+    assert.deepEqual(connection._activeConnectionConfig, connection._urlStringToObject(config.url))
   })
 
   it('#connect() handles multiple string urls and tries the next url in the list if one is not working', async () => {
     const multiUrlConfig = copyConfig({
-      url: [config.url.replace('localhost', 'localhost2'), config.url]
+      url: ['amqps://random-host:5671', config.url]
     })
 
     const connection = new QueueConnection(multiUrlConfig)
     await connection.connect()
-    assert.strictEqual(connection._activeConnectionConfig, config.url)
+    assert.deepEqual(connection._activeConnectionConfig, connection._urlStringToObject(config.url))
   })
 
   it('#connect() handles multiple hosts in an url object and connects to the first working one', async () => {
-    const url = new URL(config.url)
-    const urlObject = {
-      protocol: url.protocol.replace(':', ''),
-      hostname: [url.hostname, 'invalid_host'],
-      port: parseInt(url.port, 10),
-      username: url.username ? url.username : undefined,
-      password: url.password ? url.password : undefined
+    let urlObject
+    if (typeof config.url === 'string') {
+      const url = new URL(config.url)
+      urlObject = {
+        protocol: url.protocol.replace(':', ''),
+        hostname: [url.hostname, 'invalid_host'],
+        port: parseInt(url.port, 10),
+        username: url.username ? url.username : undefined,
+        password: url.password ? url.password : undefined
+      }
+    } else {
+      urlObject = {
+        ...config.url,
+        hostname: [config.url.hostname, 'invalid_host']
+      }
     }
+
     const multiUrlConfig = copyConfig({
       url: urlObject
     })
 
     const connection = new QueueConnection(multiUrlConfig)
     await connection.connect()
-    assert.strictEqual(connection._activeConnectionConfig.hostname, url.hostname)
+    assert.deepEqual(connection._activeConnectionConfig, connection._urlStringToObject(config.url))
   })
 
   it('#connect() handles multiple hosts in an url object and tries the next url in the list if one is not working', async () => {
-    const url = new URL(config.url)
-    const urlObject = {
-      protocol: url.protocol.replace(':', ''),
-      hostname: [url.hostname, 'invalid_host'],
-      port: parseInt(url.port, 10),
-      username: url.username ? url.username : undefined,
-      password: url.password ? url.password : undefined
+    let urlObject
+    if (typeof config.url === 'string') {
+      const url = new URL(config.url)
+      urlObject = {
+        protocol: url.protocol.replace(':', ''),
+        hostname: [url.hostname, 'invalid_host'],
+        port: parseInt(url.port, 10),
+        username: url.username ? url.username : undefined,
+        password: url.password ? url.password : undefined
+      }
+    } else {
+      urlObject = {
+        ...config.url,
+        hostname: [config.url.hostname, 'invalid_host']
+      }
     }
+
     const multiUrlConfig = copyConfig({
       url: urlObject
     })
 
     const connection = new QueueConnection(multiUrlConfig)
     await connection.connect()
-    assert.strictEqual(connection._activeConnectionConfig.hostname, url.hostname)
+    assert.deepEqual(connection._activeConnectionConfig, connection._urlStringToObject(config.url))
   })
 
   it('#close() closes connection to RabbitMQ', async () => {
