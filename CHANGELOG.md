@@ -1,6 +1,5 @@
 6.0.0
 - BREAKING: removed process.exit on connection close
-- BREAKING: connection configs only support string AMQP URI syntax (https://www.rabbitmq.com/uri-spec.html)
 - connection events are emitted (error, close, blocked, unblocked)
 - ability to reconnect
 - supports only node v16+
