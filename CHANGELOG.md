@@ -1,4 +1,3 @@
-6.0.1
 - Added backward compatibility for object based connection URL configuration
 
 6.0.0
