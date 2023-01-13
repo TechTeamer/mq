@@ -9,7 +9,7 @@ const { URL } = require('node:url')
  * */
 class QueueConnection extends EventEmitter {
   /**
-   * @param {QueueConfig} config
+   * @param {Object|QueueConfig} config
    */
   constructor (config) {
     super()

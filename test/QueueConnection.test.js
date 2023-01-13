@@ -146,7 +146,7 @@ describe('QueueConnection', () => {
     }
 
     try {
-      await connection.close(true)
+      await connection.close()
     } catch (e) {
       throw new Error(`close() failed: ${e}`)
     }
