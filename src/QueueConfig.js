@@ -20,11 +20,7 @@ class RabbitMqOptions {
 
 class QueueConfig {
   static isValidConfig (obj) {
-    if (!obj || !obj.url) {
-      return false
-    }
-
-    return true
+    return !!(obj && obj.url)
   }
 
   constructor (config = {}) {
