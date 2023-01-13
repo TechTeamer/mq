@@ -3,7 +3,6 @@ const ConsoleInspector = require('./consoleInspector')
 const config = require('./config/LoadConfig')
 const chai = require('chai')
 const expect = chai.expect
-const assert = chai.assert
 
 describe('RPCClient && RPCServer actions', function () {
   const rpcName = 'techteamer-mq-js-test-rpc-action'
