@@ -17,6 +17,7 @@ describe('QueueConnection', () => {
     const connection = new QueueConnection(config)
     connection.connect()
       .then(() => {
+        assert.isNotNull(connection._connection)
         done()
       })
       .catch((e) => {
@@ -33,6 +34,7 @@ describe('QueueConnection', () => {
     connection.connect().then(() => {
       done(new Error('Should not connect'))
     }).catch(() => {
+      assert.isNull(connection._connection)
       done()
     })
   })
