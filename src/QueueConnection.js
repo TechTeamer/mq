@@ -2,7 +2,6 @@ const fs = require('fs')
 const amqp = require('amqplib/channel_api')
 const QueueConfig = require('./QueueConfig')
 const EventEmitter = require('events')
-const { URL } = require('node:url')
 
 /**
  * @class QueueConnection
@@ -48,7 +47,7 @@ class QueueConnection extends EventEmitter {
     }
 
     this._connectionPromise = this._connect(this._config.url, options).then((conn) => {
-      this._logger.info(`RabbitMQ connection established: '${this._urlObjectToLogString(this._activeConnectionConfig)}'`)
+      this._logger.info(`RabbitMQ connection established: '${QueueConfig.urlObjectToLogString(this._activeConnectionConfig)}'`)
 
       conn.on('error', (err) => {
         if (err.message !== 'Connection closing') {
@@ -86,7 +85,7 @@ class QueueConnection extends EventEmitter {
       const urls = []
       for (const host of configUrl.hostname) {
         urls.push({
-          ...this._config.url, // copy given config
+          ...configUrl, // copy given config
           hostname: host // use hostname from current iteration
         })
       }
@@ -99,7 +98,7 @@ class QueueConnection extends EventEmitter {
     }
 
     // assume simple url string or standard url object
-    const connectionUrl = this._urlStringToObject(configUrl)
+    const connectionUrl = QueueConfig.urlStringToObject(configUrl)
     const connection = await amqp.connect(configUrl, options)
     this._activeConnectionConfig = connectionUrl
     return connection
@@ -107,7 +106,7 @@ class QueueConnection extends EventEmitter {
 
   async _connectWithMultipleUrls (urls, options) {
     for (const url of urls) {
-      const connectionUrl = this._urlStringToObject(url)
+      const connectionUrl = QueueConfig.urlStringToObject(url)
       try {
         const connection = await amqp.connect(connectionUrl, options)
         this._activeConnectionConfig = connectionUrl
@@ -118,32 +117,6 @@ class QueueConnection extends EventEmitter {
     }
 
     throw new Error('RabbitMQ connection filed with multiple urls')
-  }
-
-  _urlStringToObject (url) {
-    if (typeof url !== 'string') {
-      return url
-    }
-
-    const parsedUrl = new URL(url)
-    return {
-      protocol: parsedUrl.protocol ? parsedUrl.protocol.slice(0, -1) : undefined,
-      hostname: parsedUrl.hostname ? parsedUrl.hostname : undefined,
-      port: parsedUrl.port ? parseInt(parsedUrl.port, 10) : undefined,
-      username: parsedUrl.username ? parsedUrl.username : undefined,
-      password: parsedUrl.password ? parsedUrl.password : undefined,
-      vhost: parsedUrl.pathname ? parsedUrl.pathname.slice(1) : undefined
-    }
-  }
-
-  _urlObjectToLogString (urlObject) {
-    return [
-      urlObject.protocol || 'amqps',
-      '://',
-      urlObject.hostname,
-      urlObject.port ? `:${urlObject.port}` : '',
-      urlObject.vhost ? `/${urlObject.vhost}` : ''
-    ].join('')
   }
 
   /**
