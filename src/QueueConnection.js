@@ -2,14 +2,13 @@ const fs = require('fs')
 const amqp = require('amqplib/channel_api')
 const QueueConfig = require('./QueueConfig')
 const EventEmitter = require('events')
-const URL = require('node:url').URL
 
 /**
  * @class QueueConnection
  * */
 class QueueConnection extends EventEmitter {
   /**
-   * @param {QueueConfig} config
+   * @param {Object|QueueConfig} config
    */
   constructor (config) {
     super()
@@ -19,7 +18,7 @@ class QueueConnection extends EventEmitter {
     this._connectionPromise = null
     this._channel = null
     this._channelPromise = null
-    this._activeConnectionUrl = null
+    this._activeConnectionConfig = null
   }
 
   setLogger (logger) {
@@ -48,8 +47,7 @@ class QueueConnection extends EventEmitter {
     }
 
     this._connectionPromise = this._connect(this._config.url, options).then((conn) => {
-      const urlObject = new URL(this._activeConnectionUrl)
-      this._logger.info(`RabbitMQ connection established on '${urlObject.host}' host`)
+      this._logger.info(`RabbitMQ connection established: '${QueueConfig.urlObjectToLogString(this._activeConnectionConfig)}'`)
 
       conn.on('error', (err) => {
         if (err.message !== 'Connection closing') {
@@ -82,27 +80,43 @@ class QueueConnection extends EventEmitter {
   }
 
   async _connect (configUrl, options) {
-    if (Array.isArray(configUrl)) {
-      // handle multiple connection urls
-      for (const url of configUrl) {
-        try {
-          const connection = await amqp.connect(url, options)
-          this._activeConnectionUrl = url
-          return connection
-        } catch (err) {
-          // let the next connection url in the list by tried
-          const urlObject = new URL(url)
-          this._logger.warn('RabbitMQ connection failed to host:', urlObject.host)
-        }
+    // handle multiple connection hosts
+    if (Array.isArray(configUrl.hostname)) {
+      const urls = []
+      for (const host of configUrl.hostname) {
+        urls.push({
+          ...configUrl, // copy given config
+          hostname: host // use hostname from current iteration
+        })
       }
-
-      throw new Error('RabbitMQ connection filed with multiple urls')
-    } else {
-      // assume simple url string
-      const connection = await amqp.connect(configUrl, options)
-      this._activeConnectionUrl = configUrl
-      return connection
+      configUrl = urls
     }
+
+    // handle multiple connection urls
+    if (Array.isArray(configUrl)) {
+      return this._connectWithMultipleUrls(configUrl, options)
+    }
+
+    // assume simple url string or standard url object
+    const connectionUrl = QueueConfig.urlStringToObject(configUrl)
+    const connection = await amqp.connect(configUrl, options)
+    this._activeConnectionConfig = connectionUrl
+    return connection
+  }
+
+  async _connectWithMultipleUrls (urls, options) {
+    for (const url of urls) {
+      const connectionUrl = QueueConfig.urlStringToObject(url)
+      try {
+        const connection = await amqp.connect(connectionUrl, options)
+        this._activeConnectionConfig = connectionUrl
+        return connection
+      } catch (err) {
+        this._logger.warn('RabbitMQ connection failed to host:', { ...connectionUrl, password: connectionUrl.password ? '***' : connectionUrl.password })
+      }
+    }
+
+    throw new Error('RabbitMQ connection filed with multiple urls')
   }
 
   /**

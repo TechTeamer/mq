@@ -19,52 +19,31 @@ describe('QueueManager', () => {
     logger.empty()
   })
 
-  it('Manager can get Publisher && Subscriber', (done) => {
+  it('Manager can get Publisher && Subscriber', () => {
     const exchange = 'test-pubsub'
     const publisher = manager.getPublisher(exchange)
     const subscriber = manager.getSubscriber(exchange)
 
-    if (!(publisher instanceof Publisher)) {
-      return done(new Error('Couldn\'t get a Publisher'))
-    }
-
-    if (!(subscriber instanceof Subscriber)) {
-      return done(new Error('Couldn\'t get a Subscriber'))
-    }
-
-    done()
+    assert.instanceOf(publisher, Publisher, 'not an instance of Publisher')
+    assert.instanceOf(subscriber, Subscriber, 'not an instance of Subscriber')
   })
 
-  it('Manager can get QueueClient && QueueServer', (done) => {
+  it('Manager can get QueueClient && QueueServer', () => {
     const queue = 'test-queue'
-    const queueServer = manager.getQueueServer(queue)
     const queueClient = manager.getQueueClient(queue)
+    const queueServer = manager.getQueueServer(queue)
 
-    if (!(queueClient instanceof QueueClient)) {
-      return done(new Error('Couldn\'t get a QueueClient'))
-    }
-
-    if (!(queueServer instanceof QueueServer)) {
-      return done(new Error('Couldn\'t get a QueueServer'))
-    }
-
-    done()
+    assert.instanceOf(queueClient, QueueClient, 'not an instance of QueueClient')
+    assert.instanceOf(queueServer, QueueServer, 'not an instance of QueueServer')
   })
 
-  it('Manager can get RPCClient && RPCServer', (done) => {
+  it('Manager can get RPCClient && RPCServer', () => {
     const rpc = 'test-rpc'
     const rpcClient = manager.getRPCClient(rpc)
     const rpcServer = manager.getRPCServer(rpc)
 
-    if (!(rpcClient instanceof RPCClient)) {
-      return done(new Error('Couldn\'t get an RPCClient'))
-    }
-
-    if (!(rpcServer instanceof RPCServer)) {
-      return done(new Error('Couldn\'t get an RPCServer'))
-    }
-
-    done()
+    assert.instanceOf(rpcClient, RPCClient, 'not an instance of RPCClient')
+    assert.instanceOf(rpcServer, RPCServer, 'not an instance of RPCServer')
   })
 
   // ==== RPCClient/RPCServer override

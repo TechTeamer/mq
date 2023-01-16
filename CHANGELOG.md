@@ -1,3 +1,5 @@
+- Added backward compatibility for object based connection URL configuration
+
 6.0.0
 - BREAKING: removed process.exit on connection close
 - BREAKING: connection configs only support string AMQP URI syntax (https://www.rabbitmq.com/uri-spec.html)
@@ -36,7 +38,7 @@
 - dependency updates, drop support for node v10
 
 4.1.1
-- dependency updates 
+- dependency updates
 
 4.1.0
 - promises rewrite to async-await in most cases

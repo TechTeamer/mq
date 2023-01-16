@@ -143,11 +143,11 @@ class RPCClient {
   /**
    * @param {String} action
    * @param {*} data
-   * @param {Number} timeoutMs
-   * @param {Map} attachments
+   * @param {Number|null} timeoutMs
+   * @param {Map|null} attachments
    * @return {Promise}
    * */
-  callAction (action, data, timeoutMs, attachments) {
+  callAction (action, data, timeoutMs = null, attachments = null) {
     return this.call({ action, data }, timeoutMs, attachments)
   }
 

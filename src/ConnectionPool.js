@@ -14,6 +14,9 @@ class ConnectionPool {
     const { defaultConnectionName } = poolConfig || {}
 
     this._logger = null
+    /**
+     * @type {Map<string, QueueManager>}
+     */
     this.connections = new Map()
     this.defaultConnection = null
     this.defaultConnectionName = defaultConnectionName || 'default'

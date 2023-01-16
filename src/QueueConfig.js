@@ -1,3 +1,4 @@
+const { URL } = require('node:url')
 
 class RabbitMqOptions {
   constructor (options = {}) {
@@ -19,14 +20,6 @@ class RabbitMqOptions {
 }
 
 class QueueConfig {
-  static isValidConfig (obj) {
-    if (!obj || !obj.url) {
-      return false
-    }
-
-    return true
-  }
-
   constructor (config = {}) {
     const {
       url = 'amqps://localhost:5672',
@@ -42,6 +35,36 @@ class QueueConfig {
     this.rpcTimeoutMs = rpcTimeoutMs
     this.rpcQueueMaxSize = rpcQueueMaxSize
     this.logger = logger
+  }
+
+  static isValidConfig (obj) {
+    return !!(obj && obj.url)
+  }
+
+  static urlStringToObject (url) {
+    if (typeof url !== 'string') {
+      return url
+    }
+
+    const parsedUrl = new URL(url)
+    return {
+      protocol: parsedUrl.protocol ? parsedUrl.protocol.slice(0, -1) : undefined,
+      hostname: parsedUrl.hostname ? parsedUrl.hostname : undefined,
+      port: parsedUrl.port ? parseInt(parsedUrl.port, 10) : undefined,
+      username: parsedUrl.username ? parsedUrl.username : undefined,
+      password: parsedUrl.password ? parsedUrl.password : undefined,
+      vhost: parsedUrl.pathname ? parsedUrl.pathname.slice(1) : undefined
+    }
+  }
+
+  static urlObjectToLogString (urlObject) {
+    return [
+      urlObject.protocol || 'amqps',
+      '://',
+      urlObject.hostname,
+      urlObject.port ? `:${urlObject.port}` : '',
+      urlObject.vhost ? `/${urlObject.vhost}` : ''
+    ].join('')
   }
 }
 

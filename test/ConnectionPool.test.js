@@ -52,6 +52,10 @@ describe('ConnectionPool', () => {
     Promise.resolve().then(() => {
       return pool.connect()
     }).then(() => {
+      // Assert every QueueConnection connected
+      pool.connections.forEach(manager => {
+        assert.isNotNull(manager.connection._connection)
+      })
       done()
     }).catch((err) => {
       done(err)
@@ -93,6 +97,10 @@ describe('ConnectionPool', () => {
     }).then(() => {
       return pool.reconnect()
     }).then(() => {
+      // Assert every QueueConnection connected
+      pool.connections.forEach(manager => {
+        assert.isNotNull(manager.connection._connection)
+      })
       done()
     }).catch((err) => {
       done(err)

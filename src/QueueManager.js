@@ -121,7 +121,7 @@ class QueueManager {
       OverrideClass = RPCClient
     }
 
-    if (OverrideClass !== RPCClient && !(OverrideClass.prototype instanceof RPCClient)) {
+    if (!this._isSubClass(OverrideClass, RPCClient)) {
       throw new Error('Override must be a subclass of RPCClient')
     }
 
@@ -153,7 +153,7 @@ class QueueManager {
       OverrideClass = RPCServer
     }
 
-    if (OverrideClass !== RPCServer && !(OverrideClass.prototype instanceof RPCServer)) {
+    if (!this._isSubClass(OverrideClass, RPCServer)) {
       throw new Error('Override must be a subclass of RPCServer')
     }
 
@@ -185,7 +185,7 @@ class QueueManager {
       OverrideClass = Publisher
     }
 
-    if (OverrideClass !== Publisher && !(OverrideClass.prototype instanceof Publisher)) {
+    if (!this._isSubClass(OverrideClass, Publisher)) {
       throw new Error('Override must be a subclass of Publisher')
     }
 
@@ -212,7 +212,7 @@ class QueueManager {
       OverrideClass = Subscriber
     }
 
-    if (OverrideClass !== Subscriber && !(OverrideClass.prototype instanceof Subscriber)) {
+    if (!this._isSubClass(OverrideClass, Subscriber)) {
       throw new Error('Override must be a subclass of Subscriber')
     }
 
@@ -245,7 +245,7 @@ class QueueManager {
       OverrideClass = GatheringClient
     }
 
-    if (OverrideClass !== GatheringClient && !(OverrideClass.prototype instanceof GatheringClient)) {
+    if (!this._isSubClass(OverrideClass, GatheringClient)) {
       throw new Error('Override must be a subclass of GatheringClient')
     }
 
@@ -272,7 +272,7 @@ class QueueManager {
       OverrideClass = GatheringServer
     }
 
-    if (OverrideClass !== GatheringServer && !(OverrideClass.prototype instanceof GatheringServer)) {
+    if (!this._isSubClass(OverrideClass, GatheringServer)) {
       throw new Error('Override must be a subclass of GatheringServer')
     }
 
@@ -303,7 +303,7 @@ class QueueManager {
       OverrideClass = QueueClient
     }
 
-    if (OverrideClass !== QueueClient && !(OverrideClass.prototype instanceof QueueClient)) {
+    if (!this._isSubClass(OverrideClass, QueueClient)) {
       throw new Error('Override must be a subclass of QueueClient')
     }
 
@@ -330,7 +330,7 @@ class QueueManager {
       OverrideClass = QueueServer
     }
 
-    if (OverrideClass !== QueueServer && !(OverrideClass.prototype instanceof QueueServer)) {
+    if (!this._isSubClass(OverrideClass, QueueServer)) {
       throw new Error('Override must be a subclass of QueueServer')
     }
 
@@ -345,6 +345,10 @@ class QueueManager {
     this.queueServers.set(queueName, queueServer)
 
     return queueServer
+  }
+
+  _isSubClass (TestClass, ParentClass) {
+    return TestClass === ParentClass || TestClass.prototype instanceof ParentClass
   }
 }
 
