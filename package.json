@@ -19,7 +19,7 @@
   "scripts": {
     "lint": "eslint .",
     "unit": "mocha --exit",
-    "test": "eslint . && nyc mocha --exit && nyc report --reporter=text-lcov | coveralls"
+    "test": "eslint . && nyc mocha --temp-directory=./test/coverage/ --exit && nyc report --reporter=text-lcov --report-dir=./test/coverage/ --reporter=lcovonly  | coveralls"
   },
   "dependencies": {
     "amqplib": "^0.10.3",
