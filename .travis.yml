@@ -15,3 +15,7 @@ node_js:
 
 env:
   - NODE_ENV=travis
+
+script:
+  - yarn test
+  - sonar-scanner
