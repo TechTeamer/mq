@@ -123,10 +123,9 @@ describe('GatheringClient && GatheringServer', () => {
     gatheringServer1.consume((msg, queueMessage) => {
       if (queueMessage.getAttachments().get('test').toString() !== buf.toString()) {
         done(new Error('String received is not the same as the String sent'))
-        return true
+        return
       }
       done()
-      return true
     })
 
     gatheringClient.request(stringMessage, null, attachments).catch((err) => {
@@ -151,10 +150,8 @@ describe('GatheringClient && GatheringServer', () => {
   it(`GatheringClient.request() throws an error if it doesn't receive a response sooner than ${timeoutMs}ms`, (done) => {
     const objectMessage = { foo: 'bar', bar: 'foo' }
 
-    gatheringServer1.consume((msg) => {
-      const now = Date.now()
-      // eslint-disable-next-line no-empty
-      while (new Date().getTime() < now + timeoutMs + 100) { }
+    gatheringServer1.consume(async (msg) => {
+      await new Promise((resolve) => setTimeout(resolve, timeoutMs + 100))
       return msg
     })
 

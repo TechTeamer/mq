@@ -46,20 +46,7 @@ class GatheringClient {
       this._replyQueue = replyQueue.queue
 
       await channel.consume(this._replyQueue, (reply) => {
-        if (!reply) {
-          this._logger.error(`QUEUE GATHERING CLIENT: INVALID REPLY ON '${this.name}': NO REPLY`, reply)
-          return
-        }
-        if (!reply.properties) {
-          this._logger.error(`QUEUE GATHERING CLIENT: INVALID REPLY ON '${this.name}': NO PROPERTIES ON REPLY`, reply)
-          return
-        }
-        if (!reply.properties.correlationId) {
-          this._logger.error(`QUEUE GATHERING CLIENT: INVALID REPLY ON '${this.name}': NO CORRELATION ID ON REPLY`, reply)
-          return
-        }
-        if (!reply.properties.type) {
-          this._logger.error(`QUEUE GATHERING CLIENT: INVALID REPLY ON '${this.name}': NO MESSAGE TYPE ON REPLY`, reply)
+        if (!this.isValidReply(reply)) {
           return
         }
 
@@ -81,6 +68,27 @@ class GatheringClient {
       this._logger.error(`QUEUE GATHERING CLIENT: Error initializing '${this.name}'`)
       throw new Error('Error initializing Gathering Client')
     }
+  }
+
+  isValidReply (reply) {
+    if (!reply) {
+      this._logger.error(`QUEUE GATHERING CLIENT: INVALID REPLY ON '${this.name}': NO REPLY`, reply)
+      return false
+    }
+    if (!reply.properties) {
+      this._logger.error(`QUEUE GATHERING CLIENT: INVALID REPLY ON '${this.name}': NO PROPERTIES ON REPLY`, reply)
+      return false
+    }
+    if (!reply.properties.correlationId) {
+      this._logger.error(`QUEUE GATHERING CLIENT: INVALID REPLY ON '${this.name}': NO CORRELATION ID ON REPLY`, reply)
+      return false
+    }
+    if (!reply.properties.type) {
+      this._logger.error(`QUEUE GATHERING CLIENT: INVALID REPLY ON '${this.name}': NO MESSAGE TYPE ON REPLY`, reply)
+      return false
+    }
+
+    return true
   }
 
   /**

@@ -175,10 +175,8 @@ describe('RPCClient && RPCServer', () => {
   it(`RPCClient.call() throws an error if it doesn't receive a response sooner than ${timeoutMs}ms`, (done) => {
     const objectMessage = { foo: 'bar', bar: 'foo' }
 
-    rpcServer.consume((msg) => {
-      const now = Date.now()
-      // eslint-disable-next-line no-empty
-      while (new Date().getTime() < now + timeoutMs + 100) { }
+    rpcServer.consume(async (msg) => {
+      await new Promise((resolve) => setTimeout(resolve, timeoutMs + 100))
       return msg
     })
 
