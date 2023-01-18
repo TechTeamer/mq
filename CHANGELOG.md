@@ -1,3 +1,5 @@
+- Emit Channel events (close, error, drain, return)
+
 6.1.0
 - Added backward compatibility for object based connection URL configuration
 
