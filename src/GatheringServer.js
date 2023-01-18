@@ -113,39 +113,15 @@ class GatheringServer {
    * @private
    */
   async _handleGatheringAnnouncement (channel, msg) {
-    if (!msg || !msg.properties) {
-      this._logger.error(`QUEUE GATHERING SERVER: INVALID REQUEST ON '${this.name}': NO MESSAGE/PROPERTIES`, msg)
-      this._nack(channel, msg)
-      return
-    }
-    if (!msg.properties.correlationId) {
-      this._logger.error(`QUEUE GATHERING SERVER: INVALID REQUEST ON '${this.name}': NO CORRELATION ID`, msg)
-      this._nack(channel, msg)
-      return
-    }
-    if (!msg.properties.replyTo) {
-      this._logger.error(`QUEUE GATHERING SERVER: INVALID REQUEST ON '${this.name}': NO REPLY TO`, msg)
-      this._nack(channel, msg)
-      return
-    }
+    const {
+      isValid,
+      correlationId,
+      replyTo,
+      request
+    } = this.unserializeMessage(channel, msg)
 
-    const correlationId = msg.properties.correlationId
-    const replyTo = msg.properties.replyTo
-    let request
-
-    try {
-      request = QueueMessage.unserialize(msg.content)
-      if (request.status !== 'ok') {
-        this._logger.error(`QUEUE GATHERING SERVER: MESSAGE NOT OK '${this.name}' ${correlationId}`, request)
-        this._sendStatus(channel, replyTo, correlationId, 'error', 'message not OK')
-        this._nack(channel, msg)
-        return
-      }
-    } catch (err) {
-      this._logger.error(`QUEUE GATHERING SERVER: MALFORMED MESSAGE '${this.name}' ${correlationId}`, err)
-      this._sendStatus(channel, replyTo, correlationId, 'error', 'malformed message')
-      this._nack(channel, msg)
-      return
+    if (!isValid) {
+      return // Invalid request
     }
 
     let responseTimedOut = false
@@ -220,6 +196,65 @@ class GatheringServer {
   _sendStatus (channel, replyTo, correlationId, status, message = '') {
     const reply = new QueueMessage(status, message)
     channel.sendToQueue(replyTo, reply.serialize(), { correlationId, type: 'status' })
+  }
+
+  /**
+   * @returns {boolean} is valid
+   */
+  verifyMessage (channel, msg) {
+    if (!msg || !msg.properties) {
+      this._logger.error(`QUEUE GATHERING SERVER: INVALID REQUEST ON '${this.name}': NO MESSAGE/PROPERTIES`, msg)
+      this._nack(channel, msg)
+      return false
+    }
+    if (!msg.properties.correlationId) {
+      this._logger.error(`QUEUE GATHERING SERVER: INVALID REQUEST ON '${this.name}': NO CORRELATION ID`, msg)
+      this._nack(channel, msg)
+      return false
+    }
+    if (!msg.properties.replyTo) {
+      this._logger.error(`QUEUE GATHERING SERVER: INVALID REQUEST ON '${this.name}': NO REPLY TO`, msg)
+      this._nack(channel, msg)
+      return false
+    }
+    return true
+  }
+
+  /**
+   * @param channel
+   * @param msg
+   * @returns {{request: QueueMessage, isValid: boolean, replyTo: *, correlationId: *}}
+   */
+  unserializeMessage (channel, msg) {
+    if (!this.verifyMessage(channel, msg)) {
+      return { isValid: false }
+    }
+
+    const correlationId = msg.properties.correlationId
+    const replyTo = msg.properties.replyTo
+    let request
+
+    try {
+      request = QueueMessage.unserialize(msg.content)
+      if (request.status !== 'ok') {
+        this._logger.error(`QUEUE GATHERING SERVER: MESSAGE NOT OK '${this.name}' ${correlationId}`, request)
+        this._sendStatus(channel, replyTo, correlationId, 'error', 'message not OK')
+        this._nack(channel, msg)
+        return { isValid: false }
+      }
+    } catch (err) {
+      this._logger.error(`QUEUE GATHERING SERVER: MALFORMED MESSAGE '${this.name}' ${correlationId}`, err)
+      this._sendStatus(channel, replyTo, correlationId, 'error', 'malformed message')
+      this._nack(channel, msg)
+      return { isValid: false }
+    }
+
+    return {
+      isValid: true,
+      correlationId,
+      replyTo,
+      request
+    }
   }
 
   /**
