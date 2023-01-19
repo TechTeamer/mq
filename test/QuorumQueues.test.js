@@ -23,6 +23,10 @@ describe('QuorumQueues', () => {
     queueServerAssertQueueOptions: defaultOptionsOverride
   })
 
+  before(() => {
+    quorumManager.connect()
+  })
+
   after(() => {
     logger.empty()
   })
