@@ -212,10 +212,8 @@ class RPCServer {
       const replyAttachments = response.getAttachments()
       try {
         const reply = this._createReply(msg, answer)
-        if (replyAttachments instanceof Map) {
-          for (const [key, value] of replyAttachments) {
-            reply.addAttachment(key, value)
-          }
+        for (const [key, value] of replyAttachments) {
+          reply.addAttachment(key, value)
         }
         replyData = reply.serialize()
       } catch (err) {

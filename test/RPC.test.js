@@ -4,6 +4,7 @@ const SeedRandom = require('seed-random')
 const config = require('./config/LoadConfig')
 const chai = require('chai')
 const assert = chai.assert
+const { v4: uuid } = require('uuid')
 
 describe('RPCClient && RPCServer', () => {
   const rpcName = 'techteamer-mq-js-test-rpc'
@@ -264,5 +265,21 @@ describe('RPCClient && RPCServer', () => {
     } catch (err) {
       throw new Error('Should not fail!')
     }
+  })
+
+  it('RPCServer should not process messages when request status is not \'ok\'', async () => {
+    let called = false
+    rpcServer.consume(() => {
+      called = true
+    })
+
+    const options = Object.assign({ correlationId: uuid(), replyTo: rpcClient._replyQueue })
+    const message = Buffer.from('{invalid string that could look like json')
+
+    const channel = await rpcClient._connection.getChannel()
+    channel.sendToQueue(rpcClient.name, message, options)
+
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+    assert.equal(called, false)
   })
 })
