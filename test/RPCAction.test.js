@@ -3,6 +3,7 @@ const ConsoleInspector = require('./consoleInspector')
 const config = require('./config/LoadConfig')
 const chai = require('chai')
 const expect = chai.expect
+const assert = chai.assert
 
 describe('RPCClient && RPCServer actions', function () {
   const rpcName = 'techteamer-mq-js-test-rpc-action'
@@ -41,7 +42,7 @@ describe('RPCClient && RPCServer actions', function () {
   })
 
   it('RPCClient handles unserializeable content', (done) => {
-    rpcServer.registerAction('wrongtest1', (msg) => {
+    rpcServer.registerAction('wrongtest1', () => {
       done(new Error('RPCServer Action should not be called'))
     })
 
@@ -57,7 +58,7 @@ describe('RPCClient && RPCServer actions', function () {
   })
 
   it('RPCServer handles unserializeable content', (done) => {
-    rpcServer.registerAction('wrongtest2', (msg) => {
+    rpcServer.registerAction('wrongtest2', () => {
       const obj = {}
       obj.a = { b: obj }
 
@@ -70,5 +71,26 @@ describe('RPCClient && RPCServer actions', function () {
       expect(err).to.be.an.instanceof(Error)
       done()
     })
+  })
+
+  it('RPCServer registerAction throws when handler is not a function', () => {
+    assert.throws(() => {
+      rpcServer.registerAction('wrong-action', 'not-a-function')
+    })
+  })
+
+  it('RPCServer registerAction throws when handler is already registered', () => {
+    const handler1 = () => {
+      // Do something...
+    }
+    const handler2 = () => {
+      // Do something else...
+    }
+
+    rpcServer.registerAction('some-action', handler1)
+    rpcServer.registerAction('some-action', handler2) // logs warning and ignores handler2
+
+    assert.equal(rpcServer.actions.get('some-action'), handler1)
+    assert.notEqual(rpcServer.actions.get('some-action'), handler2)
   })
 })

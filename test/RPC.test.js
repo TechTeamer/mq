@@ -2,6 +2,8 @@ const QueueManager = require('../src/QueueManager')
 const ConsoleInspector = require('./consoleInspector')
 const SeedRandom = require('seed-random')
 const config = require('./config/LoadConfig')
+const chai = require('chai')
+const assert = chai.assert
 
 describe('RPCClient && RPCServer', () => {
   const rpcName = 'techteamer-mq-js-test-rpc'
@@ -163,7 +165,7 @@ describe('RPCClient && RPCServer', () => {
     const nonJSONSerializableMessage = {}
     nonJSONSerializableMessage.a = { b: nonJSONSerializableMessage }
 
-    rpcServer.consume((msg) => {
+    rpcServer.consume(() => {
       done(new Error('Should not receive the message'))
     })
 
@@ -204,5 +206,63 @@ describe('RPCClient && RPCServer', () => {
       })
       .then(() => done())
       .catch(err => done(err))
+  })
+
+  it('RPCServer handles errors and can continue to work after them', async () => {
+    const objectMessage = { foo: 'bar', bar: 'foo' }
+    const response = 'still working'
+    let shouldFail = true
+    rpcServer.consume(async () => {
+      if (shouldFail) {
+        shouldFail = false
+        throw new Error('Failed to process message')
+      }
+
+      return response
+    })
+
+    try {
+      await rpcClient.call(objectMessage)
+      throw new Error('Should have thrown by now...')
+    } catch (err) {
+      assert.equal(err.message, 'RPCCLIENT: cannot make rpc call cannot answer')
+    }
+
+    try {
+      const result = await rpcClient.call(objectMessage)
+      assert.equal(result, response)
+    } catch (err) {
+      throw new Error('Should not fail!')
+    }
+  })
+
+  it('RPCServer handles errors after timeout and can continue to work after them', async () => {
+    const objectMessage = { foo: 'bar', bar: 'foo' }
+    const response = 'still working'
+
+    let shouldFail = true
+    rpcServer.consume(async () => {
+      if (shouldFail) {
+        shouldFail = false
+        await new Promise(resolve => setTimeout(resolve, timeoutMs + 100))
+        throw new Error('Failed to process message')
+      }
+
+      return response
+    })
+
+    try {
+      await rpcClient.call(objectMessage)
+      throw new Error('Should have thrown by now...')
+    } catch (err) {
+      assert.equal(err.message, 'RPCCLIENT: cannot make rpc call Error: RPCCLIENT MESSAGE TIMEOUT techteamer-mq-js-test-rpc')
+    }
+
+    try {
+      const result = await rpcClient.call(objectMessage)
+      assert.equal(result, response)
+    } catch (err) {
+      throw new Error('Should not fail!')
+    }
   })
 })
