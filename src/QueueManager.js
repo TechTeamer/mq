@@ -127,7 +127,9 @@ class QueueManager {
 
     const settings = Object.assign({
       queueMaxSize: this._config.rpcQueueMaxSize,
-      timeoutMs: this._config.rpcTimeoutMs
+      timeoutMs: this._config.rpcTimeoutMs,
+      assertReplyQueueOptions: this._config.rpcClientAssertReplyQueueOptions,
+      exchangeOptions: this._config.rpcClientExchangeOptions
     }, options)
 
     const rpcClient = new OverrideClass(this.connection, this._logger, rpcName, settings)
@@ -159,7 +161,9 @@ class QueueManager {
 
     const settings = Object.assign({
       prefetchCount: 1,
-      timeoutMs: this._config.rpcTimeoutMs
+      timeoutMs: this._config.rpcTimeoutMs,
+      assertQueueOptions: this._config.rpcServerAssertQueueOptions,
+      exchangeOptions: this._config.rpcServerExchangeOptions
     }, options)
 
     const rpcServer = new OverrideClass(this.connection, this._logger, rpcName, settings)
@@ -189,7 +193,11 @@ class QueueManager {
       throw new Error('Override must be a subclass of Publisher')
     }
 
-    const publisher = new OverrideClass(this.connection, this._logger, exchangeName, options)
+    const settings = Object.assign({
+      assertExchangeOptions: this._config.publisherAssertExchangeOptions
+    }, options)
+
+    const publisher = new OverrideClass(this.connection, this._logger, exchangeName, settings)
 
     this.publishers.set(exchangeName, publisher)
 
@@ -219,7 +227,9 @@ class QueueManager {
     const settings = Object.assign({
       prefetchCount: 1,
       maxRetry: 5,
-      timeoutMs: this._config.rpcTimeoutMs
+      timeoutMs: this._config.rpcTimeoutMs,
+      assertQueueOptions: this._config.subscriberAssertQueueOptions,
+      assertExchangeOptions: this._config.subscriberAssertExchangeOptions
     }, options)
 
     const subscriber = new OverrideClass(this.connection, this._logger, exchangeName, settings)
@@ -249,7 +259,12 @@ class QueueManager {
       throw new Error('Override must be a subclass of GatheringClient')
     }
 
-    const gatheringClient = new OverrideClass(this.connection, this._logger, exchangeName, options)
+    const settings = Object.assign({
+      assertQueueOptions: this._config.gatheringClientAssertQueueOptions,
+      assertExchangeOptions: this._config.gatheringClientAssertExchangeOptions
+    }, options)
+
+    const gatheringClient = new OverrideClass(this.connection, this._logger, exchangeName, settings)
 
     this.gatheringClients.set(exchangeName, gatheringClient)
 
@@ -277,7 +292,9 @@ class QueueManager {
     }
 
     const settings = Object.assign({
-      timeoutMs: this._config.rpcTimeoutMs
+      timeoutMs: this._config.rpcTimeoutMs,
+      assertQueueOptions: this._config.gatheringServerAssertQueueOptions,
+      assertExchangeOptions: this._config.gatheringServerAssertExchangeOptions
     }, options)
 
     const gatheringServer = new OverrideClass(this.connection, this._logger, exchangeName, settings)
@@ -307,7 +324,11 @@ class QueueManager {
       throw new Error('Override must be a subclass of QueueClient')
     }
 
-    const queueClient = new OverrideClass(this.connection, this._logger, queueName, options)
+    const settings = Object.assign({
+      assertQueueOptions: this._config.queueClientAssertQueueOptions
+    }, options)
+
+    const queueClient = new OverrideClass(this.connection, this._logger, queueName, settings)
 
     this.queueClients.set(queueName, queueClient)
 
@@ -337,7 +358,8 @@ class QueueManager {
     const settings = Object.assign({
       prefetchCount: 1,
       maxRetry: 5,
-      timeoutMs: this._config.rpcTimeoutMs
+      timeoutMs: this._config.rpcTimeoutMs,
+      assertQueueOptions: this._config.queueServerAssertQueueOptions
     }, options)
 
     const queueServer = new OverrideClass(this.connection, this._logger, queueName, settings)

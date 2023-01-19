@@ -1,4 +1,3 @@
-
 class RPCError extends Error {
 
 }

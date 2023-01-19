@@ -7,7 +7,7 @@ class Publisher {
    * @param {String} exchange
    * @param {Object} options
    */
-  constructor (queueConnection, logger, exchange, options) {
+  constructor (queueConnection, logger, exchange, options = {}) {
     this._connection = queueConnection
     this._logger = logger
     this.exchange = exchange
@@ -15,17 +15,17 @@ class Publisher {
     this.options = options
 
     const {
-      MessageModel,
-      ContentSchema,
+      MessageModel = QueueMessage,
+      ContentSchema = JSON,
       assertExchange = true,
-      assertExchangeOptions = null
-    } = options || {}
+      assertExchangeOptions = {}
+    } = options
 
     this._assertExchange = assertExchange === true
-    this._assertExchangeOptions = Object.assign({ durable: true }, assertExchangeOptions || {})
+    this._assertExchangeOptions = Object.assign({ durable: true }, assertExchangeOptions)
 
-    this.MessageModel = MessageModel || QueueMessage
-    this.ContentSchema = ContentSchema || JSON
+    this.MessageModel = MessageModel
+    this.ContentSchema = ContentSchema
   }
 
   /**

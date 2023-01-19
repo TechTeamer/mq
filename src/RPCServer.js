@@ -11,36 +11,36 @@ class RPCServer {
    * @param {String} rpcName
    * @param {Object} options
    */
-  constructor (queueConnection, logger, rpcName, options) {
+  constructor (queueConnection, logger, rpcName, options = {}) {
     const {
       prefetchCount,
       timeoutMs,
-      RequestMessageModel,
-      ResponseMessageModel,
-      RequestContentSchema,
-      ResponseContentSchema,
+      RequestMessageModel = QueueMessage,
+      ResponseMessageModel = QueueMessage,
+      RequestContentSchema = JSON,
+      ResponseContentSchema = JSON,
       assertQueue = true,
-      assertQueueOptions = null,
+      assertQueueOptions = {},
       bindDirectExchangeName = null,
-      exchangeOptions = null
-    } = options || {}
+      exchangeOptions = {}
+    } = options
 
     this._connection = queueConnection
     this._logger = logger
     this.name = rpcName
 
     this._assertQueue = assertQueue === true
-    this._assertQueueOptions = Object.assign({ durable: true }, assertQueueOptions || {})
+    this._assertQueueOptions = Object.assign({ durable: true }, assertQueueOptions)
 
     this._bindDirectExchangeName = bindDirectExchangeName
-    this._exchangeOptions = exchangeOptions || {}
+    this._exchangeOptions = exchangeOptions
 
     this._prefetchCount = prefetchCount
     this._timeoutMs = timeoutMs
-    this.RequestModel = RequestMessageModel || QueueMessage
-    this.ResponseModel = ResponseMessageModel || QueueMessage
-    this.RequestContentSchema = RequestContentSchema || JSON
-    this.ResponseContentSchema = ResponseContentSchema || JSON
+    this.RequestModel = RequestMessageModel
+    this.ResponseModel = ResponseMessageModel
+    this.RequestContentSchema = RequestContentSchema
+    this.ResponseContentSchema = ResponseContentSchema
 
     this.actions = new Map()
   }
@@ -70,11 +70,13 @@ class RPCServer {
   registerAction (action, handler) {
     if (typeof handler !== 'function') {
       throw new TypeError(`${typeof handler} is not a Function`)
-    } else if (this.actions.has(action)) {
-      this._logger.warn(`Actions-handlers map already contains an action named ${action}`)
-    } else {
-      this.actions.set(action, handler)
     }
+    if (this.actions.has(action)) {
+      this._logger.warn(`Actions-handlers map already contains an action named ${action}. New handler was ignored!`)
+      return
+    }
+
+    this.actions.set(action, handler)
   }
 
   /**
@@ -210,10 +212,8 @@ class RPCServer {
       const replyAttachments = response.getAttachments()
       try {
         const reply = this._createReply(msg, answer)
-        if (replyAttachments instanceof Map) {
-          for (const [key, value] of replyAttachments) {
-            reply.addAttachment(key, value)
-          }
+        for (const [key, value] of replyAttachments) {
+          reply.addAttachment(key, value)
         }
         replyData = reply.serialize()
       } catch (err) {
