@@ -1,7 +1,10 @@
-- Emit Channel events (close, error, drain, return)
+6.2.0
+- added option to set global defaults for queue and exchange assertion
+- emit Channel events (close, error, drain, return)
+- updated and upgraded dependencies
 
 6.1.0
-- Added backward compatibility for object based connection URL configuration
+- added backward compatibility for object based connection URL configuration
 
 6.0.0
 - BREAKING: removed process.exit on connection close
