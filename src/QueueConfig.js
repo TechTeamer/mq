@@ -70,8 +70,6 @@ class QueueConfig {
     this.subscriberAssertQueueOptions = subscriberAssertQueueOptions
     this.subscriberAssertExchangeOptions = subscriberAssertExchangeOptions
 
-    this.subscriberAssertExchangeOptions = subscriberAssertExchangeOptions
-
     this.gatheringClientAssertQueueOptions = gatheringClientAssertQueueOptions
     this.gatheringClientAssertExchangeOptions = gatheringClientAssertExchangeOptions
 

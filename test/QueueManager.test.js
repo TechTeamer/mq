@@ -14,6 +14,26 @@ const config = require('./config/LoadConfig')
 describe('QueueManager', () => {
   const logger = new ConsoleInspector(console)
   const manager = new QueueManager(config)
+  const defaultOptionsOverride = {
+    durable: false,
+    autoDelete: false
+  }
+  const managerWithDefaultOptions = new QueueManager({
+    ...config,
+    rpcClientAssertReplyQueueOptions: defaultOptionsOverride,
+    rpcClientExchangeOptions: defaultOptionsOverride,
+    rpcServerAssertQueueOptions: defaultOptionsOverride,
+    rpcServerExchangeOptions: defaultOptionsOverride,
+    publisherAssertExchangeOptions: defaultOptionsOverride,
+    subscriberAssertQueueOptions: defaultOptionsOverride,
+    subscriberAssertExchangeOptions: defaultOptionsOverride,
+    gatheringClientAssertQueueOptions: defaultOptionsOverride,
+    gatheringClientAssertExchangeOptions: defaultOptionsOverride,
+    gatheringServerAssertQueueOptions: defaultOptionsOverride,
+    gatheringServerAssertExchangeOptions: defaultOptionsOverride,
+    queueClientAssertQueueOptions: defaultOptionsOverride,
+    queueServerAssertQueueOptions: defaultOptionsOverride
+  })
 
   after(() => {
     logger.empty()
@@ -50,7 +70,9 @@ describe('QueueManager', () => {
 
   it('Provide a valid override class for RPCClient', () => {
     const name = 'test-rpc-override-valid'
-    class Override extends RPCClient {}
+
+    class Override extends RPCClient {
+    }
 
     const rpcClient = manager.getRPCClient(name, Override)
 
@@ -60,7 +82,9 @@ describe('QueueManager', () => {
 
   it('Provide an invalid override class for RPCClient', () => {
     const name = 'test-rpc-override-invalid'
-    class Override {}
+
+    class Override {
+    }
 
     assert.throws(() => {
       manager.getRPCClient(name, Override)
@@ -69,7 +93,9 @@ describe('QueueManager', () => {
 
   it('Provide a valid override class for RPCServer', () => {
     const name = 'test-rpc-override-valid'
-    class Override extends RPCServer {}
+
+    class Override extends RPCServer {
+    }
 
     const rpcServer = manager.getRPCServer(name, Override)
 
@@ -79,7 +105,9 @@ describe('QueueManager', () => {
 
   it('Provide an invalid override class for RPCServer', () => {
     const name = 'test-rpc-override-invalid'
-    class Override {}
+
+    class Override {
+    }
 
     assert.throws(() => {
       manager.getRPCServer(name, Override)
@@ -90,7 +118,9 @@ describe('QueueManager', () => {
 
   it('Provide a valid override class for QueueClient', () => {
     const name = 'test-queue-override-valid'
-    class Override extends QueueClient {}
+
+    class Override extends QueueClient {
+    }
 
     const queueClient = manager.getQueueClient(name, Override)
 
@@ -100,7 +130,9 @@ describe('QueueManager', () => {
 
   it('Provide an invalid override class for QueueClient', () => {
     const name = 'test-queue-override-invalid'
-    class Override {}
+
+    class Override {
+    }
 
     assert.throws(() => {
       manager.getRPCClient(name, Override)
@@ -109,7 +141,9 @@ describe('QueueManager', () => {
 
   it('Provide a valid override class for QueueServer', () => {
     const name = 'test-queue-override-valid'
-    class Override extends QueueServer {}
+
+    class Override extends QueueServer {
+    }
 
     const queueServer = manager.getQueueServer(name, Override)
 
@@ -119,7 +153,9 @@ describe('QueueManager', () => {
 
   it('Provide an invalid override class for QueueServer', () => {
     const rpc = 'test-queue-override-invalid'
-    class Override {}
+
+    class Override {
+    }
 
     assert.throws(() => {
       manager.getQueueServer(rpc, Override)
@@ -130,7 +166,9 @@ describe('QueueManager', () => {
 
   it('Provide a valid override class for Publisher', () => {
     const name = 'test-pubsub-override-valid'
-    class Override extends Publisher {}
+
+    class Override extends Publisher {
+    }
 
     const publisher = manager.getPublisher(name, Override)
 
@@ -140,7 +178,9 @@ describe('QueueManager', () => {
 
   it('Provide an invalid override class for Publisher', () => {
     const name = 'test-pubsub-override-invalid'
-    class Override {}
+
+    class Override {
+    }
 
     assert.throws(() => {
       manager.getPublisher(name, Override)
@@ -149,7 +189,9 @@ describe('QueueManager', () => {
 
   it('Provide a valid override class for Subscriber', () => {
     const name = 'test-pubsub-override-valid'
-    class Override extends Subscriber {}
+
+    class Override extends Subscriber {
+    }
 
     const subscriber = manager.getSubscriber(name, Override)
 
@@ -159,10 +201,64 @@ describe('QueueManager', () => {
 
   it('Provide an invalid override class for Subscriber', () => {
     const rpc = 'test-pubsub-override-invalid'
-    class Override {}
+
+    class Override {
+    }
 
     assert.throws(() => {
       manager.getSubscriber(rpc, Override)
     })
+  })
+
+  // Default options
+  it('Manager can get Publisher && Subscriber with modified default options', () => {
+    const exchange = 'test-pubsub'
+    const publisher = managerWithDefaultOptions.getPublisher(exchange)
+    const subscriber = managerWithDefaultOptions.getSubscriber(exchange)
+
+    assert.instanceOf(publisher, Publisher, 'not an instance of Publisher')
+    assert.instanceOf(subscriber, Subscriber, 'not an instance of Subscriber')
+
+    assert.isFalse(publisher._assertExchangeOptions.durable)
+    assert.isFalse(publisher._assertExchangeOptions.autoDelete)
+
+    assert.isFalse(subscriber._assertQueueOptions.durable)
+    assert.isFalse(subscriber._assertQueueOptions.autoDelete)
+    assert.isFalse(subscriber._assertExchangeOptions.durable)
+    assert.isFalse(subscriber._assertExchangeOptions.autoDelete)
+  })
+
+  it('Manager can get QueueClient && QueueServer with modified default options', () => {
+    const queue = 'test-queue'
+    const queueClient = managerWithDefaultOptions.getQueueClient(queue)
+    const queueServer = managerWithDefaultOptions.getQueueServer(queue)
+
+    assert.instanceOf(queueClient, QueueClient, 'not an instance of QueueClient')
+    assert.instanceOf(queueServer, QueueServer, 'not an instance of QueueServer')
+
+    assert.isFalse(queueClient._assertQueueOptions.durable)
+    assert.isFalse(queueClient._assertQueueOptions.autoDelete)
+
+    assert.isFalse(queueServer._assertQueueOptions.durable)
+    assert.isFalse(queueServer._assertQueueOptions.autoDelete)
+  })
+
+  it('Manager can get RPCClient && RPCServer with modified default options', () => {
+    const rpc = 'test-rpc'
+    const rpcClient = managerWithDefaultOptions.getRPCClient(rpc)
+    const rpcServer = managerWithDefaultOptions.getRPCServer(rpc)
+
+    assert.instanceOf(rpcClient, RPCClient, 'not an instance of RPCClient')
+    assert.instanceOf(rpcServer, RPCServer, 'not an instance of RPCServer')
+
+    assert.isFalse(rpcClient._assertReplyQueueOptions.durable)
+    assert.isFalse(rpcClient._assertReplyQueueOptions.autoDelete)
+    assert.isFalse(rpcClient._exchangeOptions.durable)
+    assert.isFalse(rpcClient._exchangeOptions.autoDelete)
+
+    assert.isFalse(rpcServer._assertQueueOptions.durable)
+    assert.isFalse(rpcServer._assertQueueOptions.autoDelete)
+    assert.isFalse(rpcServer._exchangeOptions.durable)
+    assert.isFalse(rpcServer._exchangeOptions.autoDelete)
   })
 })
