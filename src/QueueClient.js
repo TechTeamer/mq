@@ -7,18 +7,18 @@ class QueueClient extends Publisher {
    * @param {String} name
    * @param {Object} options
    */
-  constructor (queueConnection, logger, name, options) {
+  constructor (queueConnection, logger, name, options = {}) {
     super(queueConnection, logger, '', options)
     this.routingKey = name
     this._assertQueue = null
 
     const {
       assertQueue = true,
-      assertQueueOptions
-    } = options || {}
+      assertQueueOptions = {}
+    } = options
 
     this._assertQueue = assertQueue === true
-    this._assertQueueOptions = Object.assign({ durable: true }, assertQueueOptions || {})
+    this._assertQueueOptions = Object.assign({ durable: true }, assertQueueOptions)
   }
 
   /**

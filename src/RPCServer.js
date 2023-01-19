@@ -11,36 +11,36 @@ class RPCServer {
    * @param {String} rpcName
    * @param {Object} options
    */
-  constructor (queueConnection, logger, rpcName, options) {
+  constructor (queueConnection, logger, rpcName, options = {}) {
     const {
       prefetchCount,
       timeoutMs,
-      RequestMessageModel,
-      ResponseMessageModel,
-      RequestContentSchema,
-      ResponseContentSchema,
+      RequestMessageModel = QueueMessage,
+      ResponseMessageModel = QueueMessage,
+      RequestContentSchema = JSON,
+      ResponseContentSchema = JSON,
       assertQueue = true,
-      assertQueueOptions = null,
+      assertQueueOptions = {},
       bindDirectExchangeName = null,
-      exchangeOptions = null
-    } = options || {}
+      exchangeOptions = {}
+    } = options
 
     this._connection = queueConnection
     this._logger = logger
     this.name = rpcName
 
     this._assertQueue = assertQueue === true
-    this._assertQueueOptions = Object.assign({ durable: true }, assertQueueOptions || {})
+    this._assertQueueOptions = Object.assign({ durable: true }, assertQueueOptions)
 
     this._bindDirectExchangeName = bindDirectExchangeName
-    this._exchangeOptions = exchangeOptions || {}
+    this._exchangeOptions = exchangeOptions
 
     this._prefetchCount = prefetchCount
     this._timeoutMs = timeoutMs
-    this.RequestModel = RequestMessageModel || QueueMessage
-    this.ResponseModel = ResponseMessageModel || QueueMessage
-    this.RequestContentSchema = RequestContentSchema || JSON
-    this.ResponseContentSchema = ResponseContentSchema || JSON
+    this.RequestModel = RequestMessageModel
+    this.ResponseModel = ResponseMessageModel
+    this.RequestContentSchema = RequestContentSchema
+    this.ResponseContentSchema = ResponseContentSchema
 
     this.actions = new Map()
   }

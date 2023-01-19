@@ -21,9 +21,9 @@ class GatheringClient {
       queueMaxSize,
       timeoutMs,
       serverCount = 0,
-      assertQueueOptions,
+      assertQueueOptions = {},
       assertExchange = true,
-      assertExchangeOptions = null
+      assertExchangeOptions = {}
     } = options
 
     this._rpcQueueMaxSize = queueMaxSize
@@ -31,8 +31,8 @@ class GatheringClient {
     this._gatheringServerCount = serverCount
 
     this._assertExchange = assertExchange === true
-    this._assertQueueOptions = Object.assign({ exclusive: true, autoDelete: true }, assertQueueOptions || {})
-    this._assertExchangeOptions = Object.assign({ durable: true }, assertExchangeOptions || {})
+    this._assertQueueOptions = Object.assign({ exclusive: true, autoDelete: true }, assertQueueOptions)
+    this._assertExchangeOptions = Object.assign({ durable: true }, assertExchangeOptions)
   }
 
   async initialize () {

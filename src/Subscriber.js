@@ -7,7 +7,7 @@ class Subscriber {
    * @param {String} name
    * @param {Object} options
    */
-  constructor (queueConnection, logger, name, options) {
+  constructor (queueConnection, logger, name, options = {}) {
     this._connection = queueConnection
     this._logger = logger
     this.name = name
@@ -15,21 +15,21 @@ class Subscriber {
     const {
       maxRetry,
       timeoutMs,
-      MessageModel,
-      ContentSchema,
-      assertQueueOptions = null,
+      MessageModel = QueueMessage,
+      ContentSchema = JSON,
+      assertQueueOptions = {},
       assertExchange = true,
-      assertExchangeOptions = null
-    } = options || {}
+      assertExchangeOptions = {}
+    } = options
 
     this._maxRetry = maxRetry
     this._timeoutMs = timeoutMs
-    this.MessageModel = MessageModel || QueueMessage
-    this.ContentSchema = ContentSchema || JSON
+    this.MessageModel = MessageModel
+    this.ContentSchema = ContentSchema
 
-    this._assertQueueOptions = Object.assign({ exclusive: true, autoDelete: true }, assertQueueOptions || {})
+    this._assertQueueOptions = Object.assign({ exclusive: true, autoDelete: true }, assertQueueOptions)
     this._assertExchange = assertExchange === true
-    this._assertExchangeOptions = Object.assign({ durable: true }, assertExchangeOptions || {})
+    this._assertExchangeOptions = Object.assign({ durable: true }, assertExchangeOptions)
 
     this._retryMap = new Map()
 

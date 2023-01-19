@@ -7,19 +7,19 @@ class QueueServer extends Subscriber {
    * @param {String} name
    * @param {Object} options
    */
-  constructor (queueConnection, logger, name, options) {
+  constructor (queueConnection, logger, name, options = {}) {
     super(queueConnection, logger, name, options)
     const {
       assertQueue = true,
-      assertQueueOptions = null,
+      assertQueueOptions = {},
       prefetchCount
-    } = options || {}
+    } = options
 
     this._assertQueue = null
     this._prefetchCount = prefetchCount
 
     this._assertQueue = assertQueue === true
-    this._assertQueueOptions = Object.assign({ durable: true }, assertQueueOptions || {})
+    this._assertQueueOptions = Object.assign({ durable: true }, assertQueueOptions)
   }
 
   /**

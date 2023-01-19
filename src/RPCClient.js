@@ -12,39 +12,39 @@ class RPCClient {
    * @param {String} rpcName
    * @param {Object} options
    */
-  constructor (queueConnection, logger, rpcName, options) {
+  constructor (queueConnection, logger, rpcName, options = {}) {
     const {
       queueMaxSize,
       timeoutMs,
-      RequestMessageModel,
-      ResponseMessageModel,
-      RequestContentSchema,
-      ResponseContentSchema,
+      RequestMessageModel = QueueMessage,
+      ResponseMessageModel = QueueMessage,
+      RequestContentSchema = JSON,
+      ResponseContentSchema = JSON,
       replyQueueName = '',
       assertReplyQueue = true,
-      assertReplyQueueOptions = null,
+      assertReplyQueueOptions = {},
       bindDirectExchangeName = null,
-      exchangeOptions = null
-    } = options || {}
+      exchangeOptions = {}
+    } = options
 
     this._connection = queueConnection
     this._logger = logger
     this.name = rpcName
-    this._replyQueue = replyQueueName || ''
+    this._replyQueue = replyQueueName
     this._correlationIdMap = new Map()
 
     this._assertReplyQueue = assertReplyQueue === true
-    this._assertReplyQueueOptions = Object.assign({ exclusive: true, autoDelete: true }, assertReplyQueueOptions || {})
+    this._assertReplyQueueOptions = Object.assign({ exclusive: true, autoDelete: true }, assertReplyQueueOptions)
 
     this._bindDirectExchangeName = bindDirectExchangeName
-    this._exchangeOptions = exchangeOptions || {}
+    this._exchangeOptions = exchangeOptions
 
     this._rpcQueueMaxSize = queueMaxSize
     this._rpcTimeoutMs = timeoutMs
-    this.RequestMessageModel = RequestMessageModel || QueueMessage
-    this.ResponseMessageModel = ResponseMessageModel || QueueMessage
-    this.RequestContentSchema = RequestContentSchema || JSON
-    this.ResponseContentSchema = ResponseContentSchema || JSON
+    this.RequestMessageModel = RequestMessageModel
+    this.ResponseMessageModel = ResponseMessageModel
+    this.RequestContentSchema = RequestContentSchema
+    this.ResponseContentSchema = ResponseContentSchema
   }
 
   async initialize () {

@@ -8,7 +8,7 @@ class GatheringServer {
    * @param {String} name
    * @param {Object} options
    */
-  constructor (queueConnection, logger, name, options) {
+  constructor (queueConnection, logger, name, options = {}) {
     this._connection = queueConnection
     this._logger = logger
     this.name = name
@@ -17,17 +17,17 @@ class GatheringServer {
     const {
       prefetchCount,
       timeoutMs,
-      assertQueueOptions,
+      assertQueueOptions = {},
       assertExchange = true,
-      assertExchangeOptions = null
-    } = options || {}
+      assertExchangeOptions = {}
+    } = options
 
     this._prefetchCount = prefetchCount
     this._responseTimeoutMs = timeoutMs
 
     this._assertExchange = assertExchange === true
-    this._assertQueueOptions = Object.assign({ exclusive: true, autoDelete: true }, assertQueueOptions || {})
-    this._assertExchangeOptions = Object.assign({ durable: true }, assertExchangeOptions || {})
+    this._assertQueueOptions = Object.assign({ exclusive: true, autoDelete: true }, assertQueueOptions)
+    this._assertExchangeOptions = Object.assign({ durable: true }, assertExchangeOptions)
 
     this.actions = new Map()
   }

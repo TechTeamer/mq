@@ -26,7 +26,29 @@ class QueueConfig {
       options = {},
       rpcTimeoutMs = 10000,
       rpcQueueMaxSize = 100,
-      logger = console
+      logger = console,
+
+      // Queue & exchange options
+      rpcClientAssertReplyQueueOptions = {},
+      rpcClientExchangeOptions = {},
+
+      rpcServerAssertQueueOptions = {},
+      rpcServerExchangeOptions = {},
+
+      publisherAssertExchangeOptions = {},
+
+      subscriberAssertQueueOptions = {},
+      subscriberAssertExchangeOptions = {},
+
+      gatheringClientAssertQueueOptions = {},
+      gatheringClientAssertExchangeOptions = {},
+
+      gatheringServerAssertQueueOptions = {},
+      gatheringServerAssertExchangeOptions = {},
+
+      queueClientAssertQueueOptions = {},
+
+      queueServerAssertQueueOptions = {}
     } = config
 
     const rabbitMqOptions = new RabbitMqOptions(options)
@@ -35,6 +57,30 @@ class QueueConfig {
     this.rpcTimeoutMs = rpcTimeoutMs
     this.rpcQueueMaxSize = rpcQueueMaxSize
     this.logger = logger
+
+    // Queue & exchange options
+    this.rpcClientAssertReplyQueueOptions = rpcClientAssertReplyQueueOptions
+    this.rpcClientExchangeOptions = rpcClientExchangeOptions
+
+    this.rpcServerAssertQueueOptions = rpcServerAssertQueueOptions
+    this.rpcServerExchangeOptions = rpcServerExchangeOptions
+
+    this.publisherAssertExchangeOptions = publisherAssertExchangeOptions
+
+    this.subscriberAssertQueueOptions = subscriberAssertQueueOptions
+    this.subscriberAssertExchangeOptions = subscriberAssertExchangeOptions
+
+    this.subscriberAssertExchangeOptions = subscriberAssertExchangeOptions
+
+    this.gatheringClientAssertQueueOptions = gatheringClientAssertQueueOptions
+    this.gatheringClientAssertExchangeOptions = gatheringClientAssertExchangeOptions
+
+    this.gatheringServerAssertQueueOptions = gatheringServerAssertQueueOptions
+    this.gatheringServerAssertExchangeOptions = gatheringServerAssertExchangeOptions
+
+    this.queueClientAssertQueueOptions = queueClientAssertQueueOptions
+
+    this.queueServerAssertQueueOptions = queueServerAssertQueueOptions
   }
 
   static isValidConfig (obj) {
