@@ -95,6 +95,34 @@ describe('QueueConnection', () => {
     assert.deepEqual(connection._activeConnectionConfig, QueueConfig.urlStringToObject(config.url))
   })
 
+  it('#shuffleUrls() really shuffles the received urls and QueueConnection can still connect to the correct url', async () => {
+    const original = ['amqps://random-host:5671', config.url]
+    const connection = new QueueConnection(copyConfig({
+      url: original,
+      shuffleUrls: true
+    }))
+
+    let canDoTheSame = false
+    let canDoDifferent = false
+
+    for (let i = 1; i <= 100 && !(canDoTheSame && canDoDifferent); i++) {
+      const shuffled = connection.shuffleUrls(original)
+
+      if (JSON.stringify(original) === JSON.stringify(shuffled)) {
+        canDoTheSame = true
+      } else {
+        canDoDifferent = true
+      }
+    }
+
+    // This test failing has a chance of 1 in 2^100 (==1,267,650,600,228,229,401,496,703,205,376)
+    assert.isTrue(canDoDifferent, 'connect urls shuffle failed to create different order out of a 100 tries')
+    assert.isTrue(canDoTheSame, 'connect urls shuffle failed to create same order out of a 100 tries')
+
+    await connection.connect()
+    assert.isNotNull(connection._connection)
+  })
+
   it('#close() closes connection to RabbitMQ', async () => {
     const connection = new QueueConnection(config)
     try {
