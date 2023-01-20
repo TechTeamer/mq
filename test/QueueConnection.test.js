@@ -96,12 +96,15 @@ describe('QueueConnection', () => {
   })
 
   it('#shuffleUrls() really shuffles the received urls', async () => {
-    const connection = new QueueConnection(copyConfig({}))
+    const original = ['amqps://random-host:5671', config.url]
+    const connection = new QueueConnection(copyConfig({
+      url: original,
+      shuffleUrls: true
+    }))
 
     let canDoTheSame = false
     let canDoDifferent = false
 
-    const original = ['amqps://random-host:5671', config.url]
     for (let i = 1; i <= 100 && !(canDoTheSame && canDoDifferent); i++) {
       const shuffled = connection.shuffleUrls(original)
 
