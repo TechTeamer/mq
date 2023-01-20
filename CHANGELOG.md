@@ -1,3 +1,6 @@
+6.3.0
+- added option to shuffle connection urls
+
 6.2.0
 - added option to set global defaults for queue and exchange assertion
 - emit Channel events (close, error, drain, return)
