@@ -108,6 +108,10 @@ class QueueConnection extends EventEmitter {
   }
 
   async _connectWithMultipleUrls (urls, options) {
+    if (this._config.shuffleUrls) {
+      urls = this.shuffleUrls(urls)
+    }
+
     for (const url of urls) {
       const connectionUrl = QueueConfig.urlStringToObject(url)
       try {
@@ -120,6 +124,11 @@ class QueueConnection extends EventEmitter {
     }
 
     throw new Error('RabbitMQ connection filed with multiple urls')
+  }
+
+  shuffleUrls (urls) {
+    // shuffle urls - try to connect to nodes in a random order
+    return [...urls].sort((a, b) => 0.5 - Math.random())
   }
 
   /**

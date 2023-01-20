@@ -28,6 +28,8 @@ class QueueConfig {
       rpcQueueMaxSize = 100,
       logger = console,
 
+      shuffleUrls = false,
+
       // Queue & exchange options
       rpcClientAssertReplyQueueOptions = {},
       rpcClientExchangeOptions = {},
@@ -57,6 +59,8 @@ class QueueConfig {
     this.rpcTimeoutMs = rpcTimeoutMs
     this.rpcQueueMaxSize = rpcQueueMaxSize
     this.logger = logger
+
+    this.shuffleUrls = shuffleUrls
 
     // Queue & exchange options
     this.rpcClientAssertReplyQueueOptions = rpcClientAssertReplyQueueOptions
