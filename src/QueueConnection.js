@@ -123,7 +123,7 @@ class QueueConnection extends EventEmitter {
       }
     }
 
-    throw new Error('RabbitMQ connection filed with multiple urls')
+    throw new Error('RabbitMQ connection failed with multiple urls')
   }
 
   shuffleUrls (urls) {

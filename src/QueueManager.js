@@ -52,7 +52,7 @@ class QueueManager {
     try {
       await this.connection.connect()
     } catch (err) {
-      this._logger.error('Filed to connect to queue server', err)
+      this._logger.error('Failed to connect to queue server', err)
       throw err
     }
 
