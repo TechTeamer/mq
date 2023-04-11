@@ -26,20 +26,20 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
-    "chai": "^4.3.6",
-    "coveralls": "^3.0.7",
-    "eslint": "^8.8.0",
+    "chai": "^4.3.7",
+    "coveralls": "^3.1.1",
+    "eslint": "^8.38.0",
     "eslint-config-standard": "^17.0.0",
-    "eslint-plugin-import": "^2.25.4",
-    "eslint-plugin-n": "^15.2.0",
-    "eslint-plugin-promise": "^6.0.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-n": "^15.7.0",
+    "eslint-plugin-promise": "^6.1.1",
     "eslint-plugin-standard": "^5.0.0",
-    "mocha": "^10.0.0",
+    "mocha": "^10.2.0",
     "nyc": "^15.1.0",
-    "protobufjs": "^7.0.0",
+    "protobufjs": "^7.2.3",
     "seed-random": "^2.2.0"
   },
   "peerDependencies": {
-    "protobufjs": "^7.0.0"
+    "protobufjs": "^7.2.3"
   }
 }
