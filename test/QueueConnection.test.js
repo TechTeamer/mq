@@ -164,6 +164,58 @@ describe('QueueConnection', () => {
     assert.strictEqual(callbackCalled, true)
   })
 
+  it('Connection errors emit error events if there are any listeners', async () => {
+    const connection = new QueueConnection(config)
+
+    let callbackCalled = false
+    connection.addListener('error', () => {
+      callbackCalled = true
+    })
+
+    try {
+      await connection.connect()
+    } catch (e) {
+      throw new Error(`connect() failed: ${e}`)
+    }
+
+    try {
+      await connection._connection.emit('error', new Error('Example: Heartbeat timeout'))
+    } catch (e) {
+      throw new Error(`close() failed: ${e}`)
+    }
+
+    assert.strictEqual(callbackCalled, true)
+  })
+
+  it('Connection errors do NOT emit error events if there are no listeners', async () => {
+    const connection = new QueueConnection(config)
+
+    let callbackCalled = false
+    connection.addListener('close', () => {
+      callbackCalled = true
+    })
+
+    try {
+      await connection.connect()
+    } catch (e) {
+      throw new Error(`connect() failed: ${e}`)
+    }
+
+    try {
+      // NOTE: https://nodejs.org/docs/latest-v18.x/api/errors.html#error-propagation-and-interception
+      // 'error' named events must have a subscriber in order to avoid uncaughtException errors.
+      await connection._connection.emit('error', new Error('Heartbeat timeout'))
+
+      // If QueueConnection emitted an error event but did not have a listener for it
+      // we won't even get here to emit the close event due to the uncaughtException error
+      await connection._connection.emit('close', new Error('Close MQ'))
+    } catch (e) {
+      throw new Error(`close() failed: ${e}`)
+    }
+
+    assert.strictEqual(callbackCalled, true)
+  })
+
   it('#close() closes connection to RabbitMQ and the close event callback is not invoked', async () => {
     const connection = new QueueConnection(config)
 

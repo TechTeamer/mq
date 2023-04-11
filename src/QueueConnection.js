@@ -65,7 +65,13 @@ class QueueConnection extends EventEmitter {
     connection.on('error', (err) => {
       if (err.message !== 'Connection closing') {
         this._logger.error('RabbitMQ error', err)
-        this.emit('error', err)
+
+        if (this.listenerCount('error') > 0) {
+          // NOTE: https://nodejs.org/docs/latest-v18.x/api/errors.html#error-propagation-and-interception
+          // 'error' named events must have a subscriber in order to avoid uncaughtException errors.
+          // We use this listenerCount condition to avoid emitting errors if there are no listeners.
+          this.emit('error', err)
+        }
       }
     })
     connection.on('close', (err) => {
@@ -176,7 +182,13 @@ class QueueConnection extends EventEmitter {
   emitChannelEvents (channel) {
     channel.on('error', (err) => {
       this._logger.error('RabbitMQ channel error', err)
-      this.emit('error', err)
+
+      if (this.listenerCount('error') > 0) {
+        // NOTE: https://nodejs.org/docs/latest-v18.x/api/errors.html#error-propagation-and-interception
+        // 'error' named events must have a subscriber in order to avoid uncaughtException errors.
+        // We use this listenerCount condition to avoid emitting errors if there are no listeners.
+        this.emit('error', err)
+      }
     })
     channel.on('close', (err) => {
       this._logger.error('RabbitMQ channel closed', err)
