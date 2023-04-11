@@ -116,7 +116,7 @@ describe('RPCClient && RPCServer', () => {
       if (!response.hasAttachment('test')) {
         done(new Error('Missing attachment name "test" from response'))
       }
-      if (!response.getAttachment('test') === buf) {
+      if (response.getAttachment('test') !== buf) {
         done(new Error('Attachment name "test" is not the same'))
       }
       return msg
