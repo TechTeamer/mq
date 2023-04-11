@@ -1,3 +1,7 @@
+6.3.1
+- fixed error emitting logic
+- updated and upgraded dependencies
+
 6.3.0
 - added option to shuffle connection urls
 
