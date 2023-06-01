@@ -197,7 +197,7 @@ class RPCClient {
     }
 
     if (!this._correlationIdMap.has(reply.properties.correlationId)) {
-      this._logger.warn('UNABLE TO MATCH RPC REPLY WITH MESSAGE SENT ON %s (possibly timed out)', this.name, reply)
+      this._logger.warn('UNABLE TO MATCH RPC REPLY WITH MESSAGE SENT ON %s (possibly timed out)', this.name, reply.properties)
       return
     }
 
@@ -214,7 +214,7 @@ class RPCClient {
         resolve(replyContent.data)
       }
     } else {
-      this._logger.error('RPC CLIENT GOT ERROR', this.name, reply.properties.correlationId, replyContent)
+      this._logger.error('RPC CLIENT GOT ERROR', this.name, reply.properties.correlationId)
       reject(replyContent.data)
     }
   }

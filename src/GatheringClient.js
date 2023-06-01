@@ -58,7 +58,7 @@ class GatheringClient {
           } else if (reply.properties.type === 'reply') {
             this._handleGatheringResponse(reply)
           } else {
-            this._logger.error(`QUEUE GATHERING CLIENT: INVALID REPLY ON '${this.name}': UNKNOWN MESSAGE TYPE ON REPLY`, correlationId, reply)
+            this._logger.error(`QUEUE GATHERING CLIENT: INVALID REPLY ON '${this.name}': UNKNOWN MESSAGE TYPE ON REPLY`, correlationId, reply.properties)
           }
         } catch (err) {
           this._logger.error(`QUEUE GATHERING CLIENT: FAILED TO HANDLE MESSAGE ON '${this.name}'`, correlationId, err)
@@ -72,19 +72,19 @@ class GatheringClient {
 
   isValidReply (reply) {
     if (!reply) {
-      this._logger.error(`QUEUE GATHERING CLIENT: INVALID REPLY ON '${this.name}': NO REPLY`, reply)
+      this._logger.error(`QUEUE GATHERING CLIENT: INVALID REPLY ON '${this.name}': NO REPLY`)
       return false
     }
     if (!reply.properties) {
-      this._logger.error(`QUEUE GATHERING CLIENT: INVALID REPLY ON '${this.name}': NO PROPERTIES ON REPLY`, reply)
+      this._logger.error(`QUEUE GATHERING CLIENT: INVALID REPLY ON '${this.name}': NO PROPERTIES ON REPLY`)
       return false
     }
     if (!reply.properties.correlationId) {
-      this._logger.error(`QUEUE GATHERING CLIENT: INVALID REPLY ON '${this.name}': NO CORRELATION ID ON REPLY`, reply)
+      this._logger.error(`QUEUE GATHERING CLIENT: INVALID REPLY ON '${this.name}': NO CORRELATION ID ON REPLY`, reply.properties)
       return false
     }
     if (!reply.properties.type) {
-      this._logger.error(`QUEUE GATHERING CLIENT: INVALID REPLY ON '${this.name}': NO MESSAGE TYPE ON REPLY`, reply)
+      this._logger.error(`QUEUE GATHERING CLIENT: INVALID REPLY ON '${this.name}': NO MESSAGE TYPE ON REPLY`, reply.properties)
       return false
     }
 
@@ -235,7 +235,7 @@ class GatheringClient {
         resolve(replyContent.data)
       }
     } else {
-      this._logger.error('QUEUE GATHERING CLIENT: RECEIVED ERROR REPLY', this.name, correlationId, replyContent)
+      this._logger.error('QUEUE GATHERING CLIENT: RECEIVED ERROR REPLY', this.name, correlationId)
       reject(new Error(replyContent.data))
     }
   }
@@ -252,7 +252,7 @@ class GatheringClient {
 
     const replyMessage = QueueMessage.unserialize(reply.content)
     if (replyMessage.status === 'error') {
-      this._logger.error(`QUEUE GATHERING CLIENT: RECEIVED ERROR STATUS ON '${this.name}'`, correlationId, replyMessage.data)
+      this._logger.error(`QUEUE GATHERING CLIENT: RECEIVED ERROR STATUS ON '${this.name}'`, correlationId)
       this._correlationIdMap.delete(correlationId)
       reject(new Error(replyMessage.data))
       return

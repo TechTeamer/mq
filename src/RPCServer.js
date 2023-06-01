@@ -197,7 +197,7 @@ class RPCServer {
     const timeoutMs = typeof request.timeOut === 'number' ? request.timeOut : this._timeoutMs
     const timer = setTimeout(() => {
       timedOut = true
-      this._logger.error('RPCServer response timeout', this.name, request.data)
+      this._logger.error('RPCServer response timeout', this.name)
       this.handleResponseTimeout(ch, msg, request)
     }, timeoutMs)
 

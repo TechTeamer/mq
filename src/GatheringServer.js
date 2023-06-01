@@ -237,7 +237,7 @@ class GatheringServer {
     try {
       request = QueueMessage.unserialize(msg.content)
       if (request.status !== 'ok') {
-        this._logger.error(`QUEUE GATHERING SERVER: MESSAGE NOT OK '${this.name}' ${correlationId}`, request)
+        this._logger.error(`QUEUE GATHERING SERVER: MESSAGE NOT OK '${this.name}' ${correlationId}`)
         this._sendStatus(channel, replyTo, correlationId, 'error', 'message not OK')
         this._nack(channel, msg)
         return { isValid: false }

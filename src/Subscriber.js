@@ -114,7 +114,7 @@ class Subscriber {
       const request = this.MessageModel.unserialize(msg.content, this.ContentSchema)
 
       if (request.status !== 'ok') {
-        this._logger.error('CANNOT GET QUEUE MESSAGE PARAMS', this.name, request)
+        this._logger.error('CANNOT GET QUEUE MESSAGE PARAMS', this.name)
         return null
       }
 
@@ -147,7 +147,7 @@ class Subscriber {
     }
 
     if (counter > this._maxRetry) {
-      this._logger.error('SUBSCRIBER TRIED TOO MANY TIMES', this.name, request, msg)
+      this._logger.error('SUBSCRIBER TRIED TOO MANY TIMES', this.name, msg)
       this._retryMap.delete(consumerTag)
       return true
     }
@@ -178,7 +178,7 @@ class Subscriber {
     const timeoutMs = typeof request.timeOut === 'number' ? request.timeOut : this._timeoutMs
     const timer = setTimeout(() => {
       timedOut = true
-      this._logger.error('Timeout in Subscriber', this.name, request.data)
+      this._logger.error('Timeout in Subscriber', this.name)
       this._nack(channel, msg)
     }, timeoutMs)
 
