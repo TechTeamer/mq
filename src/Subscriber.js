@@ -88,7 +88,7 @@ class Subscriber {
    */
   _ack (channel, msg) {
     if (msg.acked) {
-      this._logger.error('trying to double ack', msg)
+      this._logger.error('trying to double ack', msg.properties)
       return
     }
     channel.ack(msg)
@@ -102,7 +102,7 @@ class Subscriber {
    */
   _nack (channel, msg) {
     if (msg.acked) {
-      this._logger.error('trying to double nack', msg)
+      this._logger.error('trying to double nack', msg.properties)
       return
     }
     channel.nack(msg)
@@ -147,7 +147,7 @@ class Subscriber {
     }
 
     if (counter > this._maxRetry) {
-      this._logger.error('SUBSCRIBER TRIED TOO MANY TIMES', this.name, msg)
+      this._logger.error('SUBSCRIBER TRIED TOO MANY TIMES', this.name, msg.properties)
       this._retryMap.delete(consumerTag)
       return true
     }

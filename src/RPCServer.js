@@ -110,7 +110,7 @@ class RPCServer {
    */
   _ack (ch, msg) {
     if (msg.acked) {
-      this._logger.error('trying to double ack', msg)
+      this._logger.error('trying to double ack', msg.properties)
       return
     }
     ch.ack(msg)
