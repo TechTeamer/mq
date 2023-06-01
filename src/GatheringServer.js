@@ -208,12 +208,12 @@ class GatheringServer {
       return false
     }
     if (!msg.properties.correlationId) {
-      this._logger.error(`QUEUE GATHERING SERVER: INVALID REQUEST ON '${this.name}': NO CORRELATION ID`, msg)
+      this._logger.error(`QUEUE GATHERING SERVER: INVALID REQUEST ON '${this.name}': NO CORRELATION ID`, msg.properties)
       this._nack(channel, msg)
       return false
     }
     if (!msg.properties.replyTo) {
-      this._logger.error(`QUEUE GATHERING SERVER: INVALID REQUEST ON '${this.name}': NO REPLY TO`, msg)
+      this._logger.error(`QUEUE GATHERING SERVER: INVALID REQUEST ON '${this.name}': NO REPLY TO`, msg.properties)
       this._nack(channel, msg)
       return false
     }
@@ -237,7 +237,7 @@ class GatheringServer {
     try {
       request = QueueMessage.unserialize(msg.content)
       if (request.status !== 'ok') {
-        this._logger.error(`QUEUE GATHERING SERVER: MESSAGE NOT OK '${this.name}' ${correlationId}`, request)
+        this._logger.error(`QUEUE GATHERING SERVER: MESSAGE NOT OK '${this.name}' ${correlationId}`)
         this._sendStatus(channel, replyTo, correlationId, 'error', 'message not OK')
         this._nack(channel, msg)
         return { isValid: false }
@@ -264,7 +264,7 @@ class GatheringServer {
    */
   _ack (ch, msg) {
     if (msg.acked) {
-      this._logger.error('trying to double ack', msg)
+      this._logger.error('trying to double ack', msg.properties)
       return
     }
     ch.ack(msg)
@@ -279,7 +279,7 @@ class GatheringServer {
    */
   _nack (channel, msg, requeue = false) {
     if (msg.acked) {
-      this._logger.error('trying to double nack', msg)
+      this._logger.error('trying to double nack', msg.properties)
       return
     }
     channel.nack(msg, false, requeue)
