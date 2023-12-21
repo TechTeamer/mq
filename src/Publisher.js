@@ -1,5 +1,11 @@
 const QueueMessage = require('./QueueMessage')
 
+/**
+ * @typedef {import('./QueueConnection')} QueueConnection
+ * @typedef {import('amqplib').ConfirmChannel} ConfirmChannel
+ * @typedef {import('amqplib').QueueMessage} QueueMessage
+ */
+
 class Publisher {
   /**
    * @param {QueueConnection} queueConnection
@@ -24,6 +30,7 @@ class Publisher {
     this._assertExchange = assertExchange === true
     this._assertExchangeOptions = Object.assign({ durable: true }, assertExchangeOptions)
 
+    /** @type {typeof QueueMessage} MessageModel - The class reference for the QueueMessage model. */
     this.MessageModel = MessageModel
     this.ContentSchema = ContentSchema
   }
@@ -31,8 +38,7 @@ class Publisher {
   /**
    * Overridden in queueClient to assertQueue instead of exchange
    *
-   * @param channel
-   * @returns {Promise}
+   * @param {ConfirmChannel} channel
    */
   assertExchangeOrQueue (channel) {
     if (this._assertExchange) {
