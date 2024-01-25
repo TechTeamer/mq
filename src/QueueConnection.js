@@ -53,7 +53,7 @@ class QueueConnection extends EventEmitter {
       this._connection = connection
       return connection
     }).catch((err) => {
-      this._logger.error('RabbitMQ connection failed', err)
+      this._logger.error('RabbitMQ connection failed', this._config.url, err)
 
       throw err
     })
