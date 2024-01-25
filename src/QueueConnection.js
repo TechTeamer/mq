@@ -53,7 +53,7 @@ class QueueConnection extends EventEmitter {
       this._connection = connection
       return connection
     }).catch((err) => {
-      this._logger.error('RabbitMQ connection failed', this._config.url, err)
+      this._logger.error('RabbitMQ connection failed', err)
 
       throw err
     })
@@ -108,9 +108,14 @@ class QueueConnection extends EventEmitter {
 
     // assume simple url string or standard url object
     const connectionUrl = QueueConfig.urlStringToObject(configUrl)
-    const connection = await amqp.connect(configUrl, options)
-    this._activeConnectionConfig = connectionUrl
-    return connection
+    try{
+      const connection = await amqp.connect(configUrl, options)
+      this._activeConnectionConfig = connectionUrl
+      return connection
+    } catch (error) {
+      this._logger.error('RabbitMQ connection failed to host:', { ...connectionUrl, password: connectionUrl.password ? '***' : connectionUrl.password })
+      throw new Error('RabbitMQ connection failed with single url')
+    }
   }
 
   async _connectWithMultipleUrls (urls, options) {
