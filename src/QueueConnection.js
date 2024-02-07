@@ -149,11 +149,12 @@ class QueueConnection extends EventEmitter {
         if (!err.message.startsWith('Connection closed')) {
           throw err
         }
+      } finally {
+        // TODO: only empty connection if the error is not related to connection closure
+        this._connection = null
+        this._connectionPromise = null
       }
     }
-
-    this._connection = null
-    this._connectionPromise = null
   }
 
   /**
