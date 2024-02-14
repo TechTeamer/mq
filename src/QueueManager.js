@@ -56,6 +56,10 @@ class QueueManager {
       throw err
     }
 
+    if (!this.connection._connection) {
+      throw new Error('Failed to connect to queue server')
+    }
+
     try {
       for (const [, rpcServer] of this.rpcServers) {
         await rpcServer.initialize()
