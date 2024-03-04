@@ -4,6 +4,7 @@ addons:
   apt:
     packages:
       - rabbitmq-server
+      - openjdk-17-jdk
   sonarcloud:
     organization: techteamer
 
