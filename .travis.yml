@@ -4,6 +4,7 @@ addons:
   apt:
     packages:
       - rabbitmq-server
+      - openjdk-17-jdk
   sonarcloud:
     organization: techteamer
 
@@ -21,4 +22,6 @@ env:
 
 script:
   - yarn test
+  - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+  - export PATH=$JAVA_HOME/bin:$PATH
   - sonar-scanner
