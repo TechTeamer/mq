@@ -1,3 +1,7 @@
+6.3.2
+- fix the reconnecting
+- updated dependencies
+
 6.3.1
 - fixed error emitting logic
 - updated and upgraded dependencies
