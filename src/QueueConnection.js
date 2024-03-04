@@ -54,7 +54,7 @@ class QueueConnection extends EventEmitter {
       return connection
     }).catch((err) => {
       this._logger.error('RabbitMQ connection failed', err)
-
+      this._connectionPromise = null
       throw err
     })
 
@@ -146,7 +146,9 @@ class QueueConnection extends EventEmitter {
         await this._connection.close()
       } catch (err) {
         this._logger.error('RabbitMQ close connection failed', err)
-        throw err
+        if (!err.message.startsWith('Connection closed')) {
+          throw err
+        }
       }
     }
 

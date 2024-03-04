@@ -238,4 +238,29 @@ describe('QueueConnection', () => {
 
     assert.strictEqual(callbackCalled, false)
   })
+
+  it('#close() already closed connection should not throw error', async () => {
+    const connection = new QueueConnection(config)
+    try {
+      await connection.connect()
+    } catch (connectionConnectError) {
+      throw new Error(`connect() failed: ${connectionConnectError}`)
+    }
+
+    try {
+      await connection.close()
+    } catch (connectionCloseError) {
+      throw new Error(`close() failed: ${connectionCloseError}`)
+    }
+
+    try {
+      await connection.close()
+    } catch (connectionCloseError) {
+      throw new Error(`close() on already closed connection failed: ${connectionCloseError}`)
+    }
+
+    assert.strictEqual(connection._connection, null)
+    assert.strictEqual(connection._connectionPromise, null)
+    assert.doesNotThrow(connection.close, Error)
+  })
 })

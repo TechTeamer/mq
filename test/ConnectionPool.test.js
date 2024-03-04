@@ -107,6 +107,25 @@ describe('ConnectionPool', () => {
     })
   })
 
+  it('should reconnect if the connection is already closed', async () => {
+    const pool = new ConnectionPool()
+    pool.setLogger(logger)
+    pool.setupQueueManagers({
+      default: config
+    })
+    try {
+      await pool.connect()
+      const queueManager = pool.getConnection('default')
+      await queueManager.connection.close()
+      await pool.reconnect()
+
+      assert.isNotNull(queueManager.connection._connection)
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error)
+    }
+  })
+
   it('Should not reconnect to wrong config', (done) => {
     const pool = new ConnectionPool()
     pool.setLogger(logger)
