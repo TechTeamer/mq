@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs'
-import { connect as __connect } from 'amqplib/channel_api.js'
+import { connect } from 'amqplib/channel_api.js'
 import QueueConfig from './QueueConfig.js'
 import EventEmitter from 'node:events'
 
@@ -108,7 +108,7 @@ class QueueConnection extends EventEmitter {
 
     // assume simple url string or standard url object
     const connectionUrl = QueueConfig.urlStringToObject(configUrl)
-    const connection = await __connect(configUrl, options)
+    const connection = await connect(configUrl, options)
     this._activeConnectionConfig = connectionUrl
     return connection
   }
@@ -121,7 +121,7 @@ class QueueConnection extends EventEmitter {
     for (const url of urls) {
       const connectionUrl = QueueConfig.urlStringToObject(url)
       try {
-        const connection = await __connect(connectionUrl, options)
+        const connection = await connect(connectionUrl, options)
         this._activeConnectionConfig = connectionUrl
         return connection
       } catch (err) {
