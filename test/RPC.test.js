@@ -1,11 +1,10 @@
-import QueueManager from '../src/QueueManager.js'
-import ConsoleInspector from './consoleInspector.js'
-import SeedRandom from 'seed-random'
-import config from './config/LoadConfig.js'
-import chai from 'chai'
-import { v4 as uuid } from 'uuid'
-
+const QueueManager = require('../src/QueueManager')
+const ConsoleInspector = require('./consoleInspector')
+const SeedRandom = require('seed-random')
+const config = require('./config/LoadConfig')
+const chai = require('chai')
 const assert = chai.assert
+const { v4: uuid } = require('uuid')
 
 describe('RPCClient && RPCServer', () => {
   const rpcName = 'techteamer-mq-js-test-rpc'

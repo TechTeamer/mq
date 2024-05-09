@@ -1,15 +1,16 @@
-import chai from 'chai'
-import QueueManager from '../src/QueueManager.js'
-import Publisher from '../src/Publisher.js'
-import Subscriber from '../src/Subscriber.js'
-import QueueClient from '../src/QueueClient.js'
-import QueueServer from '../src/QueueServer.js'
-import RPCClient from '../src/RPCClient.js'
-import RPCServer from '../src/RPCServer.js'
-import ConsoleInspector from './consoleInspector.js'
-import config from './config/LoadConfig.js'
-
+const chai = require('chai')
 const assert = chai.assert
+const QueueManager = require('../src/QueueManager')
+const Publisher = require('../src/Publisher')
+const Subscriber = require('../src/Subscriber')
+const QueueClient = require('../src/QueueClient')
+const QueueServer = require('../src/QueueServer')
+const RPCClient = require('../src/RPCClient')
+const RPCServer = require('../src/RPCServer')
+const ConsoleInspector = require('./consoleInspector')
+
+const config = require('./config/LoadConfig')
+
 describe('QueueManager', () => {
   const logger = new ConsoleInspector(console)
   const manager = new QueueManager(config)

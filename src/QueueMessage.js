@@ -110,4 +110,4 @@ class QueueMessage {
   }
 }
 
-export default QueueMessage
+module.exports = QueueMessage

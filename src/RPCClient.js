@@ -1,5 +1,5 @@
-import { v4 as uuid } from 'uuid'
-import QueueMessage from './QueueMessage.js'
+const { v4: uuid } = require('uuid')
+const QueueMessage = require('./QueueMessage')
 
 /**
  * A queue handler
@@ -220,4 +220,4 @@ class RPCClient {
   }
 }
 
-export default RPCClient
+module.exports = RPCClient

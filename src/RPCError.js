@@ -2,4 +2,4 @@ class RPCError extends Error {
 
 }
 
-export default RPCError
+module.exports = RPCError

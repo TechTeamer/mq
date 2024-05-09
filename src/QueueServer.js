@@ -1,4 +1,4 @@
-import Subscriber from './Subscriber.js'
+const Subscriber = require('./Subscriber')
 
 class QueueServer extends Subscriber {
   /**
@@ -42,4 +42,4 @@ class QueueServer extends Subscriber {
   }
 }
 
-export default QueueServer
+module.exports = QueueServer

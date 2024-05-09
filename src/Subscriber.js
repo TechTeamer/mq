@@ -1,4 +1,4 @@
-import QueueMessage from './QueueMessage.js'
+const QueueMessage = require('./QueueMessage')
 
 class Subscriber {
   /**
@@ -209,4 +209,4 @@ class Subscriber {
   }
 }
 
-export default Subscriber
+module.exports = Subscriber

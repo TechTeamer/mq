@@ -1,5 +1,5 @@
-import { v4 as uuid } from 'uuid'
-import QueueMessage from './QueueMessage.js'
+const { v4: uuid } = require('uuid')
+const QueueMessage = require('./QueueMessage')
 
 class GatheringClient {
   /**
@@ -271,4 +271,4 @@ class GatheringClient {
   }
 }
 
-export default GatheringClient
+module.exports = GatheringClient

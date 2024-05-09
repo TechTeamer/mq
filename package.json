@@ -1,15 +1,8 @@
 {
   "name": "@techteamer/mq",
-  "version": "6.3.3-alpha",
+  "version": "6.3.2",
   "description": "A RabbitMQ wrapper for node",
-  "main": "dist/cjs/index.js",
-  "module": "dist/mjs/index.js",
-  "exports": {
-    ".": {
-      "import": "./dist/mjs/index.js",
-      "require": "./dist/cjs/index.js"
-    }
-  },
+  "main": "index.js",
   "author": "TechTeamer",
   "contributors": [
     "Gábor Tóth <gabor@techteamer.com>",
@@ -24,12 +17,10 @@
     "node": ">=16"
   },
   "scripts": {
-    "build": "rm -fr dist/* && tsc -p tsconfig.json && tsc -p tsconfig-cjs.json && ./fixup.sh",
     "lint": "eslint .",
     "unit": "mocha --exit",
     "test": "eslint . && nyc mocha --temp-directory=./test/coverage/ --exit && nyc report --reporter=text-lcov --report-dir=./test/coverage/ --reporter=lcovonly  | coveralls"
   },
-  "type": "module",
   "dependencies": {
     "amqplib": "^0.10.3",
     "uuid": "^9.0.0"
@@ -46,8 +37,7 @@
     "mocha": "^10.2.0",
     "nyc": "^15.1.0",
     "protobufjs": "^7.2.3",
-    "seed-random": "^2.2.0",
-    "typescript": "^5.4.5"
+    "seed-random": "^2.2.0"
   },
   "peerDependencies": {
     "protobufjs": "^7.2.3"

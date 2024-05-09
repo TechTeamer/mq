@@ -1,7 +1,7 @@
-import QueueManager from '../src/QueueManager.js'
-import ConsoleInspector from './consoleInspector.js'
-import SeedRandom from 'seed-random'
-import config from './config/LoadConfig.js'
+const QueueManager = require('../src/QueueManager')
+const ConsoleInspector = require('./consoleInspector')
+const SeedRandom = require('seed-random')
+const config = require('./config/LoadConfig')
 
 describe('GatheringClient && GatheringServer', () => {
   const gatheringName = 'techteamer-mq-js-test-gathering'

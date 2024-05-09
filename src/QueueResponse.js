@@ -90,4 +90,4 @@ class QueueResponse {
   }
 }
 
-export default QueueResponse
+module.exports = QueueResponse

@@ -1,5 +1,5 @@
-import QueueMessage from './QueueMessage.js'
-import QueueResponse from './QueueResponse.js'
+const QueueMessage = require('./QueueMessage')
+const QueueResponse = require('./QueueResponse')
 
 class GatheringServer {
   /**
@@ -287,4 +287,4 @@ class GatheringServer {
   }
 }
 
-export default GatheringServer
+module.exports = GatheringServer

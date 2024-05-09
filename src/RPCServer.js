@@ -1,5 +1,5 @@
-import QueueMessage from './QueueMessage.js'
-import QueueResponse from './QueueResponse.js'
+const QueueMessage = require('./QueueMessage')
+const QueueResponse = require('./QueueResponse')
 
 /**
  * @class RPCServer
@@ -252,4 +252,4 @@ class RPCServer {
   }
 }
 
-export default RPCServer
+module.exports = RPCServer

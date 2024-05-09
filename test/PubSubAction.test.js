@@ -1,6 +1,6 @@
-import QueueManager from '../src/QueueManager.js'
-import ConsoleInspector from './consoleInspector.js'
-import config from './config/LoadConfig.js'
+const QueueManager = require('../src/QueueManager')
+const ConsoleInspector = require('./consoleInspector')
+const config = require('./config/LoadConfig')
 
 describe('Publisher && Subscriber actions', () => {
   const publisherName = 'techteamer-mq-js-test-publisher-action'
