@@ -11,4 +11,4 @@ if (process.env.NODE_ENV === 'travis') {
   }
 }
 
-export default config;
+export default config

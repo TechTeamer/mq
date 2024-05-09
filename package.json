@@ -47,7 +47,8 @@
     "nyc": "^15.1.0",
     "protobufjs": "^7.2.3",
     "seed-random": "^2.2.0",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "typescript-eslint": "^7.8.0"
   },
   "peerDependencies": {
     "protobufjs": "^7.2.3"
