@@ -1,14 +1,14 @@
-const QueueManager = require('../src/QueueManager')
-const GatheringServer = require('../src/GatheringServer')
-const ConsoleInspector = require('./consoleInspector')
-const config = require('./config/LoadConfig')
+import QueueManager from '../src/QueueManager.js'
+import GatheringServer from '../src/GatheringServer.js'
+import ConsoleInspector from './consoleInspector.js'
+import defaultConfig from './config/LoadConfig.js'
 
 describe('GatheringClient && multiple GatheringServer', () => {
   const gatheringName = 'techteamer-mq-js-test-gathering-multi'
   const logger = new ConsoleInspector(console)
   const timeoutMs = 1000
   const assertExchangeOptions = { durable: false, autoDelete: true }
-
+  const config = { ...defaultConfig.default }
   const queueManager = new QueueManager(config)
   queueManager.setLogger(logger)
 

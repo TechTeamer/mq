@@ -1,13 +1,13 @@
-const QueueConfig = require('./QueueConfig')
-const QueueConnection = require('./QueueConnection')
-const RPCClient = require('./RPCClient')
-const RPCServer = require('./RPCServer')
-const Publisher = require('./Publisher')
-const Subscriber = require('./Subscriber')
-const QueueClient = require('./QueueClient')
-const QueueServer = require('./QueueServer')
-const GatheringClient = require('./GatheringClient')
-const GatheringServer = require('./GatheringServer')
+import QueueConfig from './QueueConfig.js'
+import QueueConnection from './QueueConnection.js'
+import RPCClient from './RPCClient.js'
+import RPCServer from './RPCServer.js'
+import Publisher from './Publisher.js'
+import Subscriber from './Subscriber.js'
+import QueueClient from './QueueClient.js'
+import QueueServer from './QueueServer.js'
+import GatheringClient from './GatheringClient.js'
+import GatheringServer from './GatheringServer.js'
 
 /**
  * @class QueueManager
@@ -374,4 +374,4 @@ class QueueManager {
   }
 }
 
-module.exports = QueueManager
+export default QueueManager

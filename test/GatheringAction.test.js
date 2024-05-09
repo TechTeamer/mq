@@ -1,7 +1,8 @@
-const QueueManager = require('../src/QueueManager')
-const ConsoleInspector = require('./consoleInspector')
-const config = require('./config/LoadConfig')
-const chai = require('chai')
+import QueueManager from '../src/QueueManager.js'
+import ConsoleInspector from './consoleInspector.js'
+import config from './config/LoadConfig.js'
+import chai from 'chai'
+
 const expect = chai.expect
 
 describe('GatheringClient && GatheringServer actions', () => {

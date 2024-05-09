@@ -1,4 +1,4 @@
-const Publisher = require('./Publisher')
+import Publisher from './Publisher.js'
 
 class QueueClient extends Publisher {
   /**
@@ -32,4 +32,4 @@ class QueueClient extends Publisher {
   }
 }
 
-module.exports = QueueClient
+export default QueueClient

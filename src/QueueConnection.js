@@ -1,7 +1,7 @@
-const fs = require('fs')
-const amqp = require('amqplib/channel_api')
-const QueueConfig = require('./QueueConfig')
-const EventEmitter = require('events')
+import { readFileSync } from 'node:fs'
+import { connect as __connect } from 'amqplib/channel_api.js'
+import QueueConfig from './QueueConfig.js'
+import EventEmitter from 'node:events'
 
 /**
  * @class QueueConnection
@@ -38,13 +38,13 @@ class QueueConnection extends EventEmitter {
 
     const options = Object.assign({}, this._config.options)
     if (options.cert) {
-      options.cert = fs.readFileSync(options.cert)
+      options.cert = readFileSync(options.cert)
     }
     if (options.key) {
-      options.key = fs.readFileSync(options.key)
+      options.key = readFileSync(options.key)
     }
     if (options.ca) {
-      options.ca = options.ca.map((ca) => fs.readFileSync(ca))
+      options.ca = options.ca.map((ca) => readFileSync(ca))
     }
 
     this._connectionPromise = this._connect(this._config.url, options).then((connection) => {
@@ -108,7 +108,7 @@ class QueueConnection extends EventEmitter {
 
     // assume simple url string or standard url object
     const connectionUrl = QueueConfig.urlStringToObject(configUrl)
-    const connection = await amqp.connect(configUrl, options)
+    const connection = await __connect(configUrl, options)
     this._activeConnectionConfig = connectionUrl
     return connection
   }
@@ -121,7 +121,7 @@ class QueueConnection extends EventEmitter {
     for (const url of urls) {
       const connectionUrl = QueueConfig.urlStringToObject(url)
       try {
-        const connection = await amqp.connect(connectionUrl, options)
+        const connection = await __connect(connectionUrl, options)
         this._activeConnectionConfig = connectionUrl
         return connection
       } catch (err) {
@@ -205,4 +205,4 @@ class QueueConnection extends EventEmitter {
   }
 }
 
-module.exports = QueueConnection
+export default QueueConnection
