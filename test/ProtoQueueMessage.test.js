@@ -1,12 +1,11 @@
-const chai = require('chai')
+import chai from 'chai'
+import path from 'node:path'
+import protobuf from 'protobufjs'
+import QueueMessage from '../src/QueueMessage.js'
+import ProtoQueueMessage from '../src/ProtoQueueMessage.js'
+
 const assert = chai.assert
 const expect = chai.expect
-const path = require('path')
-const protobuf = require('protobufjs')
-
-const QueueMessage = require('../src/QueueMessage')
-const ProtoQueueMessage = require('../src/ProtoQueueMessage')
-
 describe('ProtoQueueMessage', () => {
   const okStatus = 'ok'
 

@@ -1,8 +1,8 @@
-const assert = require('assert')
-const QueueManager = require('../src/QueueManager')
-const ConsoleInspector = require('./consoleInspector')
-const SeedRandom = require('seed-random')
-const config = require('./config/LoadConfig')
+import assert from 'node:assert'
+import QueueManager from '../src/QueueManager.js'
+import ConsoleInspector from './consoleInspector.js'
+import SeedRandom from 'seed-random'
+import config from './config/LoadConfig.js'
 
 describe('QueueClient && QueueServer', () => {
   const queueName = 'techteamer-mq-js-test-queue'

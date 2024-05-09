@@ -1,4 +1,4 @@
-const QueueMessage = require('./QueueMessage')
+import QueueMessage from './QueueMessage.js'
 
 class Publisher {
   /**
@@ -109,4 +109,4 @@ class Publisher {
   }
 }
 
-module.exports = Publisher
+export default Publisher
