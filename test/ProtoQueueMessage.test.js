@@ -1,6 +1,6 @@
 import chai from 'chai'
 import path from 'path'
-import * as protobuf from 'protobufjs'
+import protobuf from 'protobufjs'
 import QueueMessage from '../src/QueueMessage.js'
 import ProtoQueueMessage from '../src/ProtoQueueMessage.js'
 const assert = chai.assert

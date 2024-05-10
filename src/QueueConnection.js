@@ -1,5 +1,5 @@
 import fs from 'fs'
-import * as amqp from 'amqplib/channel_api.js'
+import amqp from 'amqplib/channel_api.js'
 import QueueConfig from './QueueConfig.js'
 import EventEmitter from 'events'
 /**
