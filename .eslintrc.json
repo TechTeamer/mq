@@ -1,6 +1,6 @@
 {
   "root": true,
-  "extends": ["standard", "plugin:n/recommended"],
+  "extends": ["standard", "plugin:n/recommended", "plugin:@typescript-eslint/stylistic"],
   "rules": {
     "curly": ["error", "all"],
     "brace-style": ["error", "1tbs", { "allowSingleLine": false }],
@@ -20,6 +20,8 @@
     "es6": true
   },
   "parserOptions": {
-    "ecmaVersion": 2020
-  }
+    "ecmaVersion": 2020,
+    "sourceType": "module"
+  },
+  "ignorePatterns": ["dist/", "*.d.ts"]
 }

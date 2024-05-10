@@ -6,7 +6,6 @@ const statuses = {
   [NOT_FOUND]: NOT_FOUND,
   [ERROR]: ERROR
 }
-
 class QueueResponse {
   constructor () {
     this.statusMessage = ''
@@ -31,9 +30,9 @@ class QueueResponse {
   }
 
   /**
-   * @param statusCode
-   * @param [statusMessage]
-   */
+     * @param statusCode
+     * @param [statusMessage]
+     */
   setStatus (statusCode, statusMessage = this.statuses[statusCode]) {
     this.statusCode = statusCode
     this.statusMessage = statusMessage
@@ -52,42 +51,41 @@ class QueueResponse {
   }
 
   /**
-   * @param {String} name
-   * @param {Buffer} buffer
-   */
+     * @param {String} name
+     * @param {Buffer} buffer
+     */
   addAttachment (name, buffer) {
     this.attachments.set(name, buffer)
   }
 
   /**
-   * @param {String} name
-   * @returns {Buffer}
-   */
+     * @param {String} name
+     * @returns {Buffer}
+     */
   getAttachment (name) {
     return this.attachments.get(name)
   }
 
   /**
-   * @param {String} name
-   * @returns {boolean}
-   */
+     * @param {String} name
+     * @returns {boolean}
+     */
   hasAttachment (name) {
     return this.attachments.has(name)
   }
 
   /**
-   * @returns {boolean}
-   */
+     * @returns {boolean}
+     */
   hasAnyAttachments () {
     return this.attachments.size > 0
   }
 
   /**
-   * @returns {Map<String, Buffer>}
-   */
+     * @returns {Map<String, Buffer>}
+     */
   getAttachments () {
     return this.attachments
   }
 }
-
-module.exports = QueueResponse
+export default QueueResponse

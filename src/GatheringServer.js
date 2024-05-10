@@ -1,34 +1,23 @@
-const QueueMessage = require('./QueueMessage')
-const QueueResponse = require('./QueueResponse')
-
+import QueueMessage from './QueueMessage.js'
+import QueueResponse from './QueueResponse.js'
 class GatheringServer {
   /**
-   * @param {QueueConnection} queueConnection
-   * @param {Console} logger
-   * @param {String} name
-   * @param {Object} options
-   */
+     * @param {QueueConnection} queueConnection
+     * @param {Console} logger
+     * @param {String} name
+     * @param {Object} options
+     */
   constructor (queueConnection, logger, name, options = {}) {
     this._connection = queueConnection
     this._logger = logger
     this.name = name
     this.statusQueue = name
-
-    const {
-      prefetchCount,
-      timeoutMs,
-      assertQueueOptions = {},
-      assertExchange = true,
-      assertExchangeOptions = {}
-    } = options
-
+    const { prefetchCount, timeoutMs, assertQueueOptions = {}, assertExchange = true, assertExchangeOptions = {} } = options
     this._prefetchCount = prefetchCount
     this._responseTimeoutMs = timeoutMs
-
     this._assertExchange = assertExchange === true
     this._assertQueueOptions = Object.assign({ exclusive: true, autoDelete: true }, assertQueueOptions)
     this._assertExchangeOptions = Object.assign({ durable: true }, assertExchangeOptions)
-
     this.actions = new Map()
   }
 
@@ -40,16 +29,13 @@ class GatheringServer {
       }
       const serverQueue = await channel.assertQueue('', this._assertQueueOptions)
       const serverQueueName = serverQueue.queue
-
       await channel.prefetch(this._prefetchCount)
       await channel.bindQueue(serverQueueName, this.name, '')
-
       await channel.consume(serverQueueName, (msg) => {
         this._handleGatheringAnnouncement(channel, msg).catch(() => {
           // this should not throw
         })
       })
-
       await channel.assertQueue(this.statusQueue, {
         exclusive: false,
         autoDelete: true
@@ -64,31 +50,26 @@ class GatheringServer {
   }
 
   /**
-   * @param {*} msg
-   * @param {QueueMessage} request
-   * @param {QueueResponse} response
-   * @protected
-   * @returns {Promise}
-   */
+     * @param {*} msg
+     * @param {QueueMessage} request
+     * @param {QueueResponse} response
+     * @protected
+     * @returns {Promise}
+     */
   async _callback (msg, request, response) {
-    const {
-      action,
-      data
-    } = msg || {}
+    const { action, data } = msg || {}
     if (!this.actions.has(action)) {
       response.notFound(`No action handler for ${action}`)
       return
     }
-
     const handler = this.actions.get(action)
-
     return handler.call(this, data, request, response)
   }
 
   /**
-   * @param {string} action
-   * @param {Function} handler
-   */
+     * @param {string} action
+     * @param {Function} handler
+     */
   registerAction (action, handler) {
     if (typeof handler !== 'function') {
       throw new TypeError(`${typeof handler} is not a Function`)
@@ -100,30 +81,23 @@ class GatheringServer {
   }
 
   /**
-   * @param {Function} cb
-   */
+     * @param {Function} cb
+     */
   consume (cb) {
     this._callback = cb
   }
 
   /**
-   * @param channel
-   * @param msg
-   * @return {Promise}
-   * @private
-   */
+     * @param channel
+     * @param msg
+     * @return {Promise}
+     * @private
+     */
   async _handleGatheringAnnouncement (channel, msg) {
-    const {
-      isValid,
-      correlationId,
-      replyTo,
-      request
-    } = this.unserializeMessage(channel, msg)
-
+    const { isValid, correlationId, replyTo, request } = this.unserializeMessage(channel, msg)
     if (!isValid) {
       return // Invalid request
     }
-
     let responseTimedOut = false
     const response = new QueueResponse()
     const timeoutMs = typeof request.timeOut === 'number' ? request.timeOut : this._responseTimeoutMs
@@ -133,7 +107,6 @@ class GatheringServer {
       this._sendStatus(channel, replyTo, correlationId, 'ok', 'response timed out')
       this._nack(channel, msg)
     }, timeoutMs)
-
     let answer
     try {
       answer = await this._callback(request.data, request, response)
@@ -143,13 +116,10 @@ class GatheringServer {
       this._nack(channel, msg)
       return
     }
-
     if (responseTimedOut) {
       return
     }
-
     clearTimeout(timerId)
-
     if (!response.statusCode) {
       // implicit status
       if (typeof answer === 'undefined') {
@@ -158,7 +128,6 @@ class GatheringServer {
         response.setStatus(response.OK)
       }
     }
-
     let reply
     try {
       if (response.statusCode === response.OK) {
@@ -184,7 +153,6 @@ class GatheringServer {
       this._nack(channel, msg)
       return
     }
-
     try {
       channel.sendToQueue(replyTo, reply, { correlationId, type: 'reply' })
       this._ack(channel, msg)
@@ -199,8 +167,8 @@ class GatheringServer {
   }
 
   /**
-   * @returns {boolean} is valid
-   */
+     * @returns {boolean} is valid
+     */
   verifyMessage (channel, msg) {
     if (!msg || !msg.properties) {
       this._logger.error(`QUEUE GATHERING SERVER: INVALID REQUEST ON '${this.name}': NO MESSAGE/PROPERTIES`, msg)
@@ -221,19 +189,17 @@ class GatheringServer {
   }
 
   /**
-   * @param channel
-   * @param msg
-   * @returns {{request: QueueMessage, isValid: boolean, replyTo: *, correlationId: *}}
-   */
+     * @param channel
+     * @param msg
+     * @returns {{request: QueueMessage, isValid: boolean, replyTo: *, correlationId: *}}
+     */
   unserializeMessage (channel, msg) {
     if (!this.verifyMessage(channel, msg)) {
       return { isValid: false }
     }
-
     const correlationId = msg.properties.correlationId
     const replyTo = msg.properties.replyTo
     let request
-
     try {
       request = QueueMessage.unserialize(msg.content)
       if (request.status !== 'ok') {
@@ -248,7 +214,6 @@ class GatheringServer {
       this._nack(channel, msg)
       return { isValid: false }
     }
-
     return {
       isValid: true,
       correlationId,
@@ -258,10 +223,10 @@ class GatheringServer {
   }
 
   /**
-   * @param ch
-   * @param msg
-   * @private
-   */
+     * @param ch
+     * @param msg
+     * @private
+     */
   _ack (ch, msg) {
     if (msg.acked) {
       this._logger.error('trying to double ack', msg.properties)
@@ -272,11 +237,11 @@ class GatheringServer {
   }
 
   /**
-   * @param channel
-   * @param msg
-   * @param [requeue=true]
-   * @private
-   */
+     * @param channel
+     * @param msg
+     * @param [requeue=true]
+     * @private
+     */
   _nack (channel, msg, requeue = false) {
     if (msg.acked) {
       this._logger.error('trying to double nack', msg.properties)
@@ -286,5 +251,4 @@ class GatheringServer {
     msg.acked = true
   }
 }
-
-module.exports = GatheringServer
+export default GatheringServer

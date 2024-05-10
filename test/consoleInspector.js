@@ -3,7 +3,6 @@ const loggerMethods = [
   'groupCollapsed', 'groupEnd', 'clear', 'count', 'assert', 'markTimeline', 'profile',
   'profileEnd', 'timeline', 'timelineEnd', 'time', 'timeEnd', 'timeStamp', 'context', 'memory'
 ]
-
 class ConsoleInspector {
   constructor (logger, options) {
     const { storeLines = true, silent = true } = options || {}
@@ -15,7 +14,6 @@ class ConsoleInspector {
 
   printLogs (methods) {
     const { whitelist, blacklist } = methods || {}
-
     this.lines.forEach(({ method, args }) => {
       if (Array.isArray(blacklist) && blacklist.includes(method)) {
         return
@@ -30,7 +28,6 @@ class ConsoleInspector {
     this.lines = []
   }
 }
-
 loggerMethods.forEach((method) => {
   ConsoleInspector.prototype[method] = function () {
     if (this.storeLines) {
@@ -41,5 +38,4 @@ loggerMethods.forEach((method) => {
     }
   }
 })
-
-module.exports = ConsoleInspector
+export default ConsoleInspector

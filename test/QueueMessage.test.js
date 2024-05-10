@@ -1,56 +1,46 @@
-const chai = require('chai')
+import chai from 'chai'
+import QueueMessage from '../src/QueueMessage.js'
 const assert = chai.assert
 const expect = chai.expect
-
-const QueueMessage = require('../src/QueueMessage')
-
 describe('QueueMessage', () => {
   const okStatus = 'ok'
   const errorStatus = 'error'
   const queuMessageData = 'This is a valid QueueMessage'
-
   const number = 1
   const string = 'hello ŰÁÉÚŐÓÜÖÍűáéúőóüöí$\\`#^+-[]<>*;~!%/()孫詒讓\u1FFF\u{10FFFF}'
   const array = [1, 2, 3]
   const testBuffer = Buffer.from('test buffer')
   const object = { number, string, array, buffer: testBuffer }
-
   it('#fromJSON() returns a QueueMessage with status "error" if it receives an invalid QueueMessage', () => {
     const badQueueMessage = 'thisIsNotAQueueMessage'
     assert.strictEqual(QueueMessage.fromJSON(badQueueMessage).status, errorStatus)
   })
-
   it('#fromJSON() parses the stringified QueueMessage with the correct status', () => {
     const goodQueueMessage = JSON.stringify(new QueueMessage(okStatus, queuMessageData))
     assert.strictEqual(QueueMessage.fromJSON(goodQueueMessage).status, okStatus)
   })
-
   it('#fromJSON() parses the stringified QueueMessage containing a number', () => {
     const queueMessage = JSON.stringify(new QueueMessage(okStatus, number))
     const data = QueueMessage.fromJSON(queueMessage).data
     assert.strictEqual(data, number)
   })
-
   it('#fromJSON() parses the stringified QueueMessage containing a string', () => {
     const queueMessage = JSON.stringify(new QueueMessage(okStatus, string))
     const data = QueueMessage.fromJSON(queueMessage).data
     assert.strictEqual(data, string)
   })
-
   it('#fromJSON() parses the serialized QueueMessage containing an array', () => {
     const queueMessage = JSON.stringify(new QueueMessage(okStatus, array))
     const data = QueueMessage.fromJSON(queueMessage).data
     assert.isArray(data, array)
     assert.sameMembers(data, array)
   })
-
   it('#fromJSON() parses the serialized QueueMessage containing a buffer', () => {
     const queueMessage = JSON.stringify(new QueueMessage(okStatus, testBuffer))
     const data = QueueMessage.fromJSON(queueMessage).data
     const _buffer = Buffer.from(data)
     assert.strictEqual(_buffer.toString('utf8'), 'test buffer', 'buffer content not match')
   })
-
   it('#fromJSON() parses the serialized QueueMessage containing an object', () => {
     const queueMessage = JSON.stringify(new QueueMessage(okStatus, object))
     const data = QueueMessage.fromJSON(queueMessage).data
@@ -63,7 +53,6 @@ describe('QueueMessage', () => {
     const buffer = Buffer.from(data.buffer)
     assert.strictEqual(buffer.toString('utf8'), 'test buffer', 'buffer content not match')
   })
-
   it('#serialize() serialize the QueueMessage to a Buffer', () => {
     const queueMessage = new QueueMessage(okStatus, object, 100)
     queueMessage.addAttachment('test1', Buffer.from('test1'))
@@ -73,7 +62,6 @@ describe('QueueMessage', () => {
     const queueMessageBuffer = queueMessage.serialize()
     expect(queueMessageBuffer).to.be.instanceof(Buffer)
   })
-
   it('#unserialize() deserialize the QueueMessage to the original QueueMessage', () => {
     const queueMessage = new QueueMessage(okStatus, object, 100)
     queueMessage.addAttachment('test1', Buffer.from('test1'))
@@ -83,7 +71,6 @@ describe('QueueMessage', () => {
     const queueMessageBuffer = queueMessage.serialize()
     const newQueueMessage = QueueMessage.unserialize(queueMessageBuffer)
     assert.strictEqual(newQueueMessage.status, okStatus, 'status not match')
-
     const data = newQueueMessage.data
     assert.isObject(data, 'not an object')
     assert.hasAllKeys(data, ['number', 'string', 'array', 'buffer'], 'object members not match')
@@ -93,14 +80,11 @@ describe('QueueMessage', () => {
     assert.sameMembers(data.array, array, 'array members not match')
     const buffer = Buffer.from(data.buffer)
     assert.strictEqual(buffer.toString('utf8'), 'test buffer', 'buffer content not match')
-
     assert.strictEqual(newQueueMessage.timeOut, 100, 'timeout not match')
-
     newQueueMessage.getAttachments().forEach((value, key) => {
       assert.strictEqual(value.toString(), queueMessage.getAttachments().get(key).toString(), 'attachement not match')
     })
   })
-
   it('#unserialize() is backward compatible with older JSON message format', () => {
     const queueMessage = new QueueMessage(okStatus, object, 100)
     const queueMessageBuffer = Buffer.from(JSON.stringify(queueMessage), 'utf8')

@@ -1,72 +1,54 @@
-const QueueMessage = require('./QueueMessage')
-const QueueResponse = require('./QueueResponse')
-
+import QueueMessage from './QueueMessage.js'
+import QueueResponse from './QueueResponse.js'
 /**
  * @class RPCServer
  * */
 class RPCServer {
   /**
-   * @param {QueueConnection} queueConnection
-   * @param {Console} logger
-   * @param {String} rpcName
-   * @param {Object} options
-   */
+     * @param {QueueConnection} queueConnection
+     * @param {Console} logger
+     * @param {String} rpcName
+     * @param {Object} options
+     */
   constructor (queueConnection, logger, rpcName, options = {}) {
-    const {
-      prefetchCount,
-      timeoutMs,
-      RequestMessageModel = QueueMessage,
-      ResponseMessageModel = QueueMessage,
-      RequestContentSchema = JSON,
-      ResponseContentSchema = JSON,
-      assertQueue = true,
-      assertQueueOptions = {},
-      bindDirectExchangeName = null,
-      exchangeOptions = {}
-    } = options
-
+    const { prefetchCount, timeoutMs, RequestMessageModel = QueueMessage, ResponseMessageModel = QueueMessage, RequestContentSchema = JSON, ResponseContentSchema = JSON, assertQueue = true, assertQueueOptions = {}, bindDirectExchangeName = null, exchangeOptions = {} } = options
     this._connection = queueConnection
     this._logger = logger
     this.name = rpcName
-
     this._assertQueue = assertQueue === true
     this._assertQueueOptions = Object.assign({ durable: true }, assertQueueOptions)
-
     this._bindDirectExchangeName = bindDirectExchangeName
     this._exchangeOptions = exchangeOptions
-
     this._prefetchCount = prefetchCount
     this._timeoutMs = timeoutMs
     this.RequestModel = RequestMessageModel
     this.ResponseModel = ResponseMessageModel
     this.RequestContentSchema = RequestContentSchema
     this.ResponseContentSchema = ResponseContentSchema
-
     this.actions = new Map()
   }
 
   /**
-   * @param {*} body
-   * @param {QueueMessage} request
-   * @param {QueueResponse} response
-   * @param {Object} msg
-   * @protected
-   * @returns {Promise}
-   */
+     * @param {*} body
+     * @param {QueueMessage} request
+     * @param {QueueResponse} response
+     * @param {Object} msg
+     * @protected
+     * @returns {Promise}
+     */
   _callback (body, request, response, msg) {
     const { action, data } = body || {}
     if (!this.actions.has(action)) {
       return Promise.resolve()
     }
-
     const handler = this.actions.get(action)
     return Promise.resolve().then(() => handler.call(this, data, request, response, msg))
   }
 
   /**
-   * @param {string} action
-   * @param {Function} handler
-   */
+     * @param {string} action
+     * @param {Function} handler
+     */
   registerAction (action, handler) {
     if (typeof handler !== 'function') {
       throw new TypeError(`${typeof handler} is not a Function`)
@@ -75,24 +57,21 @@ class RPCServer {
       this._logger.warn(`Actions-handlers map already contains an action named ${action}. New handler was ignored!`)
       return
     }
-
     this.actions.set(action, handler)
   }
 
   /**
-   * @return {Promise}
-   */
+     * @return {Promise}
+     */
   async initialize () {
     try {
       const channel = await this._connection.getChannel()
       if (this._assertQueue) {
         await channel.assertQueue(this.name, this._assertQueueOptions)
       }
-
       if (this._bindDirectExchangeName) {
         await channel.assertExchange(this._bindDirectExchangeName, 'direct', this._exchangeOptions)
       }
-
       await channel.prefetch(this._prefetchCount)
       await channel.consume(this.name, (msg) => {
         this._processMessage(channel, msg)
@@ -104,10 +83,10 @@ class RPCServer {
   }
 
   /**
-   * @param ch
-   * @param msg
-   * @private
-   */
+     * @param ch
+     * @param msg
+     * @private
+     */
   _ack (ch, msg) {
     if (msg.acked) {
       this._logger.error('trying to double ack', msg.properties)
@@ -176,23 +155,19 @@ class RPCServer {
   }
 
   /**
-   * @param ch
-   * @param msg
-   * @return {Promise}
-   * @private
-   */
+     * @param ch
+     * @param msg
+     * @return {Promise}
+     * @private
+     */
   async _processMessage (ch, msg) {
     const request = this.RequestModel.unserialize(msg.content, this.RequestContentSchema)
-
     const response = new QueueResponse()
-
     if (request.status !== 'ok') {
       this._logger.error('CANNOT GET RPC CALL PARAMS', this.name, request)
-
       this.handleRequestError(ch, msg, request)
       return
     }
-
     let timedOut = false
     const timeoutMs = typeof request.timeOut === 'number' ? request.timeOut : this._timeoutMs
     const timer = setTimeout(() => {
@@ -200,13 +175,11 @@ class RPCServer {
       this._logger.error('RPCServer response timeout', this.name)
       this.handleResponseTimeout(ch, msg, request)
     }, timeoutMs)
-
     try {
       const answer = await this._callback(request.data, request, response, msg)
       if (timedOut) {
         return
       }
-
       clearTimeout(timer)
       let replyData
       const replyAttachments = response.getAttachments()
@@ -221,16 +194,13 @@ class RPCServer {
         this.handleResponseError(ch, msg, err, request)
         return
       }
-
       this._send(ch, msg.properties.replyTo, replyData, { correlationId: msg.properties.correlationId })
       this._ack(ch, msg)
     } catch (err) {
       if (timedOut) {
         return
       }
-
       clearTimeout(timer)
-
       this._logger.error('CANNOT SEND RPC REPLY', this.name, err)
       this.handleResponseError(ch, msg, err, request)
     }
@@ -245,11 +215,10 @@ class RPCServer {
   }
 
   /**
-   * @param {Function} cb
-   */
+     * @param {Function} cb
+     */
   consume (cb) {
     this._callback = cb
   }
 }
-
-module.exports = RPCServer
+export default RPCServer

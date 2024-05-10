@@ -1,28 +1,22 @@
-const QueueManager = require('../src/QueueManager')
-const ConsoleInspector = require('./consoleInspector')
-const SeedRandom = require('seed-random')
-const config = require('./config/LoadConfig')
-
+import QueueManager from '../src/QueueManager.js'
+import ConsoleInspector from './consoleInspector.js'
+import SeedRandom from 'seed-random'
+import config from './config/LoadConfig.js'
 describe('GatheringClient && GatheringServer', () => {
   const gatheringName = 'techteamer-mq-js-test-gathering'
   const logger = new ConsoleInspector(console)
   const timeoutMs = 1000
   const assertExchangeOptions = { durable: false, autoDelete: true }
-
   const queueManager = new QueueManager(config)
   queueManager.setLogger(logger)
-
   const gatheringClient = queueManager.getGatheringClient(gatheringName, { queueMaxSize: 100, timeoutMs, assertExchangeOptions })
   const gatheringServer1 = queueManager.getGatheringServer(gatheringName, { prefetchCount: 1, timeoutMs, assertExchangeOptions })
-
   before(() => {
     return queueManager.connect()
   })
-
   after(() => {
     logger.empty()
   })
-
   it('GatheringClient.request() sends a STRING and GatheringServer.consume() receives it', (done) => {
     const stringMessage = 'foobar'
     gatheringServer1.consume((msg) => {
@@ -37,7 +31,6 @@ describe('GatheringClient && GatheringServer', () => {
       done(err)
     })
   })
-
   it('GatheringClient.request() sends an OBJECT and GatheringServer.consume() receives it', (done) => {
     const objectMessage = { foo: 'bar', bar: 'foo' }
     gatheringServer1.consume((msg) => {
@@ -52,7 +45,6 @@ describe('GatheringClient && GatheringServer', () => {
       done(err)
     })
   })
-
   it('GatheringClient.request() sends an OBJECT, GatheringServer.consume() sends it back and GatheringClient receives it intact', (done) => {
     const objectMessage = { foo: 'bar', bar: 'foo' }
     gatheringServer1.consume((msg) => {
@@ -68,17 +60,14 @@ describe('GatheringClient && GatheringServer', () => {
       done(err)
     })
   })
-
   it('GatheringClient.request() sends an OBJECT, GatheringServer.consume() sends back a response' +
-    'with a 100MB random generated buffer and GatheringClient receives it', (done) => {
+        'with a 100MB random generated buffer and GatheringClient receives it', (done) => {
     const objectMessage = { foo: 'bar', bar: 'foo' }
-
     const rand = SeedRandom()
     const buf = Buffer.alloc(102400)
     for (let i = 0; i < 102400; ++i) {
       buf[i] = (rand() * 255) << 0
     }
-
     gatheringServer1.consume((msg, request, response) => {
       response.addAttachment('test', buf)
       if (!response.hasAnyAttachments()) {
@@ -106,20 +95,15 @@ describe('GatheringClient && GatheringServer', () => {
       done(err)
     })
   })
-
   it('gatheringClient.request() sends a message with a 100MB random generated buffer and gatheringServer1.consume() receives it', function (done) {
     const stringMessage = 'foobar'
     const attachments = new Map()
-
     const rand = SeedRandom()
     const buf = Buffer.alloc(102400)
-
     for (let i = 0; i < 102400; ++i) {
       buf[i] = (rand() * 255) << 0
     }
-
     attachments.set('test', buf)
-
     gatheringServer1.consume((msg, queueMessage) => {
       if (queueMessage.getAttachments().get('test').toString() !== buf.toString()) {
         done(new Error('String received is not the same as the String sent'))
@@ -127,46 +111,37 @@ describe('GatheringClient && GatheringServer', () => {
       }
       done()
     })
-
     gatheringClient.request(stringMessage, null, attachments).catch((err) => {
       done(err)
     })
   })
-
   it('GatheringClient.request() throws an error when the parameter cant be JSON-serialized', (done) => {
     const nonJSONSerializableMessage = {}
     nonJSONSerializableMessage.a = { b: nonJSONSerializableMessage }
-
     gatheringServer1.consume((msg) => {
       done(new Error('Should not receive the message'))
       return true
     })
-
     gatheringClient.request(nonJSONSerializableMessage)
       .then(() => done(new Error('Did not throw an error')))
       .catch(() => done())
   })
-
   it(`GatheringClient.request() throws an error if it doesn't receive a response sooner than ${timeoutMs}ms`, (done) => {
     const objectMessage = { foo: 'bar', bar: 'foo' }
-
     gatheringServer1.consume(async (msg) => {
       await new Promise((resolve) => setTimeout(resolve, timeoutMs + 100))
       return msg
     })
-
     gatheringClient.request(objectMessage)
       .then(() => done(new Error('Did not throw a timeout error')))
       .catch(() => done())
   })
-
   it('gatheringClient.request() rejects when a consumer sets an error status', (done) => {
     const messageBody = 'hello'
     gatheringServer1.consume((msg, message, response) => {
       // undefined is implied not found
       response.setStatus(response.ERROR, 'HELLO_ERROR')
     })
-
     gatheringClient.request(messageBody, 10000, null, false, false).then(() => {
       done(new Error('Should have rejected'))
     }).catch((err) => {
@@ -177,7 +152,6 @@ describe('GatheringClient && GatheringServer', () => {
       }
     })
   })
-
   it('gatheringClient.request() rejects when a consumer sends malformed message', (done) => {
     const messageBody = 'hello'
     gatheringServer1.consume(() => {
@@ -186,7 +160,6 @@ describe('GatheringClient && GatheringServer', () => {
       obj.a = { b: obj }
       return obj
     })
-
     gatheringClient.request(messageBody, 10000, null, false, false).then(() => {
       done(new Error('Should have rejected'))
     }).catch((err) => {
@@ -197,14 +170,12 @@ describe('GatheringClient && GatheringServer', () => {
       }
     })
   })
-
   it('gatheringClient.request() rejects when a consumer throws an error', (done) => {
     const messageBody = 'hello'
     gatheringServer1.consume(() => {
       // undefined is implied not found
       throw new Error('HELLO_ERROR')
     })
-
     gatheringClient.request(messageBody, 10000, null, false, false).then(() => {
       done(new Error('Should reject when one of the consumers reject'))
     }).catch((err) => {

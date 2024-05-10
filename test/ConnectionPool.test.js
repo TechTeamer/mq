@@ -1,29 +1,23 @@
-const chai = require('chai')
+import chai from 'chai'
+import QueueManager from '../src/QueueManager.js'
+import ConnectionPool from '../src/ConnectionPool.js'
+import ConsoleInspector from './consoleInspector.js'
+import QueueConfig from '../src/QueueConfig.js'
+import config from './config/LoadConfig.js'
 const assert = chai.assert
-const QueueManager = require('../src/QueueManager')
-const ConnectionPool = require('../src/ConnectionPool')
-const ConsoleInspector = require('./consoleInspector')
-const QueueConfig = require('../src/QueueConfig')
-const config = require('./config/LoadConfig')
-
 describe('ConnectionPool', () => {
   const logger = new ConsoleInspector(console)
-
   after(() => {
     logger.empty()
   })
-
   it('Should handle backwards compatible config', () => {
     const pool = new ConnectionPool()
     pool.setLogger(logger)
     pool.setupQueueManagers(config)
-
     const defaultConnection = pool.getDefaultConnection()
-
     assert.isTrue(pool.hasConnection('default'), 'default connection is not defined')
     assert.instanceOf(defaultConnection, QueueManager, 'default connection is not an instance of QueueManager')
   })
-
   it('Should handle multi-connection config', () => {
     const pool = new ConnectionPool()
     pool.setLogger(logger)
@@ -31,18 +25,13 @@ describe('ConnectionPool', () => {
       default: config,
       other: config
     })
-
     const defaultConnection = pool.getDefaultConnection()
-
     assert.isTrue(pool.hasConnection('default'), 'default connection is not defined')
     assert.instanceOf(defaultConnection, QueueManager, 'default connection is not an instance of QueueManager')
-
     const otherConnection = pool.getConnection('other')
-
     assert.isTrue(pool.hasConnection('other'), 'other connection is not defined')
     assert.instanceOf(otherConnection, QueueManager, 'other connection is not an instance of QueueManager')
   })
-
   it('Should connect', (done) => {
     const pool = new ConnectionPool()
     pool.setLogger(logger)
@@ -61,7 +50,6 @@ describe('ConnectionPool', () => {
       done(err)
     })
   })
-
   it('Should not connect to wrong config', (done) => {
     const pool = new ConnectionPool()
     pool.setLogger(logger)
@@ -85,7 +73,6 @@ describe('ConnectionPool', () => {
       done()
     })
   })
-
   it('Should reconnect', (done) => {
     const pool = new ConnectionPool()
     pool.setLogger(logger)
@@ -106,7 +93,6 @@ describe('ConnectionPool', () => {
       done(err)
     })
   })
-
   it('should reconnect if the connection is already closed', async () => {
     const pool = new ConnectionPool()
     pool.setLogger(logger)
@@ -118,14 +104,12 @@ describe('ConnectionPool', () => {
       const queueManager = pool.getConnection('default')
       await queueManager.connection.close()
       await pool.reconnect()
-
       assert.isNotNull(queueManager.connection._connection)
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error(error)
     }
   })
-
   it('Should not reconnect to wrong config', (done) => {
     const pool = new ConnectionPool()
     pool.setLogger(logger)
@@ -146,7 +130,6 @@ describe('ConnectionPool', () => {
           }
         })
       })
-
       return pool.reconnect()
     }).then(() => {
       done('Reconnection with wrong config should not connect')

@@ -13,7 +13,6 @@ class QueueMessage {
       if (!param || !param.status) {
         return new QueueMessage('error', 'cannot decode JSON string')
       }
-
       return new QueueMessage(param.status, param.data, param.timeOut)
     } catch (err) {
       return new QueueMessage('error', err)
@@ -26,7 +25,6 @@ class QueueMessage {
       data: this.data,
       timeOut: this.timeOut
     }
-
     const attachmentBuffers = []
     const attachMap = new Map()
     this.attachments.forEach((value, key) => {
@@ -34,7 +32,6 @@ class QueueMessage {
       attachMap.set(key, value.length)
     })
     obj.attachArray = [...attachMap]
-
     const stringJson = JSON.stringify(obj)
     const formatBuf = Buffer.alloc(1, '+')
     const lengthBuf = Buffer.alloc(4)
@@ -44,10 +41,10 @@ class QueueMessage {
   }
 
   /**
-   * @param {Buffer} buffer
-   * @param ContentSchema
-   * @returns {QueueMessage}
-   */
+     * @param {Buffer} buffer
+     * @param ContentSchema
+     * @returns {QueueMessage}
+     */
   static unserialize (buffer, ContentSchema = JSON) {
     if (!ContentSchema || ContentSchema === JSON) {
       if (buffer.toString('utf8', 0, 1) === '+') {
@@ -59,7 +56,6 @@ class QueueMessage {
           queueMessage.addAttachment(key, buffer.subarray(prevAttachmentLength, prevAttachmentLength + length))
           prevAttachmentLength = prevAttachmentLength + length
         }
-
         return queueMessage
       } else if (buffer.toString('utf8', 0, 1) === '{') {
         return this.fromJSON(buffer.toString('utf8'))
@@ -72,42 +68,41 @@ class QueueMessage {
   }
 
   /**
-   * @param {String} name
-   * @param {Buffer} buffer
-   */
+     * @param {String} name
+     * @param {Buffer} buffer
+     */
   addAttachment (name, buffer) {
     this.attachments.set(name, buffer)
   }
 
   /**
-   * @param {String} name
-   * @returns {Buffer}
-   */
+     * @param {String} name
+     * @returns {Buffer}
+     */
   getAttachment (name) {
     return this.attachments.get(name)
   }
 
   /**
-   * @param {String} name
-   * @returns {boolean}
-   */
+     * @param {String} name
+     * @returns {boolean}
+     */
   hasAttachment (name) {
     return this.attachments.has(name)
   }
 
   /**
-   * @returns {boolean}
-   */
+     * @returns {boolean}
+     */
   hasAnyAttachments () {
     return this.attachments.size > 0
   }
 
   /**
-   * @returns {Map<String, Buffer>}
-   */
+     * @returns {Map<String, Buffer>}
+     */
   getAttachments () {
     return this.attachments
   }
 }
-
-module.exports = QueueMessage
+export default QueueMessage

@@ -1,22 +1,20 @@
-const QueueManager = require('./QueueManager')
-const QueueConfig = require('./QueueConfig')
-
+import QueueManager from './QueueManager.js'
+import QueueConfig from './QueueConfig.js'
 /**
  * @class ConnectionPool
  * */
 class ConnectionPool {
   /**
-   * @param {Object} poolConfig
-   * @param {{}} [poolConfig]
-   * @param {String} [poolConfig.defaultConnectionName]
-   */
+     * @param {Object} poolConfig
+     * @param {{}} [poolConfig]
+     * @param {String} [poolConfig.defaultConnectionName]
+     */
   constructor (poolConfig) {
     const { defaultConnectionName } = poolConfig || {}
-
     this._logger = null
     /**
-     * @type {Map<string, QueueManager>}
-     */
+         * @type {Map<string, QueueManager>}
+         */
     this.connections = new Map()
     this.defaultConnection = null
     this.defaultConnectionName = defaultConnectionName || 'default'
@@ -26,7 +24,6 @@ class ConnectionPool {
     const defaultConnectionName = this.defaultConnectionName
     let defaultConnectionConfig = null
     let restConnections = null
-
     if (QueueConfig.isValidConfig(connectionConfigs)) {
       // single connection config (backwards compatible)
       defaultConnectionConfig = connectionConfigs
@@ -44,13 +41,11 @@ class ConnectionPool {
         throw new Error('Invalid default connections config')
       }
     }
-
     if (defaultConnectionConfig) {
       const connection = this.createConnection(defaultConnectionConfig)
       this.registerConnection(defaultConnectionName, connection)
       this.setDefaultConnection(connection)
     }
-
     if (restConnections) {
       Object.keys(restConnections).forEach((connectionName) => {
         const connectionConfig = restConnections[connectionName]
@@ -70,11 +65,9 @@ class ConnectionPool {
 
   createConnection (connectionConfig) {
     const connection = new QueueManager(connectionConfig)
-
     if (this._logger) {
       connection.setLogger(this._logger)
     }
-
     return connection
   }
 
@@ -95,26 +88,23 @@ class ConnectionPool {
   }
 
   /**
-   * @return {Promise}
-   */
+     * @return {Promise}
+     */
   async connect () {
     const connections = [...this.connections.values()]
-
     for (const connection of connections) {
       await connection.connect()
     }
   }
 
   /**
-   * @return {Promise}
-   */
+     * @return {Promise}
+     */
   async reconnect () {
     const connections = [...this.connections.values()]
-
     for (const connection of connections) {
       await connection.reconnect()
     }
   }
 }
-
-module.exports = ConnectionPool
+export default ConnectionPool

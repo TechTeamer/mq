@@ -1,15 +1,14 @@
-const fs = require('fs')
-const amqp = require('amqplib/channel_api')
-const QueueConfig = require('./QueueConfig')
-const EventEmitter = require('events')
-
+import fs from 'fs'
+import * as amqp from 'amqplib/channel_api.js'
+import QueueConfig from './QueueConfig.js'
+import EventEmitter from 'events'
 /**
  * @class QueueConnection
  * */
 class QueueConnection extends EventEmitter {
   /**
-   * @param {Object|QueueConfig} config
-   */
+     * @param {Object|QueueConfig} config
+     */
   constructor (config) {
     super()
     this._config = new QueueConfig(config)
@@ -26,8 +25,8 @@ class QueueConnection extends EventEmitter {
   }
 
   /**
-   * @return Promise<amqplib.Connection>
-   * */
+     * @return Promise<amqplib.Connection>
+     * */
   async connect () {
     if (this._connection) {
       return this._connection
@@ -35,7 +34,6 @@ class QueueConnection extends EventEmitter {
     if (this._connectionPromise) {
       return this._connectionPromise
     }
-
     const options = Object.assign({}, this._config.options)
     if (options.cert) {
       options.cert = fs.readFileSync(options.cert)
@@ -46,7 +44,6 @@ class QueueConnection extends EventEmitter {
     if (options.ca) {
       options.ca = options.ca.map((ca) => fs.readFileSync(ca))
     }
-
     this._connectionPromise = this._connect(this._config.url, options).then((connection) => {
       this._logger.info(`RabbitMQ connection established: '${QueueConfig.urlObjectToLogString(this._activeConnectionConfig)}'`)
       this.emitConnectionEvents(connection)
@@ -57,7 +54,6 @@ class QueueConnection extends EventEmitter {
       this._connectionPromise = null
       throw err
     })
-
     return this._connectionPromise
   }
 
@@ -65,7 +61,6 @@ class QueueConnection extends EventEmitter {
     connection.on('error', (err) => {
       if (err.message !== 'Connection closing') {
         this._logger.error('RabbitMQ error', err)
-
         if (this.listenerCount('error') > 0) {
           // NOTE: https://nodejs.org/docs/latest-v18.x/api/errors.html#error-propagation-and-interception
           // 'error' named events must have a subscriber in order to avoid uncaughtException errors.
@@ -94,18 +89,16 @@ class QueueConnection extends EventEmitter {
       const urls = []
       for (const host of configUrl.hostname) {
         urls.push({
-          ...configUrl, // copy given config
+          ...configUrl,
           hostname: host // use hostname from current iteration
         })
       }
       configUrl = urls
     }
-
     // handle multiple connection urls
     if (Array.isArray(configUrl)) {
       return this._connectWithMultipleUrls(configUrl, options)
     }
-
     // assume simple url string or standard url object
     const connectionUrl = QueueConfig.urlStringToObject(configUrl)
     const connection = await amqp.connect(configUrl, options)
@@ -117,7 +110,6 @@ class QueueConnection extends EventEmitter {
     if (this._config.shuffleUrls) {
       urls = this.shuffleUrls(urls)
     }
-
     for (const url of urls) {
       const connectionUrl = QueueConfig.urlStringToObject(url)
       try {
@@ -128,7 +120,6 @@ class QueueConnection extends EventEmitter {
         this._logger.warn('RabbitMQ connection failed to host:', { ...connectionUrl, password: connectionUrl.password ? '***' : connectionUrl.password })
       }
     }
-
     throw new Error('RabbitMQ connection failed with multiple urls')
   }
 
@@ -138,8 +129,8 @@ class QueueConnection extends EventEmitter {
   }
 
   /**
-   * @return Promise
-   * */
+     * @return Promise
+     * */
   async close () {
     if (this._connection) {
       try {
@@ -151,14 +142,13 @@ class QueueConnection extends EventEmitter {
         }
       }
     }
-
     this._connection = null
     this._connectionPromise = null
   }
 
   /**
-   * @return Promise<amqplib.ConfirmChannel>
-   * */
+     * @return Promise<amqplib.ConfirmChannel>
+     * */
   async getChannel () {
     if (this._channel) {
       return this._channel
@@ -166,7 +156,6 @@ class QueueConnection extends EventEmitter {
     if (this._channelPromise) {
       return this._channelPromise
     }
-
     this._channelPromise = this.connect().then((connection) => {
       return connection.createConfirmChannel()
     }).then((channel) => {
@@ -177,14 +166,12 @@ class QueueConnection extends EventEmitter {
       this._logger.error(err)
       throw err
     })
-
     return this._channelPromise
   }
 
   emitChannelEvents (channel) {
     channel.on('error', (err) => {
       this._logger.error('RabbitMQ channel error', err)
-
       if (this.listenerCount('error') > 0) {
         // NOTE: https://nodejs.org/docs/latest-v18.x/api/errors.html#error-propagation-and-interception
         // 'error' named events must have a subscriber in order to avoid uncaughtException errors.
@@ -204,5 +191,4 @@ class QueueConnection extends EventEmitter {
     })
   }
 }
-
-module.exports = QueueConnection
+export default QueueConnection

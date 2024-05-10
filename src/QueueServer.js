@@ -1,30 +1,23 @@
-const Subscriber = require('./Subscriber')
-
+import Subscriber from './Subscriber.js'
 class QueueServer extends Subscriber {
   /**
-   * @param {QueueConnection} queueConnection
-   * @param {Console} logger
-   * @param {String} name
-   * @param {Object} options
-   */
+     * @param {QueueConnection} queueConnection
+     * @param {Console} logger
+     * @param {String} name
+     * @param {Object} options
+     */
   constructor (queueConnection, logger, name, options = {}) {
     super(queueConnection, logger, name, options)
-    const {
-      assertQueue = true,
-      assertQueueOptions = {},
-      prefetchCount
-    } = options
-
+    const { assertQueue = true, assertQueueOptions = {}, prefetchCount } = options
     this._assertQueue = null
     this._prefetchCount = prefetchCount
-
     this._assertQueue = assertQueue === true
     this._assertQueueOptions = Object.assign({ durable: true }, assertQueueOptions)
   }
 
   /**
-   * @return {Promise}
-   */
+     * @return {Promise}
+     */
   async initialize () {
     try {
       const channel = await this._connection.getChannel()
@@ -41,5 +34,4 @@ class QueueServer extends Subscriber {
     }
   }
 }
-
-module.exports = QueueServer
+export default QueueServer
