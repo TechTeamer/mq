@@ -14,33 +14,20 @@ import Subscriber from './src/Subscriber.js'
 import GatheringClient from './src/GatheringClient.js'
 import GatheringServer from './src/GatheringServer.js'
 
-const _QueueClient = QueueClient
-export { _QueueClient as QueueClient }
-const _QueueConfig = QueueConfig
-export { _QueueConfig as QueueConfig }
-const _QueueConnection = QueueConnection
-export { _QueueConnection as QueueConnection }
-const _ConnectionPool = ConnectionPool
-export { _ConnectionPool as ConnectionPool }
-const _QueueMessage = QueueMessage
-export { _QueueMessage as QueueMessage }
-const _ProtoQueueMessage = ProtoQueueMessage
-export { _ProtoQueueMessage as ProtoQueueMessage }
-const _QueueServer = QueueServer
-export { _QueueServer as QueueServer }
-const _QueueManager = QueueManager
-export { _QueueManager as QueueManager }
-const _RPCClient = RPCClient
-export { _RPCClient as RPCClient }
-const _RPCError = RPCError
-export { _RPCError as RPCError }
-const _RPCServer = RPCServer
-export { _RPCServer as RPCServer }
-const _Publisher = Publisher
-export { _Publisher as Publisher }
-const _Subscriber = Subscriber
-export { _Subscriber as Subscriber }
-const _GatheringClient = GatheringClient
-export { _GatheringClient as GatheringClient }
-const _GatheringServer = GatheringServer
-export { _GatheringServer as GatheringServer }
+export {
+  QueueClient,
+  QueueConfig,
+  QueueConnection,
+  ConnectionPool,
+  QueueMessage,
+  ProtoQueueMessage,
+  QueueServer,
+  QueueManager,
+  RPCClient,
+  RPCError,
+  RPCServer,
+  Publisher,
+  Subscriber,
+  GatheringClient,
+  GatheringServer
+}
