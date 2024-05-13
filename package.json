@@ -19,13 +19,22 @@
   "scripts": {
     "lint": "eslint .",
     "unit": "mocha --exit",
-    "test": "eslint . && nyc mocha --temp-directory=./test/coverage/ --exit && nyc report --reporter=text-lcov --report-dir=./test/coverage/ --reporter=lcovonly  | coveralls"
+    "test": "eslint . && nyc mocha --temp-directory=./test/coverage/ --exit && nyc report --reporter=text-lcov --report-dir=./test/coverage/ --reporter=lcovonly  | coveralls",
+    "prepare": "husky"
   },
   "dependencies": {
+    "@semantic-release/commit-analyzer": "^12.0.0",
+    "@semantic-release/github": "^10.0.3",
+    "@semantic-release/npm": "^12.0.1",
+    "@semantic-release/release-notes-generator": "^13.0.0",
     "amqplib": "^0.10.3",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "@commitlint/cli": "^19.3.0",
+    "@commitlint/config-conventional": "^19.2.2",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
     "chai": "^4.3.7",
     "coveralls": "^3.1.1",
     "eslint": "^8.38.0",
@@ -34,12 +43,17 @@
     "eslint-plugin-n": "^15.7.0",
     "eslint-plugin-promise": "^6.1.1",
     "eslint-plugin-standard": "^5.0.0",
+    "husky": "^9.0.11",
     "mocha": "^10.2.0",
     "nyc": "^15.1.0",
     "protobufjs": "^7.2.3",
-    "seed-random": "^2.2.0"
+    "seed-random": "^2.2.0",
+    "semantic-release": "^23.1.1"
   },
   "peerDependencies": {
     "protobufjs": "^7.2.3"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
