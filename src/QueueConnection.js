@@ -101,21 +101,10 @@ class QueueConnection extends EventEmitter {
       configUrl = urls
     }
 
-    // handle multiple connection urls
-    if (Array.isArray(configUrl)) {
-      return this._connectWithMultipleUrls(configUrl, options)
+    if (!Array.isArray(configUrl)) {
+      configUrl = [configUrl]
     }
-
-    // assume simple url string or standard url object
-    const connectionUrl = QueueConfig.urlStringToObject(configUrl)
-    try{
-      const connection = await amqp.connect(configUrl, options)
-      this._activeConnectionConfig = connectionUrl
-      return connection
-    } catch (error) {
-      this._logger.error('RabbitMQ connection failed to host:', { ...connectionUrl, password: connectionUrl.password ? '***' : connectionUrl.password })
-      throw new Error('RabbitMQ connection failed with single url')
-    }
+    return this._connectWithMultipleUrls(configUrl, options)
   }
 
   async _connectWithMultipleUrls (urls, options) {
