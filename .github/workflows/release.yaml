@@ -8,6 +8,12 @@ on:
       - 'beta'
       - 'alpha'
 
+permissions:
+  contents: write
+  issues: write  # Allow creating issues if needed
+  packages: write  # If you are publishing packages
+  actions: read
+
 jobs:
   release:
     runs-on: ubuntu-latest
