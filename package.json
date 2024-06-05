@@ -40,11 +40,11 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
-    "c8": "^9.1.0",
     "@commitlint/cli": "^19.3.0",
     "@commitlint/config-conventional": "^19.2.2",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
+    "c8": "^9.1.0",
     "chai": "^4.3.7",
     "coveralls": "^3.1.1",
     "eslint": "^8.38.0",
@@ -57,9 +57,9 @@
     "mocha": "^10.2.0",
     "protobufjs": "^7.2.3",
     "seed-random": "^2.2.0",
+    "semantic-release": "^23.1.1",
     "typescript": "^5.4.5",
-    "typescript-eslint": "^7.8.0",
-    "semantic-release": "^23.1.1"
+    "typescript-eslint": "^7.8.0"
   },
   "peerDependencies": {
     "protobufjs": "^7.2.3"
