@@ -1,11 +1,9 @@
+import { describe, it, assert, beforeAll, afterAll } from 'vitest'
 import QueueManager from '../src/QueueManager.js'
 import ConsoleInspector from './consoleInspector.js'
 import SeedRandom from 'seed-random'
 import config from './config/LoadConfig.js'
-import chai from 'chai'
 import { v4 as uuid } from 'uuid'
-
-const assert = chai.assert
 
 describe('RPCClient && RPCServer', () => {
   const rpcName = 'techteamer-mq-js-test-rpc'
@@ -30,43 +28,43 @@ describe('RPCClient && RPCServer', () => {
   const shortRpcClient = queueManager.getRPCClient(shortRpcName, { queueMaxSize: 1, timeoutMs })
   const shortRpcServer = queueManager.getRPCServer(shortRpcName, { prefetchCount: 1, timeoutMs, assertQueueOptions })
 
-  before(() => {
+  beforeAll(() => {
     return queueManager.connect()
   })
 
-  after(() => {
+  afterAll(() => {
     logger.empty()
   })
 
-  it('RPCClient.call() sends a STRING and RPCServer.consume() receives it', (done) => {
+  it('RPCClient.call() sends a STRING and RPCServer.consume() receives it', () => new Promise((resolve) => {
     const stringMessage = 'foobar'
     rpcServer.consume((msg) => {
       if (msg === stringMessage) {
-        done()
+        resolve()
       } else {
-        done(new Error('String received is not the same as the String sent'))
+        resolve(new Error('String received is not the same as the String sent'))
       }
     })
     rpcClient.call(stringMessage, 10000).catch((err) => {
-      done(err)
+      resolve(err)
     })
-  })
+  }))
 
-  it('RPCClient.call() sends an OBJECT and RPCServer.consume() receives it', (done) => {
+  it('RPCClient.call() sends an OBJECT and RPCServer.consume() receives it', () => new Promise((resolve) => {
     const objectMessage = { foo: 'bar', bar: 'foo' }
     rpcServer.consume((msg) => {
       if (JSON.stringify(msg) === JSON.stringify(objectMessage)) {
-        done()
+        resolve()
       } else {
-        done(new Error('The send OBJECT is not equal to the received one'))
+        resolve(new Error('The send OBJECT is not equal to the received one'))
       }
     })
     rpcClient.call(objectMessage, 10000).catch((err) => {
-      done(err)
+      resolve(err)
     })
-  })
+  }))
 
-  it('RPCClient.call() calls through an EXCHANGE and RPCServer answers back', (done) => {
+  it('RPCClient.call() calls through an EXCHANGE and RPCServer answers back', () => new Promise((resolve) => {
     const objectMessage = { foo: 'bar', bar: 'foo' }
     rpcExchangeServer.consume((msg) => {
       return msg
@@ -74,33 +72,33 @@ describe('RPCClient && RPCServer', () => {
 
     rpcExchangeClient.call(objectMessage, 10000).then((res) => {
       if (JSON.stringify(res) === JSON.stringify(objectMessage)) {
-        done()
+        resolve()
       } else {
-        done(new Error('Object sent and received are not equal'))
+        resolve(new Error('Object sent and received are not equal'))
       }
     }).catch((err) => {
-      done(err)
+      resolve(err)
     })
-  })
+  }))
 
-  it('RPCClient.call() sends an OBJECT, RPCServer.consume() sends it back and RPCClient receives it intact', (done) => {
+  it('RPCClient.call() sends an OBJECT, RPCServer.consume() sends it back and RPCClient receives it intact', () => new Promise((resolve) => {
     const objectMessage = { foo: 'bar', bar: 'foo' }
     rpcServer.consume((msg) => {
       return msg
     })
     rpcClient.call(objectMessage, 10000).then((res) => {
       if (JSON.stringify(res) === JSON.stringify(objectMessage)) {
-        done()
+        resolve()
       } else {
-        done(new Error('Object sent and received are not equal'))
+        resolve(new Error('Object sent and received are not equal'))
       }
     }).catch((err) => {
-      done(err)
+      resolve(err)
     })
-  })
+  }))
 
   it('RPCClient.call() sends an OBJECT, RPCServer.consume() sends back a response' +
-    'with a 100MB random generated buffer and RPCClient receives it', (done) => {
+    'with a 100MB random generated buffer and RPCClient receives it', () => new Promise((resolve) => {
     const objectMessage = { foo: 'bar', bar: 'foo' }
 
     const rand = SeedRandom()
@@ -112,32 +110,32 @@ describe('RPCClient && RPCServer', () => {
     rpcServer.consume((msg, request, response) => {
       response.addAttachment('test', buf)
       if (!response.hasAnyAttachments()) {
-        done(new Error('Missing attachment from response'))
+        resolve(new Error('Missing attachment from response'))
       }
       if (!response.hasAttachment('test')) {
-        done(new Error('Missing attachment name "test" from response'))
+        resolve(new Error('Missing attachment name "test" from response'))
       }
       if (response.getAttachment('test') !== buf) {
-        done(new Error('Attachment name "test" is not the same'))
+        resolve(new Error('Attachment name "test" is not the same'))
       }
       return msg
     })
     rpcClient.call(objectMessage, 10000, null, true).then((res) => {
       if (!res.hasAttachment('test')) {
-        done(new Error('Missing attachment from reply'))
+        resolve(new Error('Missing attachment from reply'))
       } else if (!(res.getAttachment('test') instanceof Buffer)) {
-        done(new Error('Attachment is not a buffer'))
+        resolve(new Error('Attachment is not a buffer'))
       } else if (res.getAttachment('test').toString() !== buf.toString()) {
-        done(new Error('String received is not the same as the String sent'))
+        resolve(new Error('String received is not the same as the String sent'))
       } else {
-        done()
+        resolve()
       }
     }).catch((err) => {
-      done(err)
+      resolve(err)
     })
-  })
+  }))
 
-  it('rpcClient.call() sends a message with a 100MB random generated buffer and rpcServer.consume() receives it', function (done) {
+  it('rpcClient.call() sends a message with a 100MB random generated buffer and rpcServer.consume() receives it', () => new Promise((resolve) => {
     const stringMessage = 'foobar'
     const attachments = new Map()
 
@@ -152,63 +150,63 @@ describe('RPCClient && RPCServer', () => {
 
     rpcServer.consume((msg, queueMessage) => {
       if (queueMessage.getAttachments().get('test').toString() !== buf.toString()) {
-        done(new Error('String received is not the same as the String sent'))
+        resolve(new Error('String received is not the same as the String sent'))
         return
       }
-      done()
+      resolve()
     })
 
     rpcClient.call(stringMessage, null, attachments).catch((err) => {
-      done(err)
+      resolve(err)
     })
-  })
+  }))
 
-  it('RPCClient.call() throws an error when the parameter cant be JSON-serialized', (done) => {
+  it('RPCClient.call() throws an error when the parameter cant be JSON-serialized', () => new Promise((resolve) => {
     const nonJSONSerializableMessage = {}
     nonJSONSerializableMessage.a = { b: nonJSONSerializableMessage }
 
     rpcServer.consume(() => {
-      done(new Error('Should not receive the message'))
+      resolve(new Error('Should not receive the message'))
     })
 
     rpcClient.call(nonJSONSerializableMessage)
-      .then(() => done(new Error('Did not throw an error')))
-      .catch(() => done())
-  })
+      .then(() => resolve(new Error('Did not throw an error')))
+      .catch(() => resolve())
+  }))
 
-  it(`RPCClient.call() throws an error if it doesn't receive a response sooner than ${timeoutMs}ms`, (done) => {
+  it(`RPCClient.call() throws an error if it doesn't receive a response sooner than ${timeoutMs}ms`, () => new Promise((resolve) => {
     const objectMessage = { foo: 'bar', bar: 'foo' }
 
     rpcServer.consume(async (msg) => {
-      await new Promise((resolve) => setTimeout(resolve, timeoutMs + 100))
+      await new Promise((res) => setTimeout(res, timeoutMs + 100))
       return msg
     })
 
     rpcClient.call(objectMessage)
-      .then(() => done(new Error('Did not throw a timeout error')))
-      .catch(() => done())
-  })
+      .then(() => resolve(new Error('Did not throw a timeout error')))
+      .catch(() => resolve())
+  }))
 
-  it('RPCClient frees up memory after timeout', (done) => {
+  it('RPCClient frees up memory after timeout', () => new Promise((resolve) => {
     const objectMessage = { foo: 'bar', bar: 'foo' }
 
     let waitForTimeout = true
     shortRpcServer.consume(() => {
       if (waitForTimeout) {
-        return new Promise(resolve => setTimeout(resolve, timeoutMs + 100))
+        return new Promise(res => setTimeout(res, timeoutMs + 100))
       }
       return Promise.resolve()
     })
 
     shortRpcClient.call(objectMessage)
-      .then(() => done(new Error('Did not throw a timeout error')))
+      .then(() => resolve(new Error('Did not throw a timeout error')))
       .catch(() => {
         waitForTimeout = false
         return shortRpcClient.call(objectMessage)
       })
-      .then(() => done())
-      .catch(err => done(err))
-  })
+      .then(() => resolve())
+      .catch(err => resolve(err))
+  }))
 
   it('RPCServer handles errors and can continue to work after them', async () => {
     const objectMessage = { foo: 'bar', bar: 'foo' }

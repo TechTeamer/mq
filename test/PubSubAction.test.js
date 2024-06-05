@@ -1,3 +1,4 @@
+import { describe, it, beforeAll, afterAll } from 'vitest'
 import QueueManager from '../src/QueueManager.js'
 import ConsoleInspector from './consoleInspector.js'
 import config from './config/LoadConfig.js'
@@ -22,29 +23,29 @@ describe('Publisher && Subscriber actions', () => {
     assertExchangeOptions
   })
 
-  before(() => {
+  beforeAll(() => {
     return publisherManager.connect().then(() => {
       return subscriberManager.connect()
     })
   })
 
-  after(() => {
+  afterAll(() => {
     logger.empty()
   })
 
-  it('subscriber.registerAction() registers the action, publisher.callAction() sends a STRING and the registered callback for the action receives it', (done) => {
+  it('subscriber.registerAction() registers the action, publisher.callAction() sends a STRING and the registered callback for the action receives it', () => new Promise((resolve) => {
     const stringMessage = 'foobar'
 
     subscriber.registerAction('compareString', (msg) => {
       if (msg === stringMessage) {
-        done()
+        resolve()
       } else {
-        done(new Error('The compared String is not equal to the String that was sent'))
+        resolve(new Error('The compared String is not equal to the String that was sent'))
       }
     })
 
     publisher.sendAction('compareString', stringMessage).catch((err) => {
-      done(err)
+      resolve(err)
     })
-  })
+  }))
 })

@@ -1,15 +1,14 @@
-import chai from 'chai'
+import { describe, it, afterAll, assert } from 'vitest'
 import QueueManager from '../src/QueueManager.js'
 import ConnectionPool from '../src/ConnectionPool.js'
 import ConsoleInspector from './consoleInspector.js'
 import QueueConfig from '../src/QueueConfig.js'
 import config from './config/LoadConfig.js'
 
-const assert = chai.assert
 describe('ConnectionPool', () => {
   const logger = new ConsoleInspector(console)
 
-  after(() => {
+  afterAll(() => {
     logger.empty()
   })
 
@@ -43,7 +42,7 @@ describe('ConnectionPool', () => {
     assert.instanceOf(otherConnection, QueueManager, 'other connection is not an instance of QueueManager')
   })
 
-  it('Should connect', (done) => {
+  it('Should connect', () => new Promise((resolve) => {
     const pool = new ConnectionPool()
     pool.setLogger(logger)
     pool.setupQueueManagers({
@@ -56,13 +55,13 @@ describe('ConnectionPool', () => {
       pool.connections.forEach(manager => {
         assert.isNotNull(manager.connection._connection)
       })
-      done()
+      resolve()
     }).catch((err) => {
-      done(err)
+      resolve(err)
     })
-  })
+  }))
 
-  it('Should not connect to wrong config', (done) => {
+  it('Should not connect to wrong config', () => new Promise((resolve) => {
     const pool = new ConnectionPool()
     pool.setLogger(logger)
     pool.setupQueueManagers({
@@ -79,14 +78,14 @@ describe('ConnectionPool', () => {
     Promise.resolve().then(() => {
       return pool.connect()
     }).then(() => {
-      done('Connection with wrong config should not connect')
+      resolve('Connection with wrong config should not connect')
     }).catch((err) => {
       assert.instanceOf(err, Error, 'Connection with wrong config should throw an error ')
-      done()
+      resolve()
     })
-  })
+  }))
 
-  it('Should reconnect', (done) => {
+  it('Should reconnect', () => new Promise((resolve) => {
     const pool = new ConnectionPool()
     pool.setLogger(logger)
     pool.setupQueueManagers({
@@ -101,11 +100,11 @@ describe('ConnectionPool', () => {
       pool.connections.forEach(manager => {
         assert.isNotNull(manager.connection._connection)
       })
-      done()
+      resolve()
     }).catch((err) => {
-      done(err)
+      resolve(err)
     })
-  })
+  }))
 
   it('should reconnect if the connection is already closed', async () => {
     const pool = new ConnectionPool()
@@ -126,7 +125,7 @@ describe('ConnectionPool', () => {
     }
   })
 
-  it('Should not reconnect to wrong config', (done) => {
+  it('Should not reconnect to wrong config', () => new Promise((resolve) => {
     const pool = new ConnectionPool()
     pool.setLogger(logger)
     pool.setupQueueManagers({
@@ -149,10 +148,10 @@ describe('ConnectionPool', () => {
 
       return pool.reconnect()
     }).then(() => {
-      done('Reconnection with wrong config should not connect')
+      resolve('Reconnection with wrong config should not connect')
     }).catch((err) => {
       assert.instanceOf(err, Error, 'Reconnection with wrong config should throw an error ')
-      done()
+      resolve()
     })
-  })
+  }))
 })

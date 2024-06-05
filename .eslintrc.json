@@ -13,7 +13,8 @@
     "no-process-exit": "off",
     "n/shebang": "off",
     "no-empty-function": "error",
-    "no-shadow": "warn"
+    "no-shadow": "warn",
+    "promise/param-names": "off"
   },
   "env": {
     "commonjs": true,

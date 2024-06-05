@@ -1,11 +1,9 @@
-import chai from 'chai'
+import { describe, it, assert, expect, beforeAll } from 'vitest'
 import path from 'node:path'
 import protobuf from 'protobufjs'
 import QueueMessage from '../src/QueueMessage.js'
 import ProtoQueueMessage from '../src/ProtoQueueMessage.js'
 
-const assert = chai.assert
-const expect = chai.expect
 describe('ProtoQueueMessage', () => {
   const okStatus = 'ok'
 
@@ -16,7 +14,7 @@ describe('ProtoQueueMessage', () => {
   const testData = { number, string, array, buffer: testBuffer }
   let TestMessage
 
-  before(async () => {
+  beforeAll(async () => {
     const RootProtobuf = await protobuf.load(path.join(process.cwd(), 'test/contentSchemas/protobuf_test_schema.proto'))
     TestMessage = RootProtobuf.lookup('TestMessage')
   })
