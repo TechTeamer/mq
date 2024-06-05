@@ -1,4 +1,4 @@
-import chai from 'chai'
+import { assert, describe, it, afterAll } from 'vitest'
 import QueueManager from '../src/QueueManager.js'
 import Publisher from '../src/Publisher.js'
 import Subscriber from '../src/Subscriber.js'
@@ -9,7 +9,6 @@ import RPCServer from '../src/RPCServer.js'
 import ConsoleInspector from './consoleInspector.js'
 import config from './config/LoadConfig.js'
 
-const assert = chai.assert
 describe('QueueManager', () => {
   const logger = new ConsoleInspector(console)
   const manager = new QueueManager(config)
@@ -34,7 +33,7 @@ describe('QueueManager', () => {
     queueServerAssertQueueOptions: defaultOptionsOverride
   })
 
-  after(() => {
+  afterAll(() => {
     logger.empty()
   })
 

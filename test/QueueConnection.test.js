@@ -1,9 +1,7 @@
+import { describe, it, assert } from 'vitest'
 import QueueConnection from '../src/QueueConnection.js'
 import QueueConfig from '../src/QueueConfig.js'
 import config from './config/LoadConfig.js'
-import chai from 'chai'
-
-const assert = chai.assert
 
 function copyConfig (obj) {
   return new QueueConfig({
@@ -14,31 +12,31 @@ function copyConfig (obj) {
 }
 
 describe('QueueConnection', () => {
-  it('#connect() creates a connection to RabbitMQ', (done) => {
+  it('#connect() creates a connection to RabbitMQ', new Promise((resolve) => {
     const connection = new QueueConnection(config)
     connection.connect()
       .then(() => {
         assert.isNotNull(connection._connection)
-        done()
+        resolve()
       })
       .catch((e) => {
-        done(new Error(`connect() failed: ${e}`))
+        resolve(new Error(`connect() failed: ${e}`))
       })
-  })
+  }))
 
-  it('#connect() fails to connect for invalid connection url', (done) => {
+  it('#connect() fails to connect for invalid connection url', new Promise((resolve) => {
     const multiUrlConfig = copyConfig({
       url: 'invalid_url'
     })
 
     const connection = new QueueConnection(multiUrlConfig)
     connection.connect().then(() => {
-      done(new Error('Should not connect'))
+      resolve(new Error('Should not connect'))
     }).catch(() => {
       assert.isNull(connection._connection)
-      done()
+      resolve()
     })
-  })
+  }))
 
   it('#connect() handles multiple string urls and connects to the first working one', async () => {
     const multiUrlConfig = copyConfig({

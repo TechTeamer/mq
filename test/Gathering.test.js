@@ -1,3 +1,4 @@
+import { describe, it, beforeAll, afterAll } from 'vitest'
 import QueueManager from '../src/QueueManager.js'
 import ConsoleInspector from './consoleInspector.js'
 import SeedRandom from 'seed-random'
@@ -15,62 +16,62 @@ describe('GatheringClient && GatheringServer', () => {
   const gatheringClient = queueManager.getGatheringClient(gatheringName, { queueMaxSize: 100, timeoutMs, assertExchangeOptions })
   const gatheringServer1 = queueManager.getGatheringServer(gatheringName, { prefetchCount: 1, timeoutMs, assertExchangeOptions })
 
-  before(() => {
+  beforeAll(() => {
     return queueManager.connect()
   })
 
-  after(() => {
+  afterAll(() => {
     logger.empty()
   })
 
-  it('GatheringClient.request() sends a STRING and GatheringServer.consume() receives it', (done) => {
+  it('GatheringClient.request() sends a STRING and GatheringServer.consume() receives it', new Promise((resolve) => {
     const stringMessage = 'foobar'
     gatheringServer1.consume((msg) => {
       if (msg === stringMessage) {
-        done()
+        resolve()
       } else {
-        done(new Error('String received is not the same as the String sent'))
+        resolve(new Error('String received is not the same as the String sent'))
       }
       return true
     })
     gatheringClient.request(stringMessage, 10000).catch((err) => {
-      done(err)
+      resolve(err)
     })
-  })
+  }))
 
-  it('GatheringClient.request() sends an OBJECT and GatheringServer.consume() receives it', (done) => {
+  it('GatheringClient.request() sends an OBJECT and GatheringServer.consume() receives it', new Promise((resolve) => {
     const objectMessage = { foo: 'bar', bar: 'foo' }
     gatheringServer1.consume((msg) => {
       if (JSON.stringify(msg) === JSON.stringify(objectMessage)) {
-        done()
+        resolve()
       } else {
-        done(new Error('The send OBJECT is not equal to the received one'))
+        resolve(new Error('The send OBJECT is not equal to the received one'))
       }
       return true
     })
     gatheringClient.request(objectMessage, 10000).catch((err) => {
-      done(err)
+      resolve(err)
     })
-  })
+  }))
 
-  it('GatheringClient.request() sends an OBJECT, GatheringServer.consume() sends it back and GatheringClient receives it intact', (done) => {
+  it('GatheringClient.request() sends an OBJECT, GatheringServer.consume() sends it back and GatheringClient receives it intact', new Promise((resolve) => {
     const objectMessage = { foo: 'bar', bar: 'foo' }
     gatheringServer1.consume((msg) => {
       return msg
     })
     gatheringClient.request(objectMessage, 10000).then((res) => {
       if (JSON.stringify(res) === JSON.stringify(objectMessage)) {
-        done()
+        resolve()
       } else {
-        done(new Error(`Object sent and received are not equal: ${JSON.stringify(res)}`))
+        resolve(new Error(`Object sent and received are not equal: ${JSON.stringify(res)}`))
       }
     }).catch((err) => {
-      done(err)
+      resolve(err)
     })
-  })
+  }))
 
   it('GatheringClient.request() sends an OBJECT, GatheringServer.consume() sends back a response' +
-    'with a 100MB random generated buffer and GatheringClient receives it', (done) => {
+    'with a 100MB random generated buffer and GatheringClient receives it', async (resolve) => {
     const objectMessage = { foo: 'bar', bar: 'foo' }
 
     const rand = SeedRandom()
@@ -82,32 +83,32 @@ describe('GatheringClient && GatheringServer', () => {
     gatheringServer1.consume((msg, request, response) => {
       response.addAttachment('test', buf)
       if (!response.hasAnyAttachments()) {
-        done(new Error('Missing attachment from response'))
+        resolve(new Error('Missing attachment from response'))
       }
       if (!response.hasAttachment('test')) {
-        done(new Error('Missing attachment name "test" from response'))
+        resolve(new Error('Missing attachment name "test" from response'))
       }
       if (response.getAttachment('test') !== buf) {
-        done(new Error('Attachment name "test" is not the same'))
+        resolve(new Error('Attachment name "test" is not the same'))
       }
       return msg
     })
     gatheringClient.request(objectMessage, 10000, null, true).then((res) => {
       if (!res.hasAttachment('test')) {
-        done(new Error('Missing attachment from reply'))
+        resolve(new Error('Missing attachment from reply'))
       } else if (!(res.getAttachment('test') instanceof Buffer)) {
-        done(new Error('Attachment is not a buffer'))
+        resolve(new Error('Attachment is not a buffer'))
       } else if (res.getAttachment('test').toString() !== buf.toString()) {
-        done(new Error('String received is not the same as the String sent'))
+        resolve(new Error('String received is not the same as the String sent'))
       } else {
-        done()
+        resolve()
       }
     }).catch((err) => {
-      done(err)
+      resolve(err)
     })
   })
 
-  it('gatheringClient.request() sends a message with a 100MB random generated buffer and gatheringServer1.consume() receives it', function (done) {
+  it('gatheringClient.request() sends a message with a 100MB random generated buffer and gatheringServer1.consume() receives it', new Promise((resolve) => {
     const stringMessage = 'foobar'
     const attachments = new Map()
 
@@ -122,45 +123,45 @@ describe('GatheringClient && GatheringServer', () => {
 
     gatheringServer1.consume((msg, queueMessage) => {
       if (queueMessage.getAttachments().get('test').toString() !== buf.toString()) {
-        done(new Error('String received is not the same as the String sent'))
+        resolve(new Error('String received is not the same as the String sent'))
         return
       }
-      done()
+      resolve()
     })
 
     gatheringClient.request(stringMessage, null, attachments).catch((err) => {
-      done(err)
+      resolve(err)
     })
-  })
+  }))
 
-  it('GatheringClient.request() throws an error when the parameter cant be JSON-serialized', (done) => {
+  it('GatheringClient.request() throws an error when the parameter cant be JSON-serialized', new Promise((resolve) => {
     const nonJSONSerializableMessage = {}
     nonJSONSerializableMessage.a = { b: nonJSONSerializableMessage }
 
     gatheringServer1.consume((msg) => {
-      done(new Error('Should not receive the message'))
+      resolve(new Error('Should not receive the message'))
       return true
     })
 
     gatheringClient.request(nonJSONSerializableMessage)
-      .then(() => done(new Error('Did not throw an error')))
-      .catch(() => done())
-  })
+      .then(() => resolve(new Error('Did not throw an error')))
+      .catch(() => resolve())
+  }))
 
-  it(`GatheringClient.request() throws an error if it doesn't receive a response sooner than ${timeoutMs}ms`, (done) => {
+  it(`GatheringClient.request() throws an error if it doesn't receive a response sooner than ${timeoutMs}ms`, new Promise((resolve) => {
     const objectMessage = { foo: 'bar', bar: 'foo' }
 
     gatheringServer1.consume(async (msg) => {
-      await new Promise((resolve) => setTimeout(resolve, timeoutMs + 100))
+      await new Promise((res) => setTimeout(res, timeoutMs + 100))
       return msg
     })
 
     gatheringClient.request(objectMessage)
-      .then(() => done(new Error('Did not throw a timeout error')))
-      .catch(() => done())
-  })
+      .then(() => resolve(new Error('Did not throw a timeout error')))
+      .catch(() => resolve())
+  }))
 
-  it('gatheringClient.request() rejects when a consumer sets an error status', (done) => {
+  it('gatheringClient.request() rejects when a consumer sets an error status', new Promise((resolve) => {
     const messageBody = 'hello'
     gatheringServer1.consume((msg, message, response) => {
       // undefined is implied not found
@@ -168,17 +169,17 @@ describe('GatheringClient && GatheringServer', () => {
     })
 
     gatheringClient.request(messageBody, 10000, null, false, false).then(() => {
-      done(new Error('Should have rejected'))
+      resolve(new Error('Should have rejected'))
     }).catch((err) => {
       if (err.message === 'HELLO_ERROR') {
-        done()
+        resolve()
       } else {
-        done(new Error(err.message))
+        resolve(new Error(err.message))
       }
     })
-  })
+  }))
 
-  it('gatheringClient.request() rejects when a consumer sends malformed message', (done) => {
+  it('gatheringClient.request() rejects when a consumer sends malformed message', new Promise((resolve) => {
     const messageBody = 'hello'
     gatheringServer1.consume(() => {
       // undefined is implied not found
@@ -188,17 +189,17 @@ describe('GatheringClient && GatheringServer', () => {
     })
 
     gatheringClient.request(messageBody, 10000, null, false, false).then(() => {
-      done(new Error('Should have rejected'))
+      resolve(new Error('Should have rejected'))
     }).catch((err) => {
       if (err.message === 'failed to construct reply') {
-        done()
+        resolve()
       } else {
-        done(new Error(err.message))
+        resolve(new Error(err.message))
       }
     })
-  })
+  }))
 
-  it('gatheringClient.request() rejects when a consumer throws an error', (done) => {
+  it('gatheringClient.request() rejects when a consumer throws an error', new Promise((resolve) => {
     const messageBody = 'hello'
     gatheringServer1.consume(() => {
       // undefined is implied not found
@@ -206,13 +207,13 @@ describe('GatheringClient && GatheringServer', () => {
     })
 
     gatheringClient.request(messageBody, 10000, null, false, false).then(() => {
-      done(new Error('Should reject when one of the consumers reject'))
+      resolve(new Error('Should reject when one of the consumers reject'))
     }).catch((err) => {
       if (err.message === 'response failed') {
-        done()
+        resolve()
       } else {
-        done(new Error(err.message))
+        resolve(new Error(err.message))
       }
     })
-  })
+  }))
 })
