@@ -1,3 +1,10 @@
+# [6.4.0-beta.3](https://github.com/TechTeamer/mq/compare/6.4.0-beta.2...6.4.0-beta.3) (2024-06-05)
+
+
+### Features
+
+* module migration to beta FKITDEV-3756 ([#61](https://github.com/TechTeamer/mq/issues/61)) ([885cea8](https://github.com/TechTeamer/mq/commit/885cea857b26b71504a3ff17d9fa91cff1409745))
+
 # [6.4.0-beta.2](https://github.com/TechTeamer/mq/compare/6.4.0-beta.1...6.4.0-beta.2) (2024-05-28)
 
 
