@@ -66,5 +66,8 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "resolutions": {
+    "wrap-ansi": "^7.0.0"
   }
 }
