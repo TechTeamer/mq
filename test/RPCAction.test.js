@@ -23,7 +23,7 @@ describe('RPCClient && RPCServer actions', function () {
     logger.empty()
   })
 
-  it('RPCServer.registerAction() registers the action, RPCClient.callAction() sends a STRING and the registered callback for the action receives it', new Promise((resolve) => {
+  it('RPCServer.registerAction() registers the action, RPCClient.callAction() sends a STRING and the registered callback for the action receives it', () => new Promise((resolve) => {
     const stringMessage = 'foobar'
 
     rpcServer.registerAction('compareString', (msg) => {
@@ -39,7 +39,7 @@ describe('RPCClient && RPCServer actions', function () {
     })
   }))
 
-  it('RPCClient handles unserializeable content', new Promise((resolve) => {
+  it('RPCClient handles unserializeable content', () => new Promise((resolve) => {
     rpcServer.registerAction('wrongtest1', () => {
       resolve(new Error('RPCServer Action should not be called'))
     })
@@ -55,7 +55,7 @@ describe('RPCClient && RPCServer actions', function () {
     })
   }))
 
-  it('RPCServer handles unserializeable content', new Promise((resolve) => {
+  it('RPCServer handles unserializeable content', () => new Promise((resolve) => {
     rpcServer.registerAction('wrongtest2', () => {
       const obj = {}
       obj.a = { b: obj }

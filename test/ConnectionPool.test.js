@@ -42,7 +42,7 @@ describe('ConnectionPool', () => {
     assert.instanceOf(otherConnection, QueueManager, 'other connection is not an instance of QueueManager')
   })
 
-  it('Should connect', new Promise((resolve) => {
+  it('Should connect', () => new Promise((resolve) => {
     const pool = new ConnectionPool()
     pool.setLogger(logger)
     pool.setupQueueManagers({
@@ -61,7 +61,7 @@ describe('ConnectionPool', () => {
     })
   }))
 
-  it('Should not connect to wrong config', new Promise((resolve) => {
+  it('Should not connect to wrong config', () => new Promise((resolve) => {
     const pool = new ConnectionPool()
     pool.setLogger(logger)
     pool.setupQueueManagers({
@@ -85,7 +85,7 @@ describe('ConnectionPool', () => {
     })
   }))
 
-  it('Should reconnect', new Promise((resolve) => {
+  it('Should reconnect', () => new Promise((resolve) => {
     const pool = new ConnectionPool()
     pool.setLogger(logger)
     pool.setupQueueManagers({
@@ -125,7 +125,7 @@ describe('ConnectionPool', () => {
     }
   })
 
-  it('Should not reconnect to wrong config', new Promise((resolve) => {
+  it('Should not reconnect to wrong config', () => new Promise((resolve) => {
     const pool = new ConnectionPool()
     pool.setLogger(logger)
     pool.setupQueueManagers({

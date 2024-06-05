@@ -37,7 +37,7 @@ describe('QueueClient && QueueServer', () => {
     logger.empty()
   })
 
-  it('QueueClient.send() sends a STRING and QueueServer.consume() receives it', new Promise((resolve) => {
+  it('QueueClient.send() sends a STRING and QueueServer.consume() receives it', () => new Promise((resolve) => {
     const stringMessage = 'foobar'
     queueServer.consume((msg) => {
       if (msg !== stringMessage) {
@@ -52,7 +52,7 @@ describe('QueueClient && QueueServer', () => {
     })
   }))
 
-  it('QueueClient.send() sends an OBJECT and QueueServer.consume() receives it', new Promise((resolve) => {
+  it('QueueClient.send() sends an OBJECT and QueueServer.consume() receives it', () => new Promise((resolve) => {
     const objectMessage = { foo: 'bar', bar: 'foo' }
     queueServer.consume((msg) => {
       if (JSON.stringify(msg) !== JSON.stringify(objectMessage)) {
@@ -66,7 +66,7 @@ describe('QueueClient && QueueServer', () => {
     })
   }))
 
-  it('QueueClient.send() throws an error when the parameter is not json-serializeable', new Promise((resolve) => {
+  it('QueueClient.send() throws an error when the parameter is not json-serializeable', () => new Promise((resolve) => {
     const nonJSONSerializableMessage = {}
     nonJSONSerializableMessage.a = { b: nonJSONSerializableMessage }
 
@@ -79,7 +79,7 @@ describe('QueueClient && QueueServer', () => {
       .catch(() => resolve())
   }))
 
-  it('QueueClient.send() sends a message with a 100MB random generated buffer and QueueServer.consume() receives it', new Promise((resolve) => {
+  it('QueueClient.send() sends a message with a 100MB random generated buffer and QueueServer.consume() receives it', () => new Promise((resolve) => {
     const stringMessage = 'foobar'
     const attachments = new Map()
 
@@ -105,7 +105,7 @@ describe('QueueClient && QueueServer', () => {
     })
   }))
 
-  it(`QueueServer.consume() tries to receive message for ${maxRetry + 1} times`, new Promise((resolve) => {
+  it(`QueueServer.consume() tries to receive message for ${maxRetry + 1} times`, () => new Promise((resolve) => {
     let consumeCalled = 0
     const objectMessage = { foo: 'bar', bar: 'foo' }
 

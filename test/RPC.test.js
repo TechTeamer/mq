@@ -36,7 +36,7 @@ describe('RPCClient && RPCServer', () => {
     logger.empty()
   })
 
-  it('RPCClient.call() sends a STRING and RPCServer.consume() receives it', new Promise((resolve) => {
+  it('RPCClient.call() sends a STRING and RPCServer.consume() receives it', () => new Promise((resolve) => {
     const stringMessage = 'foobar'
     rpcServer.consume((msg) => {
       if (msg === stringMessage) {
@@ -50,7 +50,7 @@ describe('RPCClient && RPCServer', () => {
     })
   }))
 
-  it('RPCClient.call() sends an OBJECT and RPCServer.consume() receives it', new Promise((resolve) => {
+  it('RPCClient.call() sends an OBJECT and RPCServer.consume() receives it', () => new Promise((resolve) => {
     const objectMessage = { foo: 'bar', bar: 'foo' }
     rpcServer.consume((msg) => {
       if (JSON.stringify(msg) === JSON.stringify(objectMessage)) {
@@ -64,7 +64,7 @@ describe('RPCClient && RPCServer', () => {
     })
   }))
 
-  it('RPCClient.call() calls through an EXCHANGE and RPCServer answers back', new Promise((resolve) => {
+  it('RPCClient.call() calls through an EXCHANGE and RPCServer answers back', () => new Promise((resolve) => {
     const objectMessage = { foo: 'bar', bar: 'foo' }
     rpcExchangeServer.consume((msg) => {
       return msg
@@ -81,7 +81,7 @@ describe('RPCClient && RPCServer', () => {
     })
   }))
 
-  it('RPCClient.call() sends an OBJECT, RPCServer.consume() sends it back and RPCClient receives it intact', new Promise((resolve) => {
+  it('RPCClient.call() sends an OBJECT, RPCServer.consume() sends it back and RPCClient receives it intact', () => new Promise((resolve) => {
     const objectMessage = { foo: 'bar', bar: 'foo' }
     rpcServer.consume((msg) => {
       return msg
@@ -98,7 +98,7 @@ describe('RPCClient && RPCServer', () => {
   }))
 
   it('RPCClient.call() sends an OBJECT, RPCServer.consume() sends back a response' +
-    'with a 100MB random generated buffer and RPCClient receives it', new Promise((resolve) => {
+    'with a 100MB random generated buffer and RPCClient receives it', () => new Promise((resolve) => {
     const objectMessage = { foo: 'bar', bar: 'foo' }
 
     const rand = SeedRandom()
@@ -135,7 +135,7 @@ describe('RPCClient && RPCServer', () => {
     })
   }))
 
-  it('rpcClient.call() sends a message with a 100MB random generated buffer and rpcServer.consume() receives it', new Promise((resolve) => {
+  it('rpcClient.call() sends a message with a 100MB random generated buffer and rpcServer.consume() receives it', () => new Promise((resolve) => {
     const stringMessage = 'foobar'
     const attachments = new Map()
 
@@ -161,7 +161,7 @@ describe('RPCClient && RPCServer', () => {
     })
   }))
 
-  it('RPCClient.call() throws an error when the parameter cant be JSON-serialized', new Promise((resolve) => {
+  it('RPCClient.call() throws an error when the parameter cant be JSON-serialized', () => new Promise((resolve) => {
     const nonJSONSerializableMessage = {}
     nonJSONSerializableMessage.a = { b: nonJSONSerializableMessage }
 
@@ -174,7 +174,7 @@ describe('RPCClient && RPCServer', () => {
       .catch(() => resolve())
   }))
 
-  it(`RPCClient.call() throws an error if it doesn't receive a response sooner than ${timeoutMs}ms`, new Promise((resolve) => {
+  it(`RPCClient.call() throws an error if it doesn't receive a response sooner than ${timeoutMs}ms`, () => new Promise((resolve) => {
     const objectMessage = { foo: 'bar', bar: 'foo' }
 
     rpcServer.consume(async (msg) => {
@@ -187,7 +187,7 @@ describe('RPCClient && RPCServer', () => {
       .catch(() => resolve())
   }))
 
-  it('RPCClient frees up memory after timeout', new Promise((resolve) => {
+  it('RPCClient frees up memory after timeout', () => new Promise((resolve) => {
     const objectMessage = { foo: 'bar', bar: 'foo' }
 
     let waitForTimeout = true

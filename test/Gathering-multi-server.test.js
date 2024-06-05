@@ -28,7 +28,7 @@ describe('GatheringClient && multiple GatheringServer', () => {
     logger.empty()
   })
 
-  it('GatheringClient.request() sends something and one of the GatheringServers reply in time with setting ok response status', new Promise((resolve) => {
+  it('GatheringClient.request() sends something and one of the GatheringServers reply in time with setting ok response status', () => new Promise((resolve) => {
     const messageBody = 'hello'
     gatheringServer1.consume((msg, message, response) => {
       response.setStatus(response.NOT_FOUND)
@@ -45,7 +45,7 @@ describe('GatheringClient && multiple GatheringServer', () => {
     })
   }))
 
-  it('GatheringClient.request() sends something and one of the GatheringServers reply in time with implied ok response status', new Promise((resolve) => {
+  it('GatheringClient.request() sends something and one of the GatheringServers reply in time with implied ok response status', () => new Promise((resolve) => {
     const messageBody = 'hello'
     gatheringServer1.consume((msg, message, response) => {
       response.setStatus(response.NOT_FOUND)
@@ -61,7 +61,7 @@ describe('GatheringClient && multiple GatheringServer', () => {
     })
   }))
 
-  it('GatheringClient.request() sends something and every GatheringServer replies with not_found status', new Promise((resolve) => {
+  it('GatheringClient.request() sends something and every GatheringServer replies with not_found status', () => new Promise((resolve) => {
     const messageBody = 'hello'
     gatheringServer1.consume((msg, message, response) => {
       response.setStatus(response.NOT_FOUND)
@@ -77,7 +77,7 @@ describe('GatheringClient && multiple GatheringServer', () => {
     })
   }))
 
-  it('GatheringClient.request() sends something and every GatheringServer replies with ok status', new Promise((resolve) => {
+  it('GatheringClient.request() sends something and every GatheringServer replies with ok status', () => new Promise((resolve) => {
     const stringMessage = 'hello'
     gatheringServer1.consume(() => {
       return stringMessage
@@ -98,7 +98,7 @@ describe('GatheringClient && multiple GatheringServer', () => {
     })
   }))
 
-  it('GatheringServer.consume() undefined reply implies not_found status and request resolves with undefined', new Promise((resolve) => {
+  it('GatheringServer.consume() undefined reply implies not_found status and request resolves with undefined', () => new Promise((resolve) => {
     const messageBody = 'hello'
     gatheringServer1.consume(() => {
       // undefined is implied not found
@@ -118,7 +118,7 @@ describe('GatheringClient && multiple GatheringServer', () => {
     })
   }))
 
-  it('gatheringClient.request(acceptNotFound=false) rejects not found statuses', new Promise((resolve) => {
+  it('gatheringClient.request(acceptNotFound=false) rejects not found statuses', () => new Promise((resolve) => {
     const messageBody = 'hello'
     gatheringServer1.consume(() => {
       // undefined is implied not found
@@ -134,7 +134,7 @@ describe('GatheringClient && multiple GatheringServer', () => {
     })
   }))
 
-  it('gatheringClient.request() rejects when all consumers time out', new Promise((resolve) => {
+  it('gatheringClient.request() rejects when all consumers time out', () => new Promise((resolve) => {
     const messageBody = 'hello'
     gatheringServer1.consume(() => {
       // undefined is implied not found

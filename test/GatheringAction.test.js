@@ -23,7 +23,7 @@ describe('GatheringClient && GatheringServer actions', () => {
     logger.empty()
   })
 
-  it('GatheringServer.registerAction() registers the action, GatheringClient.callAction() sends a STRING and the registered callback for the action receives it', new Promise((resolve) => {
+  it('GatheringServer.registerAction() registers the action, GatheringClient.callAction() sends a STRING and the registered callback for the action receives it', () => new Promise((resolve) => {
     const stringMessage = 'foobar'
 
     gatheringServer1.registerAction('compareString', (msg) => {
@@ -39,7 +39,7 @@ describe('GatheringClient && GatheringServer actions', () => {
     })
   }))
 
-  it('GatheringServer handles unserializeable content', new Promise((resolve) => {
+  it('GatheringServer handles unserializeable content', () => new Promise((resolve) => {
     gatheringServer1.registerAction('wrongtest1', () => {
       resolve(new Error('GatheringServer Action should not be called'))
     })
@@ -55,7 +55,7 @@ describe('GatheringClient && GatheringServer actions', () => {
     })
   }))
 
-  it('GatheringServer responds with not found when no action handler is registered', new Promise((resolve) => {
+  it('GatheringServer responds with not found when no action handler is registered', () => new Promise((resolve) => {
     gatheringClient.requestAction('notfound', 'hello', 1000).then((response) => {
       if (typeof response === 'undefined') {
         resolve()

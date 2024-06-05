@@ -24,7 +24,7 @@ describe('GatheringClient && GatheringServer', () => {
     logger.empty()
   })
 
-  it('GatheringClient.request() sends a STRING and GatheringServer.consume() receives it', new Promise((resolve) => {
+  it('GatheringClient.request() sends a STRING and GatheringServer.consume() receives it', () => new Promise((resolve) => {
     const stringMessage = 'foobar'
     gatheringServer1.consume((msg) => {
       if (msg === stringMessage) {
@@ -39,7 +39,7 @@ describe('GatheringClient && GatheringServer', () => {
     })
   }))
 
-  it('GatheringClient.request() sends an OBJECT and GatheringServer.consume() receives it', new Promise((resolve) => {
+  it('GatheringClient.request() sends an OBJECT and GatheringServer.consume() receives it', () => new Promise((resolve) => {
     const objectMessage = { foo: 'bar', bar: 'foo' }
     gatheringServer1.consume((msg) => {
       if (JSON.stringify(msg) === JSON.stringify(objectMessage)) {
@@ -54,7 +54,7 @@ describe('GatheringClient && GatheringServer', () => {
     })
   }))
 
-  it('GatheringClient.request() sends an OBJECT, GatheringServer.consume() sends it back and GatheringClient receives it intact', new Promise((resolve) => {
+  it('GatheringClient.request() sends an OBJECT, GatheringServer.consume() sends it back and GatheringClient receives it intact', () => new Promise((resolve) => {
     const objectMessage = { foo: 'bar', bar: 'foo' }
     gatheringServer1.consume((msg) => {
       return msg
@@ -71,7 +71,7 @@ describe('GatheringClient && GatheringServer', () => {
   }))
 
   it('GatheringClient.request() sends an OBJECT, GatheringServer.consume() sends back a response' +
-    'with a 100MB random generated buffer and GatheringClient receives it', async (resolve) => {
+    'with a 100MB random generated buffer and GatheringClient receives it', () => async (resolve) => {
     const objectMessage = { foo: 'bar', bar: 'foo' }
 
     const rand = SeedRandom()
@@ -108,7 +108,7 @@ describe('GatheringClient && GatheringServer', () => {
     })
   })
 
-  it('gatheringClient.request() sends a message with a 100MB random generated buffer and gatheringServer1.consume() receives it', new Promise((resolve) => {
+  it('gatheringClient.request() sends a message with a 100MB random generated buffer and gatheringServer1.consume() receives it', () => new Promise((resolve) => {
     const stringMessage = 'foobar'
     const attachments = new Map()
 
@@ -134,7 +134,7 @@ describe('GatheringClient && GatheringServer', () => {
     })
   }))
 
-  it('GatheringClient.request() throws an error when the parameter cant be JSON-serialized', new Promise((resolve) => {
+  it('GatheringClient.request() throws an error when the parameter cant be JSON-serialized', () => new Promise((resolve) => {
     const nonJSONSerializableMessage = {}
     nonJSONSerializableMessage.a = { b: nonJSONSerializableMessage }
 
@@ -148,7 +148,7 @@ describe('GatheringClient && GatheringServer', () => {
       .catch(() => resolve())
   }))
 
-  it(`GatheringClient.request() throws an error if it doesn't receive a response sooner than ${timeoutMs}ms`, new Promise((resolve) => {
+  it(`GatheringClient.request() throws an error if it doesn't receive a response sooner than ${timeoutMs}ms`, () => new Promise((resolve) => {
     const objectMessage = { foo: 'bar', bar: 'foo' }
 
     gatheringServer1.consume(async (msg) => {
@@ -161,7 +161,7 @@ describe('GatheringClient && GatheringServer', () => {
       .catch(() => resolve())
   }))
 
-  it('gatheringClient.request() rejects when a consumer sets an error status', new Promise((resolve) => {
+  it('gatheringClient.request() rejects when a consumer sets an error status', () => new Promise((resolve) => {
     const messageBody = 'hello'
     gatheringServer1.consume((msg, message, response) => {
       // undefined is implied not found
@@ -179,7 +179,7 @@ describe('GatheringClient && GatheringServer', () => {
     })
   }))
 
-  it('gatheringClient.request() rejects when a consumer sends malformed message', new Promise((resolve) => {
+  it('gatheringClient.request() rejects when a consumer sends malformed message', () => new Promise((resolve) => {
     const messageBody = 'hello'
     gatheringServer1.consume(() => {
       // undefined is implied not found
@@ -199,7 +199,7 @@ describe('GatheringClient && GatheringServer', () => {
     })
   }))
 
-  it('gatheringClient.request() rejects when a consumer throws an error', new Promise((resolve) => {
+  it('gatheringClient.request() rejects when a consumer throws an error', () => new Promise((resolve) => {
     const messageBody = 'hello'
     gatheringServer1.consume(() => {
       // undefined is implied not found

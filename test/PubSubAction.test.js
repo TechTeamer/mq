@@ -33,7 +33,7 @@ describe('Publisher && Subscriber actions', () => {
     logger.empty()
   })
 
-  it('subscriber.registerAction() registers the action, publisher.callAction() sends a STRING and the registered callback for the action receives it', new Promise((resolve) => {
+  it('subscriber.registerAction() registers the action, publisher.callAction() sends a STRING and the registered callback for the action receives it', () => new Promise((resolve) => {
     const stringMessage = 'foobar'
 
     subscriber.registerAction('compareString', (msg) => {

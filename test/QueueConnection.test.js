@@ -12,7 +12,7 @@ function copyConfig (obj) {
 }
 
 describe('QueueConnection', () => {
-  it('#connect() creates a connection to RabbitMQ', new Promise((resolve) => {
+  it('#connect() creates a connection to RabbitMQ', () => new Promise((resolve) => {
     const connection = new QueueConnection(config)
     connection.connect()
       .then(() => {
@@ -24,7 +24,7 @@ describe('QueueConnection', () => {
       })
   }))
 
-  it('#connect() fails to connect for invalid connection url', new Promise((resolve) => {
+  it('#connect() fails to connect for invalid connection url', () => new Promise((resolve) => {
     const multiUrlConfig = copyConfig({
       url: 'invalid_url'
     })
@@ -238,7 +238,7 @@ describe('QueueConnection', () => {
     assert.strictEqual(callbackCalled, false)
   })
 
-  it('#close() already closed connection should not throw error', async () => {
+  it('#close() already closed connection should not throw error', async function () {
     const connection = new QueueConnection(config)
     try {
       await connection.connect()
@@ -260,6 +260,6 @@ describe('QueueConnection', () => {
 
     assert.strictEqual(connection._connection, null)
     assert.strictEqual(connection._connectionPromise, null)
-    assert.doesNotThrow(connection.close, Error)
+    assert.doesNotThrow(() => connection.close(), Error)
   })
 })

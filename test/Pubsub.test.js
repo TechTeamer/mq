@@ -36,7 +36,7 @@ describe('Publisher && Subscriber', () => {
     logger.empty()
   })
 
-  it('Publisher.send() sends a STRING and Subscriber.consume() receives it', new Promise((resolve) => {
+  it('Publisher.send() sends a STRING and Subscriber.consume() receives it', () => new Promise((resolve) => {
     const stringMessage = 'foobar'
 
     subscriber.consume((msg) => {
@@ -52,7 +52,7 @@ describe('Publisher && Subscriber', () => {
     })
   }))
 
-  it('Publisher.send() sends an OBJECT and Subscriber.consume() receives it', new Promise((resolve) => {
+  it('Publisher.send() sends an OBJECT and Subscriber.consume() receives it', () => new Promise((resolve) => {
     const objectMessage = { foo: 'bar', bar: 'foo' }
 
     subscriber.consume((msg) => {
@@ -68,7 +68,7 @@ describe('Publisher && Subscriber', () => {
     })
   }))
 
-  it('Publisher.send() sends a message with a 100MB random generated buffer and Subscriber.consume() receives it', new Promise((resolve) => {
+  it('Publisher.send() sends a message with a 100MB random generated buffer and Subscriber.consume() receives it', () => new Promise((resolve) => {
     const stringMessage = 'foobar'
     const attachments = new Map()
 
@@ -94,7 +94,7 @@ describe('Publisher && Subscriber', () => {
     })
   }))
 
-  it('Publisher.send() throws an error when the parameter is not json-serializeable', new Promise((resolve) => {
+  it('Publisher.send() throws an error when the parameter is not json-serializeable', () => new Promise((resolve) => {
     const nonJSONSerializableMessage = {}
     nonJSONSerializableMessage.a = { b: nonJSONSerializableMessage }
 
@@ -108,7 +108,7 @@ describe('Publisher && Subscriber', () => {
   }))
 
   // The "+ 1" in the line below is the first try (which is not a "re"-try)
-  it(`QueueServer.consume() tries to receive message for ${maxRetry + 1} times`, new Promise((resolve) => {
+  it(`QueueServer.consume() tries to receive message for ${maxRetry + 1} times`, () => new Promise((resolve) => {
     let consumeCalled = 0
     const objectMessage = { foo: 'bar', bar: 'foo' }
 
@@ -131,7 +131,7 @@ describe('Publisher && Subscriber', () => {
     }, 1000)
   }))
 
-  it('Publisher.send() sends a message and each subscriber receives it', new Promise((resolve) => {
+  it('Publisher.send() sends a message and each subscriber receives it', () => new Promise((resolve) => {
     const otherManager = new QueueManager(config)
     otherManager.setLogger(logger)
     const otherSubscriber = otherManager.getSubscriber(publisherName, {
