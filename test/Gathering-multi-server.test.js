@@ -1,4 +1,4 @@
-import { describe, it, beforeAll, afterAll } from 'vitest'
+import { describe, it, beforeEach, afterAll } from 'vitest'
 import QueueManager from '../src/QueueManager.js'
 import GatheringServer from '../src/GatheringServer.js'
 import ConsoleInspector from './consoleInspector.js'
@@ -16,7 +16,7 @@ describe('GatheringClient && multiple GatheringServer', () => {
   const gatheringServer1 = new GatheringServer(queueManager.connection, queueManager._logger, gatheringName, { prefetchCount: 1, timeoutMs, assertExchangeOptions })
   const gatheringServer2 = new GatheringServer(queueManager.connection, queueManager._logger, gatheringName, { prefetchCount: 1, timeoutMs, assertExchangeOptions })
 
-  beforeAll(() => {
+  beforeEach(() => {
     return queueManager.connect().then(() => {
       return gatheringServer1.initialize()
     }).then(() => {

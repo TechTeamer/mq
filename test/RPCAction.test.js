@@ -55,7 +55,7 @@ describe('RPCClient && RPCServer actions', function () {
     })
   }))
 
-  it('RPCServer handles unserializeable content', async (resolve) => {
+  it('RPCServer handles unserializeable content', new Promise((resolve) => {
     rpcServer.registerAction('wrongtest2', () => {
       const obj = {}
       obj.a = { b: obj }
@@ -69,7 +69,7 @@ describe('RPCClient && RPCServer actions', function () {
       expect(err).to.be.an.instanceof(Error)
       resolve()
     })
-  })
+  }))
 
   it('RPCServer registerAction throws when handler is not a function', () => {
     assert.throws(() => {
