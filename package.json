@@ -1,6 +1,6 @@
 {
   "name": "@techteamer/mq",
-  "version": "6.3.3-alpha",
+  "version": "6.4.0-beta.2",
   "description": "A RabbitMQ wrapper for node",
   "main": "dist/cjs/index.js",
   "module": "dist/mjs/index.js",
@@ -27,15 +27,24 @@
     "build": "rm -fr dist/* && tsc -p tsconfig.json && tsc -p tsconfig-cjs.json && ./fixup.sh",
     "lint": "eslint .",
     "unit": "mocha --exit",
-    "test": "eslint . && c8 --temp-directory=./test/coverage/tmp mocha --exit && c8 report --reporter=text-lcov --report-dir=./test/coverage/ --reporter=lcovonly  | coveralls"
+    "test": "eslint . && c8 --temp-directory=./test/coverage/tmp mocha --exit && c8 report --reporter=text-lcov --report-dir=./test/coverage/ --reporter=lcovonly  | coveralls",
+    "prepare": "husky"
   },
   "type": "module",
   "dependencies": {
+    "@semantic-release/commit-analyzer": "^12.0.0",
+    "@semantic-release/github": "^10.0.3",
+    "@semantic-release/npm": "^12.0.1",
+    "@semantic-release/release-notes-generator": "^13.0.0",
     "amqplib": "^0.10.3",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
     "c8": "^9.1.0",
+    "@commitlint/cli": "^19.3.0",
+    "@commitlint/config-conventional": "^19.2.2",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
     "chai": "^4.3.7",
     "coveralls": "^3.1.1",
     "eslint": "^8.38.0",
@@ -44,13 +53,18 @@
     "eslint-plugin-n": "^15.7.0",
     "eslint-plugin-promise": "^6.1.1",
     "eslint-plugin-standard": "^5.0.0",
+    "husky": "^9.0.11",
     "mocha": "^10.2.0",
     "protobufjs": "^7.2.3",
     "seed-random": "^2.2.0",
     "typescript": "^5.4.5",
-    "typescript-eslint": "^7.8.0"
+    "typescript-eslint": "^7.8.0",
+    "semantic-release": "^23.1.1"
   },
   "peerDependencies": {
     "protobufjs": "^7.2.3"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

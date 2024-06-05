@@ -1,3 +1,10 @@
+# [6.4.0-beta.2](https://github.com/TechTeamer/mq/compare/6.4.0-beta.1...6.4.0-beta.2) (2024-05-28)
+
+
+### Bug Fixes
+
+* set changelog path ([486dd3c](https://github.com/TechTeamer/mq/commit/486dd3c643e37a65cdfeb897b9c9473af0334697))
+
 6.3.2
 - fix the reconnecting
 - updated dependencies
