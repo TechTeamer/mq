@@ -1,7 +1,8 @@
-const QueueConnection = require('../src/QueueConnection')
-const QueueConfig = require('../src/QueueConfig')
-const config = require('./config/LoadConfig')
-const chai = require('chai')
+import QueueConnection from '../src/QueueConnection.js'
+import QueueConfig from '../src/QueueConfig.js'
+import config from './config/LoadConfig.js'
+import chai from 'chai'
+
 const assert = chai.assert
 
 function copyConfig (obj) {

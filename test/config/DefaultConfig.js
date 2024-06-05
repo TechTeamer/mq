@@ -1,6 +1,6 @@
-const QueueConfig = require('../../src/QueueConfig')
+import QueueConfig from '../../src/QueueConfig.js'
 
-module.exports = new QueueConfig({
+export default new QueueConfig({
   url: 'amqp://guest:guest@localhost:5672',
   options: {
     rejectUnauthorized: false

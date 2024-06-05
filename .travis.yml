@@ -11,8 +11,8 @@ addons:
 language: node_js
 
 node_js:
-  - 16
   - 18
+  - 20
 
 git:
   depth: false

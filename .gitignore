@@ -1,6 +1,7 @@
 node_modules/
 local_tests/
 test/config/TestConfig.js
+dist/
 
 .npm
 .eslintcache

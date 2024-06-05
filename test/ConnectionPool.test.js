@@ -1,11 +1,11 @@
-const chai = require('chai')
-const assert = chai.assert
-const QueueManager = require('../src/QueueManager')
-const ConnectionPool = require('../src/ConnectionPool')
-const ConsoleInspector = require('./consoleInspector')
-const QueueConfig = require('../src/QueueConfig')
-const config = require('./config/LoadConfig')
+import chai from 'chai'
+import QueueManager from '../src/QueueManager.js'
+import ConnectionPool from '../src/ConnectionPool.js'
+import ConsoleInspector from './consoleInspector.js'
+import QueueConfig from '../src/QueueConfig.js'
+import config from './config/LoadConfig.js'
 
+const assert = chai.assert
 describe('ConnectionPool', () => {
   const logger = new ConsoleInspector(console)
 
