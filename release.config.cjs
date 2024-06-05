@@ -2,9 +2,7 @@
  * @type {import('semantic-release').GlobalConfig}
  */
 module.exports = {
-  branches: ['master', 'next', { name: 'beta', prerelease: true }, { name: 'alpha', prerelease: true }],
-  // Default:
-  // tagFormat: 'v${version}'
+  branches: ['master', { name: 'beta', prerelease: true }],
   // eslint-disable-next-line no-template-curly-in-string
   tagFormat: '${version}',
   plugins: [
