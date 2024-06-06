@@ -27,8 +27,7 @@
     "build": "rm -fr dist/* && tsc -p tsconfig.json && tsc -p tsconfig-cjs.json && ./fixup.sh",
     "lint": "eslint .",
     "unit": "mocha --exit",
-    "test": "eslint . && c8 --temp-directory=./test/coverage/tmp vitest run && c8 report --reporter=text-lcov --report-dir=./test/coverage/ --reporter=lcovonly  | coveralls",
-    "prepare": "husky"
+    "test": "eslint . && c8 --temp-directory=./test/coverage/tmp vitest run && c8 report --reporter=text-lcov --report-dir=./test/coverage/ --reporter=lcovonly  | coveralls"
   },
   "type": "module",
   "dependencies": {
@@ -40,8 +39,6 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
-    "@commitlint/cli": "^19.3.0",
-    "@commitlint/config-conventional": "^19.2.2",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
     "c8": "^9.1.0",
@@ -52,7 +49,6 @@
     "eslint-plugin-n": "^15.7.0",
     "eslint-plugin-promise": "^6.1.1",
     "eslint-plugin-standard": "^5.0.0",
-    "husky": "^9.0.11",
     "protobufjs": "^7.2.3",
     "seed-random": "^2.2.0",
     "semantic-release": "^23.1.1",
