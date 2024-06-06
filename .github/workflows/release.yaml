@@ -22,8 +22,8 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
+            node-version: 20
             cache: yarn
-            node-version: lts/*
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
@@ -32,4 +32,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npx semantic-release@23
+        run: npx semantic-release@24
