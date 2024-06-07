@@ -1,7 +1,7 @@
 /**
  * @type {import('semantic-release').GlobalConfig}
  */
-module.exports = {
+export default {
   branches: ['master', { name: 'beta', prerelease: true }],
   // eslint-disable-next-line no-template-curly-in-string
   tagFormat: '${version}',
