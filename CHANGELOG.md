@@ -1,3 +1,10 @@
+# [6.4.0-beta.4](https://github.com/TechTeamer/mq/compare/6.4.0-beta.3...6.4.0-beta.4) (2024-06-07)
+
+
+### Bug Fixes
+
+* remove commitlint upgrade semantic release ([#63](https://github.com/TechTeamer/mq/issues/63)) ([4fbd888](https://github.com/TechTeamer/mq/commit/4fbd8888d50e5d3dc3bee8012411cd87760abf70))
+
 # [6.4.0-beta.3](https://github.com/TechTeamer/mq/compare/6.4.0-beta.2...6.4.0-beta.3) (2024-06-05)
 
 
