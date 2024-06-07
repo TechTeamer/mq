@@ -21,7 +21,7 @@
     "url": "https://github.com/TechTeamer/mq"
   },
   "engines": {
-    "node": ">=16"
+    "node": ">=20.8.1"
   },
   "scripts": {
     "build": "rm -fr dist/* && tsc -p tsconfig.json && tsc -p tsconfig-cjs.json && ./fixup.sh",
