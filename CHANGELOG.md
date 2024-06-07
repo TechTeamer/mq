@@ -1,3 +1,15 @@
+# [7.0.0-beta.1](https://github.com/TechTeamer/mq/compare/6.4.0-beta.4...7.0.0-beta.1) (2024-06-07)
+
+
+### Build System
+
+* **deps:** bump minimum node to v20 ([1585212](https://github.com/TechTeamer/mq/commit/1585212b77805852f3d3e5381f3098d766e023cb))
+
+
+### BREAKING CHANGES
+
+* **deps:** drop support for node <20.8.1
+
 # [6.4.0-beta.4](https://github.com/TechTeamer/mq/compare/6.4.0-beta.3...6.4.0-beta.4) (2024-06-07)
 
 
