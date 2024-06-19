@@ -1,3 +1,29 @@
+# [7.0.0](https://github.com/TechTeamer/mq/compare/6.3.2...7.0.0) (2024-06-19)
+
+
+### Bug Fixes
+
+* **ci:** add permissions ([9b7351a](https://github.com/TechTeamer/mq/commit/9b7351a0db9507f310b9f079b070625e61bbe324))
+* commit rules ([d0b8134](https://github.com/TechTeamer/mq/commit/d0b8134db9122f644f7e86de5208a0255dd3528a))
+* remove commitlint upgrade semantic release ([#63](https://github.com/TechTeamer/mq/issues/63)) ([4fbd888](https://github.com/TechTeamer/mq/commit/4fbd8888d50e5d3dc3bee8012411cd87760abf70))
+* set changelog path ([486dd3c](https://github.com/TechTeamer/mq/commit/486dd3c643e37a65cdfeb897b9c9473af0334697))
+
+
+### Build System
+
+* **deps:** bump minimum node to v20 ([1585212](https://github.com/TechTeamer/mq/commit/1585212b77805852f3d3e5381f3098d766e023cb))
+
+
+### Features
+
+* module migration to beta FKITDEV-3756 ([#61](https://github.com/TechTeamer/mq/issues/61)) ([885cea8](https://github.com/TechTeamer/mq/commit/885cea857b26b71504a3ff17d9fa91cff1409745))
+* **semver:** setup semantic release ([cc4daf1](https://github.com/TechTeamer/mq/commit/cc4daf1b310d45cf43b620a8bff518b984a55328))
+
+
+### BREAKING CHANGES
+
+* **deps:** drop support for node <20.8.1
+
 # [7.0.0-beta.1](https://github.com/TechTeamer/mq/compare/6.4.0-beta.4...7.0.0-beta.1) (2024-06-07)
 
 
