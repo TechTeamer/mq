@@ -1,8 +1,8 @@
-const assert = require('assert')
-const QueueManager = require('../src/QueueManager')
-const ConsoleInspector = require('./consoleInspector')
-const SeedRandom = require('seed-random')
-const config = require('./config/LoadConfig')
+import { describe, assert, it, beforeAll, afterAll } from 'vitest'
+import QueueManager from '../src/QueueManager.js'
+import ConsoleInspector from './consoleInspector.js'
+import SeedRandom from 'seed-random'
+import config from './config/LoadConfig.js'
 
 describe('Publisher && Subscriber', () => {
   const publisherName = 'techteamer-mq-js-test-publisher'
@@ -26,49 +26,49 @@ describe('Publisher && Subscriber', () => {
     assertExchangeOptions
   })
 
-  before(() => {
+  beforeAll(() => {
     return publisherManager.connect().then(() => {
       return subscriberManager.connect()
     })
   })
 
-  after(() => {
+  afterAll(() => {
     logger.empty()
   })
 
-  it('Publisher.send() sends a STRING and Subscriber.consume() receives it', (done) => {
+  it('Publisher.send() sends a STRING and Subscriber.consume() receives it', () => new Promise((resolve) => {
     const stringMessage = 'foobar'
 
     subscriber.consume((msg) => {
       if (msg !== stringMessage) {
-        done(new Error('String received is not the same as the String sent'))
+        resolve(new Error('String received is not the same as the String sent'))
         return
       }
-      done()
+      resolve()
     })
 
     publisher.send(stringMessage).catch((err) => {
-      done(err)
+      resolve(err)
     })
-  })
+  }))
 
-  it('Publisher.send() sends an OBJECT and Subscriber.consume() receives it', (done) => {
+  it('Publisher.send() sends an OBJECT and Subscriber.consume() receives it', () => new Promise((resolve) => {
     const objectMessage = { foo: 'bar', bar: 'foo' }
 
     subscriber.consume((msg) => {
       if (JSON.stringify(msg) !== JSON.stringify(objectMessage)) {
-        done(new Error('The send OBJECT is not equal to the received one'))
+        resolve(new Error('The send OBJECT is not equal to the received one'))
         return
       }
-      done()
+      resolve()
     })
 
     publisher.send(objectMessage).catch((err) => {
-      done(err)
+      resolve(err)
     })
-  })
+  }))
 
-  it('Publisher.send() sends a message with a 100MB random generated buffer and Subscriber.consume() receives it', function (done) {
+  it('Publisher.send() sends a message with a 100MB random generated buffer and Subscriber.consume() receives it', () => new Promise((resolve) => {
     const stringMessage = 'foobar'
     const attachments = new Map()
 
@@ -83,55 +83,55 @@ describe('Publisher && Subscriber', () => {
 
     subscriber.consume((msg, msgProp, queueMessage) => {
       if (queueMessage.getAttachments().get('test').toString() !== buf.toString()) {
-        done(new Error('String received is not the same as the String sent'))
+        resolve(new Error('String received is not the same as the String sent'))
         return
       }
-      done()
+      resolve()
     })
 
     publisher.send(stringMessage, null, null, attachments).catch((err) => {
-      done(err)
+      resolve(err)
     })
-  })
+  }))
 
-  it('Publisher.send() throws an error when the parameter is not json-serializeable', (done) => {
+  it('Publisher.send() throws an error when the parameter is not json-serializeable', () => new Promise((resolve) => {
     const nonJSONSerializableMessage = {}
     nonJSONSerializableMessage.a = { b: nonJSONSerializableMessage }
 
     subscriber.consume((msg) => {
-      done(new Error('Should not receive the message'))
+      resolve(new Error('Should not receive the message'))
     })
 
     publisher.send(nonJSONSerializableMessage)
-      .then(() => done('Did not throw an error'))
-      .catch(() => done())
-  })
+      .then(() => resolve('Did not throw an error'))
+      .catch(() => resolve())
+  }))
 
   // The "+ 1" in the line below is the first try (which is not a "re"-try)
-  it(`QueueServer.consume() tries to receive message for ${maxRetry + 1} times`, (done) => {
+  it(`QueueServer.consume() tries to receive message for ${maxRetry + 1} times`, () => new Promise((resolve) => {
     let consumeCalled = 0
     const objectMessage = { foo: 'bar', bar: 'foo' }
 
     subscriber.consume((msg) => {
       consumeCalled++
       if (consumeCalled > maxRetry + 1) {
-        done(new Error(`Retried more times than limit: ${maxRetry}`))
+        resolve(new Error(`Retried more times than limit: ${maxRetry}`))
         return
       }
       throw new Error('message not processed well')
     })
 
     publisher.send(objectMessage).catch((err) => {
-      done(err)
+      resolve(err)
     })
 
     setTimeout(() => {
       assert.strictEqual(consumeCalled, maxRetry + 1, '')
-      done()
+      resolve()
     }, 1000)
-  })
+  }))
 
-  it('Publisher.send() sends a message and each subscriber receives it', (done) => {
+  it('Publisher.send() sends a message and each subscriber receives it', () => new Promise((resolve) => {
     const otherManager = new QueueManager(config)
     otherManager.setLogger(logger)
     const otherSubscriber = otherManager.getSubscriber(publisherName, {
@@ -148,31 +148,31 @@ describe('Publisher && Subscriber', () => {
 
       subscriber.consume((msg) => {
         if (msg !== stringMessage) {
-          done(new Error('String received is not the same as the String sent'))
+          resolve(new Error('String received is not the same as the String sent'))
           return
         }
         if (ack2) {
-          done()
+          resolve()
         }
         ack1 = true
       })
 
       otherSubscriber.consume((msg) => {
         if (msg !== stringMessage) {
-          done(new Error('String received is not the same as the String sent'))
+          resolve(new Error('String received is not the same as the String sent'))
           return
         }
         if (ack1) {
-          done()
+          resolve()
         }
         ack2 = true
       })
 
       publisher.send(stringMessage).catch((err) => {
-        done(err)
+        resolve(err)
       })
     }).catch((err) => {
-      done(err)
+      resolve(err)
     })
-  })
+  }))
 })

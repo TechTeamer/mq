@@ -1,4 +1,4 @@
-const QueueMessage = require('./QueueMessage')
+import QueueMessage from './QueueMessage.js'
 
 class ProtoQueueMessage extends QueueMessage {
   serialize () {
@@ -37,4 +37,4 @@ class ProtoQueueMessage extends QueueMessage {
   }
 }
 
-module.exports = ProtoQueueMessage
+export default ProtoQueueMessage

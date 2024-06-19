@@ -1,4 +1,4 @@
-const { URL } = require('node:url')
+import { URL } from 'node:url'
 
 class RabbitMqOptions {
   constructor (options = {}) {
@@ -116,4 +116,4 @@ class QueueConfig {
   }
 }
 
-module.exports = QueueConfig
+export default QueueConfig

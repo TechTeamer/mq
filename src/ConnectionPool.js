@@ -1,5 +1,5 @@
-const QueueManager = require('./QueueManager')
-const QueueConfig = require('./QueueConfig')
+import QueueManager from './QueueManager.js'
+import QueueConfig from './QueueConfig.js'
 
 /**
  * @class ConnectionPool
@@ -117,4 +117,4 @@ class ConnectionPool {
   }
 }
 
-module.exports = ConnectionPool
+export default ConnectionPool

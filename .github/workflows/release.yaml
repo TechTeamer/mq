@@ -1,0 +1,35 @@
+name: Release
+    
+on:
+  push:
+    branches:
+      - 'master'
+      - 'beta'
+
+permissions:
+  contents: write
+  issues: write  # Allow creating issues if needed
+  packages: write  # If you are publishing packages
+  actions: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+            node-version: 20
+            cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npx semantic-release@24

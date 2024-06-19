@@ -1,3 +1,36 @@
+# [7.0.0-beta.1](https://github.com/TechTeamer/mq/compare/6.4.0-beta.4...7.0.0-beta.1) (2024-06-07)
+
+
+### Build System
+
+* **deps:** bump minimum node to v20 ([1585212](https://github.com/TechTeamer/mq/commit/1585212b77805852f3d3e5381f3098d766e023cb))
+
+
+### BREAKING CHANGES
+
+* **deps:** drop support for node <20.8.1
+
+# [6.4.0-beta.4](https://github.com/TechTeamer/mq/compare/6.4.0-beta.3...6.4.0-beta.4) (2024-06-07)
+
+
+### Bug Fixes
+
+* remove commitlint upgrade semantic release ([#63](https://github.com/TechTeamer/mq/issues/63)) ([4fbd888](https://github.com/TechTeamer/mq/commit/4fbd8888d50e5d3dc3bee8012411cd87760abf70))
+
+# [6.4.0-beta.3](https://github.com/TechTeamer/mq/compare/6.4.0-beta.2...6.4.0-beta.3) (2024-06-05)
+
+
+### Features
+
+* module migration to beta FKITDEV-3756 ([#61](https://github.com/TechTeamer/mq/issues/61)) ([885cea8](https://github.com/TechTeamer/mq/commit/885cea857b26b71504a3ff17d9fa91cff1409745))
+
+# [6.4.0-beta.2](https://github.com/TechTeamer/mq/compare/6.4.0-beta.1...6.4.0-beta.2) (2024-05-28)
+
+
+### Bug Fixes
+
+* set changelog path ([486dd3c](https://github.com/TechTeamer/mq/commit/486dd3c643e37a65cdfeb897b9c9473af0334697))
+
 6.3.2
 - fix the reconnecting
 - updated dependencies

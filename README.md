@@ -13,6 +13,12 @@ A RabbitMQ wrapper for node
 yarn add @techteamer/mq
 ```
 
+## Build
+
+```
+yarn run build
+```
+
 ## Tests
 
 To run tests you need to rename `test/config/TestConfig.js.config` to `TestConfig.js` and provide valid configurations.
@@ -22,3 +28,9 @@ Then run:
 ```
 yarn test
 ```
+
+## Publish
+
+**Before publish always run the build process!** This will create the `dist` folder, which will be needed in the published package.
+
+
