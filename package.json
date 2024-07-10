@@ -1,6 +1,6 @@
 {
   "name": "@techteamer/mq",
-  "version": "7.0.0-beta.1",
+  "version": "7.0.0",
   "description": "A RabbitMQ wrapper for node",
   "main": "dist/cjs/index.js",
   "module": "dist/mjs/index.js",
@@ -39,16 +39,21 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "@commitlint/cli": "^19.3.0",
+    "@commitlint/config-conventional": "^19.2.2",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
     "c8": "^9.1.0",
+    "commitizen": "^4.3.0",
     "coveralls": "^3.1.1",
+    "cz-conventional-changelog": "^3.3.0",
     "eslint": "^8.38.0",
     "eslint-config-standard": "^17.0.0",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-n": "^15.7.0",
     "eslint-plugin-promise": "^6.1.1",
     "eslint-plugin-standard": "^5.0.0",
+    "husky": "^9.0.11",
     "protobufjs": "^7.2.3",
     "seed-random": "^2.2.0",
     "semantic-release": "^24.0.0",
@@ -64,5 +69,10 @@
   },
   "resolutions": {
     "wrap-ansi": "^7.0.0"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
   }
 }
