@@ -1,5 +1,5 @@
 name: Release
-    
+
 on:
   push:
     branches:
@@ -27,6 +27,9 @@ jobs:
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
+
+      - name: Build artifacts
+        run: yarn build
 
       - name: Release
         env:
