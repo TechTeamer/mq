@@ -1,3 +1,10 @@
+## [7.0.1](https://github.com/TechTeamer/mq/compare/7.0.0...7.0.1) (2024-08-07)
+
+
+### Bug Fixes
+
+* add build step to workflow ([#66](https://github.com/TechTeamer/mq/issues/66)) ([d61a704](https://github.com/TechTeamer/mq/commit/d61a7045af481be74046439350f1bb380d414287))
+
 # [7.0.0](https://github.com/TechTeamer/mq/compare/6.3.2...7.0.0) (2024-06-19)
 
 
