@@ -1,3 +1,10 @@
+## [7.0.3](https://github.com/TechTeamer/mq/compare/7.0.2...7.0.3) (2024-08-12)
+
+
+### Bug Fixes
+
+* adding back github release to semantic release config ([#68](https://github.com/TechTeamer/mq/issues/68)) ([dd67d48](https://github.com/TechTeamer/mq/commit/dd67d4847394cbd657815805f6b0461429273459))
+
 ## [7.0.3-beta.1](https://github.com/TechTeamer/mq/compare/7.0.2...7.0.3-beta.1) (2024-08-12)
 
 
