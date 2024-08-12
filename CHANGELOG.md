@@ -1,3 +1,10 @@
+## [7.0.2](https://github.com/TechTeamer/mq/compare/7.0.1...7.0.2) (2024-08-12)
+
+
+### Bug Fixes
+
+* remove github artifact publishing ([#67](https://github.com/TechTeamer/mq/issues/67)) ([ac55799](https://github.com/TechTeamer/mq/commit/ac55799a0e4bac115d93b18ce9428997489fe6ef))
+
 ## [7.0.1](https://github.com/TechTeamer/mq/compare/7.0.0...7.0.1) (2024-08-07)
 
 
