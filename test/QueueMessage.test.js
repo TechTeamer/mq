@@ -1,8 +1,5 @@
-const chai = require('chai')
-const assert = chai.assert
-const expect = chai.expect
-
-const QueueMessage = require('../src/QueueMessage')
+import { describe, it, assert, expect } from 'vitest'
+import QueueMessage from '../src/QueueMessage.js'
 
 describe('QueueMessage', () => {
   const okStatus = 'ok'

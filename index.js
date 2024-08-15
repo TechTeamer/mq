@@ -1,31 +1,33 @@
-const QueueClient = require('./src/QueueClient')
-const QueueConfig = require('./src/QueueConfig')
-const QueueConnection = require('./src/QueueConnection')
-const ConnectionPool = require('./src/ConnectionPool')
-const QueueMessage = require('./src/QueueMessage')
-const ProtoQueueMessage = require('./src/ProtoQueueMessage')
-const QueueServer = require('./src/QueueServer')
-const QueueManager = require('./src/QueueManager')
-const RPCClient = require('./src/RPCClient')
-const RPCError = require('./src/RPCError')
-const RPCServer = require('./src/RPCServer')
-const Publisher = require('./src/Publisher')
-const Subscriber = require('./src/Subscriber')
-const GatheringClient = require('./src/GatheringClient')
-const GatheringServer = require('./src/GatheringServer')
+import QueueClient from './src/QueueClient.js'
+import QueueConfig from './src/QueueConfig.js'
+import QueueConnection from './src/QueueConnection.js'
+import ConnectionPool from './src/ConnectionPool.js'
+import QueueMessage from './src/QueueMessage.js'
+import ProtoQueueMessage from './src/ProtoQueueMessage.js'
+import QueueServer from './src/QueueServer.js'
+import QueueManager from './src/QueueManager.js'
+import RPCClient from './src/RPCClient.js'
+import RPCError from './src/RPCError.js'
+import RPCServer from './src/RPCServer.js'
+import Publisher from './src/Publisher.js'
+import Subscriber from './src/Subscriber.js'
+import GatheringClient from './src/GatheringClient.js'
+import GatheringServer from './src/GatheringServer.js'
 
-module.exports.QueueClient = QueueClient
-module.exports.QueueConfig = QueueConfig
-module.exports.QueueConnection = QueueConnection
-module.exports.ConnectionPool = ConnectionPool
-module.exports.QueueMessage = QueueMessage
-module.exports.ProtoQueueMessage = ProtoQueueMessage
-module.exports.QueueServer = QueueServer
-module.exports.QueueManager = QueueManager
-module.exports.RPCClient = RPCClient
-module.exports.RPCError = RPCError
-module.exports.RPCServer = RPCServer
-module.exports.Publisher = Publisher
-module.exports.Subscriber = Subscriber
-module.exports.GatheringClient = GatheringClient
-module.exports.GatheringServer = GatheringServer
+export {
+  QueueClient,
+  QueueConfig,
+  QueueConnection,
+  ConnectionPool,
+  QueueMessage,
+  ProtoQueueMessage,
+  QueueServer,
+  QueueManager,
+  RPCClient,
+  RPCError,
+  RPCServer,
+  Publisher,
+  Subscriber,
+  GatheringClient,
+  GatheringServer
+}

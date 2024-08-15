@@ -1,5 +1,5 @@
-const { v4: uuid } = require('uuid')
-const QueueMessage = require('./QueueMessage')
+import { v4 as uuid } from 'uuid'
+import QueueMessage from './QueueMessage.js'
 
 /**
  * @typedef {import('./QueueConnection')} QueueConnection
@@ -229,4 +229,4 @@ class RPCClient {
   }
 }
 
-module.exports = RPCClient
+export default RPCClient

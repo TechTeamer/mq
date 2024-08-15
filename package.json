@@ -1,8 +1,15 @@
 {
   "name": "@techteamer/mq",
-  "version": "6.3.1",
+  "version": "7.0.3",
   "description": "A RabbitMQ wrapper for node",
-  "main": "index.js",
+  "main": "dist/cjs/index.js",
+  "module": "dist/mjs/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/mjs/index.js",
+      "require": "./dist/cjs/index.js"
+    }
+  },
   "author": "TechTeamer",
   "contributors": [
     "Gábor Tóth <gabor@techteamer.com>",
@@ -14,19 +21,27 @@
     "url": "https://github.com/TechTeamer/mq"
   },
   "engines": {
-    "node": ">=16"
+    "node": ">=20.8.1"
   },
   "scripts": {
+    "build": "rm -fr dist/* && tsc -p tsconfig.json && tsc -p tsconfig-cjs.json && ./fixup.sh",
     "lint": "eslint .",
-    "unit": "mocha --exit",
-    "test": "eslint . && nyc mocha --temp-directory=./test/coverage/ --exit && nyc report --reporter=text-lcov --report-dir=./test/coverage/ --reporter=lcovonly  | coveralls"
+    "unit": "vitest run",
+    "test": "eslint . && c8 --temp-directory=./test/coverage/tmp vitest run && c8 report --reporter=text-lcov --report-dir=./test/coverage/ --reporter=lcovonly  | coveralls"
   },
+  "type": "module",
   "dependencies": {
+    "@semantic-release/commit-analyzer": "^13.0.0",
+    "@semantic-release/github": "^10.0.3",
+    "@semantic-release/npm": "^12.0.1",
+    "@semantic-release/release-notes-generator": "^14.0.0",
     "amqplib": "^0.10.3",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
-    "chai": "^4.3.7",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "c8": "^9.1.0",
     "coveralls": "^3.1.1",
     "eslint": "^8.38.0",
     "eslint-config-standard": "^17.0.0",
@@ -34,12 +49,20 @@
     "eslint-plugin-n": "^15.7.0",
     "eslint-plugin-promise": "^6.1.1",
     "eslint-plugin-standard": "^5.0.0",
-    "mocha": "^10.2.0",
-    "nyc": "^15.1.0",
     "protobufjs": "^7.2.3",
-    "seed-random": "^2.2.0"
+    "seed-random": "^2.2.0",
+    "semantic-release": "^24.0.0",
+    "typescript": "^5.4.5",
+    "typescript-eslint": "^7.8.0",
+    "vitest": "^1.6.0"
   },
   "peerDependencies": {
     "protobufjs": "^7.2.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "resolutions": {
+    "wrap-ansi": "^7.0.0"
   }
 }

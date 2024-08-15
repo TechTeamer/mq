@@ -42,4 +42,4 @@ loggerMethods.forEach((method) => {
   }
 })
 
-module.exports = ConsoleInspector
+export default ConsoleInspector

@@ -1,4 +1,4 @@
-const QueueMessage = require('./QueueMessage')
+import QueueMessage from './QueueMessage.js'
 
 /**
  * @typedef {import('./QueueConnection')} QueueConnection
@@ -115,4 +115,4 @@ class Publisher {
   }
 }
 
-module.exports = Publisher
+export default Publisher

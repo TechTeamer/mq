@@ -1,7 +1,6 @@
-const chai = require('chai')
-const assert = chai.assert
-const QueueConfig = require('../src/QueueConfig')
-const config = require('./config/LoadConfig')
+import { describe, it, assert } from 'vitest'
+import QueueConfig from '../src/QueueConfig.js'
+import config from './config/LoadConfig.js'
 
 describe('QueueConfig', () => {
   it('Should validate test config', () => {
