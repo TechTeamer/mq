@@ -5,6 +5,7 @@ import EventEmitter from 'node:events'
 
 /**
  * @class QueueConnection
+ * @extends EventEmitter
  * */
 class QueueConnection extends EventEmitter {
   /**
@@ -26,7 +27,7 @@ class QueueConnection extends EventEmitter {
   }
 
   /**
-   * @return Promise<amqplib.Connection>
+   * @returns {Promise<import('amqplib').Connection>}
    * */
   async connect () {
     if (this._connection) {
@@ -157,7 +158,7 @@ class QueueConnection extends EventEmitter {
   }
 
   /**
-   * @return Promise<amqplib.ConfirmChannel>
+   * @returns {Promise<import('amqplib').ConfirmChannel>}
    * */
   async getChannel () {
     if (this._channel) {
