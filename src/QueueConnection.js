@@ -157,9 +157,6 @@ class QueueConnection extends EventEmitter {
     this._connectionPromise = null
   }
 
-  /**
-   * @returns {Promise<import('amqplib').ConfirmChannel>}
-   * */
   async getChannel () {
     if (this._channel) {
       return this._channel

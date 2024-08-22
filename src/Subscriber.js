@@ -1,5 +1,9 @@
 import QueueMessage from './QueueMessage.js'
 
+/**
+ * @typedef {import('./QueueConnection.js').default} QueueConnection
+ */
+
 class Subscriber {
   /**
    * @param {QueueConnection} queueConnection
@@ -8,6 +12,7 @@ class Subscriber {
    * @param {Object} options
    */
   constructor (queueConnection, logger, name, options = {}) {
+    /** @type {QueueConnection} */
     this._connection = queueConnection
     this._logger = logger
     this.name = name

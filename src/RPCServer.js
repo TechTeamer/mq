@@ -2,6 +2,10 @@ import QueueMessage from './QueueMessage.js'
 import QueueResponse from './QueueResponse.js'
 
 /**
+ * @typedef {import('./QueueConnection.js').default} QueueConnection
+ */
+
+/**
  * @class RPCServer
  * */
 class RPCServer {
@@ -25,6 +29,7 @@ class RPCServer {
       exchangeOptions = {}
     } = options
 
+    /** @type {QueueConnection} */
     this._connection = queueConnection
     this._logger = logger
     this.name = rpcName
@@ -79,9 +84,6 @@ class RPCServer {
     this.actions.set(action, handler)
   }
 
-  /**
-   * @return {Promise}
-   */
   async initialize () {
     try {
       const channel = await this._connection.getChannel()

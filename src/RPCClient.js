@@ -2,8 +2,7 @@ import { v4 as uuid } from 'uuid'
 import QueueMessage from './QueueMessage.js'
 
 /**
- * @typedef {import('./QueueConnection')} QueueConnection
- * @typedef {import('./QueueMessage')} QueueMessage
+ * @typedef {import('./QueueConnection.js').default} QueueConnection
  */
 
 /**
@@ -113,7 +112,7 @@ class RPCClient {
    * @param {Map} attachments
    * @param {Boolean} [resolveWithFullResponse=false]
    * @param {Object} sendOptions
-   * @returns {Promise<QueueMessage|*>}
+   * @returns {Promise<typeof QueueMessage|*>}
    * @throws {Error}
    */
   async call (message, timeoutMs = null, attachments = null, resolveWithFullResponse = false, sendOptions = {}) {
@@ -154,7 +153,6 @@ class RPCClient {
    * @param {*} data
    * @param {Number|null} timeoutMs
    * @param {Map|null} attachments
-   * @return {Promise}
    * */
   callAction (action, data, timeoutMs = null, attachments = null) {
     return this.call({ action, data }, timeoutMs, attachments)

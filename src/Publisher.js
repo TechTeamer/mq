@@ -1,7 +1,7 @@
 import QueueMessage from './QueueMessage.js'
 
 /**
- * @typedef {import('./QueueConnection')} QueueConnection
+ * @typedef {import('./QueueConnection.js').default} QueueConnection
  * @typedef {import('amqplib').ConfirmChannel} ConfirmChannel
  * @typedef {import('amqplib').QueueMessage} QueueMessage
  */
@@ -14,6 +14,7 @@ class Publisher {
    * @param {Object} options
    */
   constructor (queueConnection, logger, exchange, options = {}) {
+    /** @type {QueueConnection} */
     this._connection = queueConnection
     this._logger = logger
     this.exchange = exchange

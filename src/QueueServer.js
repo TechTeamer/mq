@@ -1,5 +1,9 @@
 import Subscriber from './Subscriber.js'
 
+/**
+ * @typedef {import('./QueueConnection.js').default} QueueConnection
+ */
+
 class QueueServer extends Subscriber {
   /**
    * @param {QueueConnection} queueConnection
