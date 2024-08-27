@@ -1,5 +1,11 @@
 import QueueMessage from './QueueMessage.js'
 
+/**
+ * @typedef {import('./QueueConnection.js').default} QueueConnection
+ * @typedef {import('amqplib').ConfirmChannel} ConfirmChannel
+ * @typedef {import('amqplib').QueueMessage} QueueMessage
+ */
+
 class Publisher {
   /**
    * @param {QueueConnection} queueConnection
@@ -8,6 +14,7 @@ class Publisher {
    * @param {Object} options
    */
   constructor (queueConnection, logger, exchange, options = {}) {
+    /** @type {QueueConnection} */
     this._connection = queueConnection
     this._logger = logger
     this.exchange = exchange
@@ -24,6 +31,7 @@ class Publisher {
     this._assertExchange = assertExchange === true
     this._assertExchangeOptions = Object.assign({ durable: true }, assertExchangeOptions)
 
+    /** @type {typeof QueueMessage} MessageModel - The class reference for the QueueMessage model. */
     this.MessageModel = MessageModel
     this.ContentSchema = ContentSchema
   }
@@ -31,8 +39,7 @@ class Publisher {
   /**
    * Overridden in queueClient to assertQueue instead of exchange
    *
-   * @param channel
-   * @returns {Promise}
+   * @param {ConfirmChannel} channel
    */
   assertExchangeOrQueue (channel) {
     if (this._assertExchange) {

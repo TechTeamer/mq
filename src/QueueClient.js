@@ -1,5 +1,9 @@
 import Publisher from './Publisher.js'
 
+/**
+ * @typedef {import('./QueueConnection.js').default} QueueConnection
+ */
+
 class QueueClient extends Publisher {
   /**
    * @param {QueueConnection} queueConnection

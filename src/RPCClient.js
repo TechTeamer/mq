@@ -2,6 +2,10 @@ import { v4 as uuid } from 'uuid'
 import QueueMessage from './QueueMessage.js'
 
 /**
+ * @typedef {import('./QueueConnection.js').default} QueueConnection
+ */
+
+/**
  * A queue handler
  * @class RPCClient
  * */
@@ -27,6 +31,7 @@ class RPCClient {
       exchangeOptions = {}
     } = options
 
+    /** @type {QueueConnection} */
     this._connection = queueConnection
     this._logger = logger
     this.name = rpcName
@@ -41,7 +46,9 @@ class RPCClient {
 
     this._rpcQueueMaxSize = queueMaxSize
     this._rpcTimeoutMs = timeoutMs
+    /** @type {typeof QueueMessage} RequestMessageModel - The class reference for the QueueMessage model. */
     this.RequestMessageModel = RequestMessageModel
+    /** @type {typeof QueueMessage} ResponseMessageModel - The class reference for the QueueMessage model. */
     this.ResponseMessageModel = ResponseMessageModel
     this.RequestContentSchema = RequestContentSchema
     this.ResponseContentSchema = ResponseContentSchema
@@ -105,8 +112,9 @@ class RPCClient {
    * @param {Map} attachments
    * @param {Boolean} [resolveWithFullResponse=false]
    * @param {Object} sendOptions
-   * @return {Promise<QueueMessage|*>}
-   * */
+   * @returns {Promise<typeof QueueMessage|*>}
+   * @throws {Error}
+   */
   async call (message, timeoutMs = null, attachments = null, resolveWithFullResponse = false, sendOptions = {}) {
     try {
       if (this._correlationIdMap.size > this._rpcQueueMaxSize) {
@@ -145,7 +153,6 @@ class RPCClient {
    * @param {*} data
    * @param {Number|null} timeoutMs
    * @param {Map|null} attachments
-   * @return {Promise}
    * */
   callAction (action, data, timeoutMs = null, attachments = null) {
     return this.call({ action, data }, timeoutMs, attachments)
