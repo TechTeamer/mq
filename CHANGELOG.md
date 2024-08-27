@@ -1,3 +1,10 @@
+## [7.0.4-beta.2](https://github.com/TechTeamer/mq/compare/7.0.4-beta.1...7.0.4-beta.2) (2024-08-27)
+
+
+### Bug Fixes
+
+* trigger npm release ([#71](https://github.com/TechTeamer/mq/issues/71)) ([79dad66](https://github.com/TechTeamer/mq/commit/79dad6664ed35f272ca81828a06e5fa003d1457e))
+
 ## [7.0.4-beta.1](https://github.com/TechTeamer/mq/compare/7.0.3...7.0.4-beta.1) (2024-08-21)
 
 
