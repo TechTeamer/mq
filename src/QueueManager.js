@@ -27,6 +27,7 @@ class QueueManager {
    */
   constructor (config) {
     this.connection = new QueueConnection(config)
+    /** @type {QueueConfig} */
     this._config = new QueueConfig(config)
     this._logger = this._config.logger
 

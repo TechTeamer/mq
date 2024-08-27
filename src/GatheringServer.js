@@ -1,6 +1,10 @@
 import QueueMessage from './QueueMessage.js'
 import QueueResponse from './QueueResponse.js'
 
+/**
+ * @typedef {import('./QueueConnection.js').default} QueueConnection
+ */
+
 class GatheringServer {
   /**
    * @param {QueueConnection} queueConnection
@@ -9,6 +13,7 @@ class GatheringServer {
    * @param {Object} options
    */
   constructor (queueConnection, logger, name, options = {}) {
+    /** @type {QueueConnection} */
     this._connection = queueConnection
     this._logger = logger
     this.name = name

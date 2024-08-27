@@ -1,6 +1,10 @@
 import { v4 as uuid } from 'uuid'
 import QueueMessage from './QueueMessage.js'
 
+/**
+ * @typedef {import('./QueueConnection.js').default} QueueConnection
+ */
+
 class GatheringClient {
   /**
    * @param {QueueConnection} queueConnection
@@ -9,6 +13,7 @@ class GatheringClient {
    * @param {Object} [options]
    */
   constructor (queueConnection, logger, name, options = {}) {
+    /** @type {QueueConnection} */
     this._connection = queueConnection
     this._logger = logger
     this.name = name
