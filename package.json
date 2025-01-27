@@ -28,7 +28,7 @@
     "lint": "eslint . --max-warnings 0 --ignore-pattern \"test/*\" && echo 'npm run eslint --max-warnings 0'",
     "lint:fix": "eslint . --fix && eslint --max-warnings 0 .",
     "unit": "vitest run",
-    "test": "eslint . && c8 --temp-directory=./test/coverage/tmp vitest run && c8 report --reporter=text-lcov --report-dir=./test/coverage/ --reporter=lcovonly  | coveralls"
+    "test": "yarn lint && c8 --temp-directory=./test/coverage/tmp vitest run && c8 report --reporter=text-lcov --report-dir=./test/coverage/ --reporter=lcovonly  | coveralls"
   },
   "type": "module",
   "dependencies": {
