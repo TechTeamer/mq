@@ -1,3 +1,10 @@
+# [7.1.0](https://github.com/TechTeamer/mq/compare/7.0.4...7.1.0) (2025-01-29)
+
+
+### Features
+
+* FKITDEV-6045 ESLint 9 ([05b03bb](https://github.com/TechTeamer/mq/commit/05b03bbdb085948ff996d7fe036796db11acf16c))
+
 ## [7.0.4](https://github.com/TechTeamer/mq/compare/7.0.3...7.0.4) (2024-08-27)
 
 
