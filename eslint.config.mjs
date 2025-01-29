@@ -44,7 +44,7 @@ const defaultRules = {
 
 export default [
   {
-    ignores: ['web/', 'client/libs/', 'client/polyfills/', 'logs/']
+    ignores: ['dist/', 'web/', 'client/libs/', 'client/polyfills/', 'logs/']
   },
   ...compat.extends('standard', 'plugin:n/recommended', 'plugin:jest-formatting/strict'),
   defaultRules,
