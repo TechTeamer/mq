@@ -32,7 +32,7 @@
   },
   "type": "module",
   "dependencies": {
-    "amqplib": "^0.10.3",
+    "amqplib": "^0.10.7",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
@@ -44,7 +44,7 @@
     "@semantic-release/github": "^10.0.3",
     "@semantic-release/npm": "^12.0.1",
     "@semantic-release/release-notes-generator": "^14.0.0",
-    "@types/amqplib": "^0.10.5",
+    "@types/amqplib": "^0.10.7",
     "c8": "^9.1.0",
     "coveralls": "^3.1.1",
     "eslint": "^9.19.0",
