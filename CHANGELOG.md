@@ -1,3 +1,10 @@
+# [7.2.0](https://github.com/TechTeamer/mq/compare/7.1.0...7.2.0) (2025-10-06)
+
+
+### Features
+
+* **yarn:** bump amqplib from 0.10.3 to 0.10.7 ([f5c0bc0](https://github.com/TechTeamer/mq/commit/f5c0bc0d24f049d2a0508420964387b2b74c7cb2))
+
 # [7.1.0](https://github.com/TechTeamer/mq/compare/7.0.4...7.1.0) (2025-01-29)
 
 
